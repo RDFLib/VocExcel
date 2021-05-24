@@ -4,7 +4,7 @@ Another Excel to RDF converter for SKOS vocabs, but one that include profile-bas
 
 How to use
 ==========
-_Coming soon!_
+*Coming soon!*
 
 
 License
