@@ -6,7 +6,7 @@ from vocexcel import profiles, convert, __version__
 
 
 def convert_file(excel_file_path: Path):
-
+    pass
 
 
 def main(args=None):
