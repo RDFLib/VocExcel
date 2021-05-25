@@ -5,40 +5,112 @@ path.append(str(Path(__file__).parent.parent))
 from vocexcel import profiles, models, __version__
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
-from rdflib import Graph, URIRef, Literal
 from pydantic.error_wrappers import ValidationError
+from openpyxl.worksheet.worksheet import Worksheet
+from typing import Literal
 
 
-def convert_file(excel_file_path: Path):
+def split_and_tidy(cell_value: str):
+    return [x.strip() for x in cell_value.strip().split(",")] if cell_value is not None else None
+
+
+def extract_concepts_and_collections(s: Worksheet) -> tuple[list[models.Concept], list[models.Collection]]:
+    concepts = []
+    collections = []
+    process_concept = False
+    process_collection = False
+    for col in s.iter_cols(max_col=1):
+        for cell in col:
+            row = cell.row
+            if cell.value == "Concept URI":
+                process_concept = True
+            elif cell.value == "Collection URI":
+                process_concept = False
+                process_collection = True
+            elif process_concept:
+                if cell.value is None:
+                    pass
+                else:
+                    try:
+                        c = models.Concept(
+                            uri=s[f"A{row}"].value,
+                            pref_label=s[f"B{row}"].value,
+                            alt_labels=split_and_tidy(s[f"C{row}"].value),
+                            definition=s[f"D{row}"].value,
+                            children=split_and_tidy(s[f"E{row}"].value),
+                            other_ids=split_and_tidy(s[f"F{row}"].value),
+                            home_vocab_uri=s[f"G{row}"].value,
+                            provenance=s[f"H{row}"].value
+                        )
+                        concepts.append(c)
+                    except ValidationError as e:
+                        print(f"On Row {row}:")
+                        print(e)
+                        exit()
+            elif process_collection:
+                if cell.value is None:
+                    pass
+                else:
+                    try:
+                        c = models.Collection(
+                            uri=s[f"A{row}"].value,
+                            pref_label=s[f"B{row}"].value,
+                            definition=s[f"C{row}"].value,
+                            members=split_and_tidy(s[f"D{row}"].value),
+                            provenance=s[f"E{row}"].value
+                        )
+                        collections.append(c)
+                    except ValidationError as e:
+                        print(f"On Row {row}:")
+                        print(e)
+                        exit()
+            elif cell.value is None:
+                pass
+
+    return concepts, collections
+
+
+def convert_file(excel_file_path: Path, sheet_name=None, output_format: Literal["file", "string", "graph"] = "file"):
     wb = None
     try:
         wb = load_workbook(filename=str(excel_file_path), data_only=True)
-        sheet_ranges = wb["example - complex"]
-
-        # g = Graph()
+        sheet = wb["vocabulary" if sheet_name is None else sheet_name]
 
         # Vocabulary
         try:
-            v = models.Vocabulary(
-                uri=sheet_ranges["B1"].value,
-                title=sheet_ranges["B2"].value,
-                description=sheet_ranges["B3"].value,
-                created=sheet_ranges["B4"].value,
-                modified=sheet_ranges["B5"].value,
-                creator=sheet_ranges["B6"].value,
-                publisher=sheet_ranges["B7"].value,
-                version=sheet_ranges["B8"].value,
-                provenance=sheet_ranges["B9"].value,
-                custodian=sheet_ranges["B10"].value,
-                ecat_doi=sheet_ranges["B11"].value,
+            cs = models.ConceptScheme(
+                uri=sheet["B1"].value,
+                title=sheet["B2"].value,
+                description=sheet["B3"].value,
+                created=sheet["B4"].value,
+                modified=sheet["B5"].value,
+                creator=sheet["B6"].value,
+                publisher=sheet["B7"].value,
+                version=sheet["B8"].value,
+                provenance=sheet["B9"].value,
+                custodian=sheet["B10"].value,
+                pid=sheet["B11"].value,
             )
         except ValidationError as e:
             print(e)
             exit()
 
-        # Concepts
-        for cell in sheet_ranges["A16:H16"][0]:
-            print(cell.value)
+        # Concepts & Collections
+        concepts, collections = extract_concepts_and_collections(sheet)
+
+        # Build the total vocab
+        v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
+
+        # Write out the file
+        if output_format == "graph":
+            return v.to_graph()
+        elif output_format == "string":
+            return v.to_graph().serialize()
+        else:  # output_format == "file":
+            dest = excel_file_path.name.replace("xlsx", "ttl")
+            print(f"Created vocab RDF file {dest}")
+            v.to_graph().serialize(destination=dest)
+
 
     except InvalidFileException as e:
         print("You supplied a path to a file that either doesn't exist or isn't an Excel file")
@@ -86,6 +158,21 @@ def main(args=None):
         default="vocpub",
     )
 
+    parser.add_argument(
+        "-of",
+        "--outputformat",
+        help="The format of the vocabulary output.",
+        choices=["file", "string"],
+        default="file",
+    )
+
+    parser.add_argument(
+        "-s",
+        "--sheet",
+        help="The sheet within the target Excel Workbook to process",
+        default="vocabulary",
+    )
+
     args = parser.parse_args()
 
     if args.listprofiles:
@@ -97,7 +184,12 @@ def main(args=None):
     elif args.excel_file:
         print(f"Processing file {args.excel_file}")
 
-        convert_file(args.excel_file)
+        try:
+            o = convert_file(args.excel_file, sheet_name=args.sheet, output_format=args.outputformat)
+            if args.outputformat == "string":
+                print(o)
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":

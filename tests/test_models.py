@@ -4,7 +4,7 @@ from pydantic.error_wrappers import ValidationError
 
 
 def test_vocabulary_valid():
-    v = Vocabulary(
+    v = ConceptScheme(
         uri="https://linked.data.gov.au/def/borehole-start-point",
         title="Borehole Start Point",
         description="Indicates the nature of the borehole start point location",
@@ -15,13 +15,13 @@ def test_vocabulary_valid():
         version="",
         provenance="Derived from the 2011-09 version of CGI Borehole start point list",
         custodian="Vance Kelly",
-        ecat_doi="http://pid.geoscience.gov.au/dataset/ga/114541"
+        pid="http://pid.geoscience.gov.au/dataset/ga/114541"
     )
 
 
 def test_vocabulary_invalid_uri():
     with pytest.raises(ValidationError):
-        v = Vocabulary(
+        v = ConceptScheme(
             uri="ftp://linked.data.gov.au/def/borehole-start-point",
             title="Borehole Start Point",
             description="Indicates the nature of the borehole start point location",
@@ -32,13 +32,13 @@ def test_vocabulary_invalid_uri():
             version="",
             provenance="Derived from the 2011-09 version of CGI Borehole start point list",
             custodian="Vance Kelly",
-            ecat_doi="http://pid.geoscience.gov.au/dataset/ga/114541"
+            pid="http://pid.geoscience.gov.au/dataset/ga/114541"
         )
 
 
 def test_vocabulary_invalid_created_date():
     with pytest.raises(ValidationError):
-        v = Vocabulary(
+        v = ConceptScheme(
             uri="https://linked.data.gov.au/def/borehole-start-point",
             title="Borehole Start Point",
             description="Indicates the nature of the borehole start point location",
@@ -49,13 +49,13 @@ def test_vocabulary_invalid_created_date():
             version="",
             provenance="Derived from the 2011-09 version of CGI Borehole start point list",
             custodian="Vance Kelly",
-            ecat_doi="http://pid.geoscience.gov.au/dataset/ga/114541"
+            pid="http://pid.geoscience.gov.au/dataset/ga/114541"
         )
 
 
 def test_vocabulary_invalid_publisher():
     with pytest.raises(ValidationError):
-        v = Vocabulary(
+        v = ConceptScheme(
             uri="https://linked.data.gov.au/def/borehole-start-point",
             title="Borehole Start Point",
             description="Indicates the nature of the borehole start point location",
@@ -66,5 +66,5 @@ def test_vocabulary_invalid_publisher():
             version="",
             provenance="Derived from the 2011-09 version of CGI Borehole start point list",
             custodian="Vance Kelly",
-            ecat_doi="http://pid.geoscience.gov.au/dataset/ga/114541"
+            pid="http://pid.geoscience.gov.au/dataset/ga/114541"
         )

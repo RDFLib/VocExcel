@@ -61,7 +61,7 @@ All command line options can be printed out by the Windows, Linux/Unix/Mac versi
 
 It will print something like this with any updates actually available in the tool:
 
-    usage: convert.py [-h] [-v] [-lp] [-val] [-p PROFILE] excel_file
+    usage: convert.py [-h] [-v] [-lp] [-val] [-p PROFILE] [-of {file,string}] [-s SHEET] excel_file
 
     positional arguments:
       excel_file            The Excel file to convert to a SKOS vocabulary in RDF
@@ -76,6 +76,10 @@ It will print something like this with any updates actually available in the too
                             A profile - a specified information model - for a vocabulary. This tool understands several profiles andyou can choose which one you want to convert
                             the Excel file according to. The list of profiles - URIs and their corresponding tokens - supported by VocExcel, can be found by running the program
                             with the flag -lp or --listprofiles. (default: vocpub)
+      -of {file,string}, --outputformat {file,string}
+                            The format of the vocabulary output. (default: file)
+      -s SHEET, --sheet SHEET
+                            The sheet within the target Excel Workbook to process (default: vocabulary)
 
 Note that the ``excel_file`` parameter is always required except for the 'help' (``-h``) option, so if you want tpo print out the version of the program, you will need to put in a fake file location like this:
 
