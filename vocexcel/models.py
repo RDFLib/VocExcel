@@ -22,7 +22,7 @@ class Vocabulary(BaseModel):
     version: str
     provenance: str
     custodian: str
-    ecat_doi: AnyHttpUrl
+    ecat_doi: AnyHttpUrl = None
 
     @validator("creator")
     def creator_must_be_from_list(cls, v):

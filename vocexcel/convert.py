@@ -6,32 +6,39 @@ from vocexcel import profiles, models, __version__
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 from rdflib import Graph, URIRef, Literal
+from pydantic.error_wrappers import ValidationError
 
 
 def convert_file(excel_file_path: Path):
     wb = None
     try:
-        wb = load_workbook(filename=str(excel_file_path))
+        wb = load_workbook(filename=str(excel_file_path), data_only=True)
         sheet_ranges = wb["example - complex"]
 
         # g = Graph()
 
         # Vocabulary
-        v = models.Vocabulary(
-            uri=sheet_ranges["B1"].value,
-            title=sheet_ranges["B2"].value,
-            description=sheet_ranges["B3"].value,
-            created=sheet_ranges["B4"].value,
-            modified=sheet_ranges["B5"].value,
-            creator=sheet_ranges["B6"].value,
-            publisher=sheet_ranges["B7"].value,
-            version=sheet_ranges["B8"].value,
-            provenance=sheet_ranges["B9"].value,
-            custodian=sheet_ranges["B10"].value,
-            ecat_doi=sheet_ranges["B11"].value,
-        )
+        try:
+            v = models.Vocabulary(
+                uri=sheet_ranges["B1"].value,
+                title=sheet_ranges["B2"].value,
+                description=sheet_ranges["B3"].value,
+                created=sheet_ranges["B4"].value,
+                modified=sheet_ranges["B5"].value,
+                creator=sheet_ranges["B6"].value,
+                publisher=sheet_ranges["B7"].value,
+                version=sheet_ranges["B8"].value,
+                provenance=sheet_ranges["B9"].value,
+                custodian=sheet_ranges["B10"].value,
+                ecat_doi=sheet_ranges["B11"].value,
+            )
+        except ValidationError as e:
+            print(e)
+            exit()
 
-        # print(v)
+        # Concepts
+        for cell in sheet_ranges["A16:H16"][0]:
+            print(cell.value)
 
     except InvalidFileException as e:
         print("You supplied a path to a file that either doesn't exist or isn't an Excel file")
