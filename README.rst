@@ -17,14 +17,17 @@ There are several methods available to process vocabularies entered into the Exc
 
 1. Windows command line
 2. Shell command line script (Linux/Unix/Mac)
-3. Python module
-4. Online - *coming soon!*
+3. Python script
+4. Python module
+5. Online - *coming soon!*
 
 Methods 1 & 2 all use the same options. See the section `Command Line Arguments`_.
 
 1. Windows command line
 ```````````````````````
 There is a Windows EXE file, ``vocexcel.exe``, in the ``vocexcel/bin/`` folder that can be used like this:
+
+::
 
     c:\\Users\\nick> vocexcel.exe vocabulary-x.xlsx
 
@@ -34,32 +37,57 @@ The command above will generate a vocabulary RDF file in the same directory as t
 ``````````````````````````````````````````
 The script ``vocexcel/bin/vocexcel.sh`` can be run as a shell script on Linux/Unix/Mac with the same options as the Windows EXE program.
 
+::
+
     ~$ sh vocexcel.sh vocabulary-x.xlsx
 
 Note that to run this shell script, you need to have installed a Python environment that contains this program's dependencies which are all listed in ``requirements.txt``. The shell script then needs to be told where the Python environment is: see the ``PYTHON`` variable in the script.
 
-3. Python module
+3. Python script
 ````````````````
 The Python script ``convert.py`` in the ``vocexcel/`` directory can be run on Wondows/Unix/Linux/Mac systems like this:
+
+::
 
     ~$ python convert.py vocabulary-x.xlsx
 
 As long as a Python environment containing the program's needed modules, listed in ``requirements.txt`` are installed.
 
-4. Online
+4. Python module
+````````````````
+The converter program can be called from other Python programs, perhaps as part of a chain of processing. For this, you would need code like this:
+
+::
+
+    from vocexcel import convert
+    from pathlib import Path
+
+    convert.convert_file(Path(".") / "path" / "to" /"vocab-file.xlsx")
+
+This will create a file ``vocab-file.ttl`` in the same directory as the ``vocab-file.xlsx``.
+
+There are several options for ``convert_file()``, just see the function itself in ``vocexcel/convert.py``.
+
+5. Online
 `````````
-*Coming soon!*. We will be providing a web page for easy use.
+*Coming soon!*.
+
+We will be providing a web page for easy use.
 
 
 Command Line Arguments
 ``````````````````````
 All command line options can be printed out by the Windows, Linux/Unix/Mac versions of the tools by specifying ``-h`` for 'help' like this:
 
+::
+
     > vocexcel.exe -h
 
     ~$ sh vocexcel.sh -h
 
 It will print something like this with any updates actually available in the tool:
+
+::
 
     usage: convert.py [-h] [-v] [-lp] [-val] [-p PROFILE] [-of {file,string}] [-s SHEET] excel_file
 
@@ -82,6 +110,8 @@ It will print something like this with any updates actually available in the too
                             The sheet within the target Excel Workbook to process (default: vocabulary)
 
 Note that the ``excel_file`` parameter is always required except for the 'help' (``-h``) option, so if you want tpo print out the version of the program, you will need to put in a fake file location like this:
+
+::
 
     > vocexcel.exe -v .
 
