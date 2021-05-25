@@ -1,5 +1,5 @@
 #!/bin/bash
-PARENT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-GRANDPARENT=`dirname $PARENT`
-GREATGRANDPARENT=`dirname $GRANDPARENT`
-"$GREATGRANDPARENT/venv/bin/python" "$GRANDPARENT/convert.py" "$@"
+P="$(cd ../; pwd)"
+GP="$(cd ../../; pwd)"
+PYTHON=$GP/venv/bin/python  # point this variable to your Python installation
+$PYTHON $P/"convert.py" "$@"
