@@ -111,7 +111,6 @@ def convert_file(excel_file_path: Path, sheet_name=None, output_format: Literal[
             print(f"Created vocab RDF file {dest}")
             v.to_graph().serialize(destination=dest)
 
-
     except InvalidFileException as e:
         print("You supplied a path to a file that either doesn't exist or isn't an Excel file")
 

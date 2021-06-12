@@ -19,7 +19,7 @@ class ConceptScheme(BaseModel):
     title: str
     description: str
     created: datetime.date
-    modified: datetime.date
+    modified: datetime.date = None
     creator: str
     publisher: str
     version: str
