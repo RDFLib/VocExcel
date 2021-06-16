@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel, ValidationError, validator
 from pydantic import AnyHttpUrl
 import datetime
@@ -74,10 +75,10 @@ class ConceptScheme(BaseModel):
 class Concept(BaseModel):
     uri: AnyHttpUrl
     pref_label: str
-    alt_labels: list[str] = None
+    alt_labels: List[str] = None
     definition: str
-    children: list[AnyHttpUrl] = None
-    other_ids: list[str] = None
+    children: List[AnyHttpUrl] = None
+    other_ids: List[str] = None
     home_vocab_uri: AnyHttpUrl = None
     provenance: str = None
 
@@ -109,7 +110,7 @@ class Collection(BaseModel):
     uri: AnyHttpUrl
     pref_label: str
     definition: str
-    members: list[AnyHttpUrl]
+    members: List[AnyHttpUrl]
     provenance: str = None
 
     def to_graph(self):
@@ -128,8 +129,8 @@ class Collection(BaseModel):
 
 class Vocabulary(BaseModel):
     concept_scheme: ConceptScheme
-    concepts: list[Concept]
-    collections: list[Collection]
+    concepts: List[Concept]
+    collections: List[Collection]
 
     def to_graph(self):
         g = self.concept_scheme.to_graph()

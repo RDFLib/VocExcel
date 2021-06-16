@@ -1,8 +1,9 @@
+from typing import List, Tuple
 from sys import path
 from pathlib import Path
 import argparse
-path.append(str(Path(__file__).parent.parent))
-from vocexcel import profiles, models, __version__
+import profiles, models
+from __init__ import __version__
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 from pydantic.error_wrappers import ValidationError
@@ -14,7 +15,7 @@ def split_and_tidy(cell_value: str):
     return [x.strip() for x in cell_value.strip().split(",")] if cell_value is not None else None
 
 
-def extract_concepts_and_collections(s: Worksheet) -> tuple[list[models.Concept], list[models.Collection]]:
+def extract_concepts_and_collections(s: Worksheet) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
     process_concept = False
@@ -121,7 +122,7 @@ def main(args=None):
     parser.add_argument(
         "-v",
         "--version",
-        help="The version of this copy of VocExel.",
+        help="The version of this copy of VocExel. Must still set an excel_file value to call this (can be fake)",
         action="store_true"
     )
 
