@@ -11,6 +11,16 @@ The file *VocExcel-template.xlsx* in this repository contains the Excel template
 
 Use one Excel workbook per vocabulary.
 
+Installation
+------------
+Several forms of use of this tool do not require any installation - see the next section. However, to run the tool as a Python script or a module, you will need to:
+
+1. have Python (3.6+) installed on your computer
+2. create a virtual environment (see [the official venv documentation](https://docs.python.org/3/library/venv.html), or, simpler, [this tutorial for Windows](https://www.c-sharpcorner.com/article/steps-to-set-up-a-virtual-environment-for-python-development/))
+3. install the necessary packages in that environment
+    * usually something like `pip install -r requirements.txt`
+4. run the script using the version of Python in your virtual environment
+
 Generating RDF from Excel
 -------------------------
 There are several methods available to process vocabularies entered into the Excel template using resources in this repository:
@@ -45,7 +55,7 @@ Note that to run this shell script, you need to have installed a Python environm
 
 3. Python script
 ````````````````
-The Python script ``convert.py`` in the ``vocexcel/`` directory can be run on Wondows/Unix/Linux/Mac systems like this:
+The Python script ``convert.py`` in the ``vocexcel/`` directory can be run on Windows/Unix/Linux/Mac systems like this:
 
 ::
 

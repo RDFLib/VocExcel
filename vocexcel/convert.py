@@ -1,14 +1,16 @@
-from typing import List, Tuple
-from sys import path
-from pathlib import Path
 import argparse
-import profiles, models
-from __init__ import __version__
+from pathlib import Path
+from typing import List, Tuple
+from typing import Literal
+
 from openpyxl import load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
-from pydantic.error_wrappers import ValidationError
 from openpyxl.worksheet.worksheet import Worksheet
-from typing import Literal
+from pydantic.error_wrappers import ValidationError
+
+import models
+import profiles
+from __init__ import __version__
 
 
 def split_and_tidy(cell_value: str):
