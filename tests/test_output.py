@@ -5,10 +5,10 @@ from rdflib.namespace import SKOS
 
 
 def test_example_complex():
-    g = convert.convert_file(
+    g = convert.excel_to_rdf(
         Path(__file__).parent.parent / "VocExcel-template.xlsx",
         sheet_name="example - complex",
-        output_format="graph"
+        output_type="graph"
     )
 
     top_concepts = 0

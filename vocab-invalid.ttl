@@ -1,0 +1,345 @@
+@prefix cs: <https://linked.data.gov.au/def/induration-style> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://linked.data.gov.au/def/induration-style/completely_cemented_duricrust> a skos:Concept ;
+    skos:altLabel "DC00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust> ;
+    skos:definition "completely cemented duricrust"@en ;
+    # skos:inScheme cs: ;
+    skos:prefLabel "completely cemented duricrust"@en .
+
+<https://linked.data.gov.au/def/induration-style/ferruginous,_moderately_cemented> a skos:Concept ;
+    skos:altLabel "DM40"@en ;
+    skos:definition "ferruginous, moderately cemented"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "ferruginous, moderately cemented"@en ;
+    skos:topConceptOf cs: .
+
+<https://linked.data.gov.au/def/induration-style/bauxitic_nodules> a skos:Concept ;
+    skos:altLabel "NO10"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/bauxitic_induration>,
+        <https://linked.data.gov.au/def/induration-style/nodules> ;
+    skos:definition "bauxitic nodules"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "bauxitic nodules"@en .
+
+<https://linked.data.gov.au/def/induration-style/bauxitic_partially_cemented> a skos:Concept ;
+    skos:altLabel "DP10"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/bauxitic_induration>,
+        <https://linked.data.gov.au/def/induration-style/partially_cemented_duricrust> ;
+    skos:definition "bauxitic, partially cemented"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "bauxitic, partially cemented"@en .
+
+<https://linked.data.gov.au/def/induration-style/calcareous_moderately_cemented> a skos:Concept ;
+    skos:altLabel "DM20"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/calcareous_induration>,
+        <https://linked.data.gov.au/def/induration-style/moderately_cemented_duricrust> ;
+    skos:definition "calcareous, moderately cemented"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "calcareous, moderately cemented"@en .
+
+<https://linked.data.gov.au/def/induration-style/calcareous_nodules> a skos:Concept ;
+    skos:altLabel "NO20"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/calcareous_induration>,
+        <https://linked.data.gov.au/def/induration-style/nodules> ;
+    skos:definition "calcareous nodules"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "calcareous nodules"@en .
+
+<https://linked.data.gov.au/def/induration-style/calcrete_(bauxite)> a skos:Concept ;
+    skos:altLabel "DC10"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/calcrete>,
+        <https://linked.data.gov.au/def/induration-style/duricrust> ;
+    skos:definition "Completely cemented duricrust cemented mainly by aluminium compounds."@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "calcrete (bauxite)"@en .
+
+<https://linked.data.gov.au/def/induration-style/clay_hardpan> a skos:Concept ;
+    skos:altLabel "DP30"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/clay_induration>,
+        <https://linked.data.gov.au/def/induration-style/partially_cemented_duricrust> ;
+    skos:definition "clay hardpan"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "clay hardpan"@en .
+
+<https://linked.data.gov.au/def/induration-style/clay_nodules> a skos:Concept ;
+    skos:altLabel "NO30"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/clay_induration>,
+        <https://linked.data.gov.au/def/induration-style/nodules> ;
+    skos:definition "clay nodules"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "clay nodules"@en .
+
+<https://linked.data.gov.au/def/induration-style/ferricrete> a skos:Concept ;
+    skos:altLabel "DC40"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_induration> ;
+    skos:definition "Completley cemented duricrust cemented mainly by iron."@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "ferricrete"@en .
+
+<https://linked.data.gov.au/def/induration-style/ferruginous_hardpan> a skos:Concept ;
+    skos:altLabel "DP40"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/ferruginous_induration>,
+        <https://linked.data.gov.au/def/induration-style/partially_cemented_duricrust> ;
+    skos:definition "ferruginous hardpan"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "ferruginous hardpan"@en .
+
+<https://linked.data.gov.au/def/induration-style/ferruginous_moderately_cemented> skos:broader <https://linked.data.gov.au/def/induration-style/ferruginous_induration>,
+        <https://linked.data.gov.au/def/induration-style/moderately_cemented_duricrust> .
+
+<https://linked.data.gov.au/def/induration-style/ferruginous_nodules> a skos:Concept ;
+    skos:altLabel "NO40"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/ferruginous_induration>,
+        <https://linked.data.gov.au/def/induration-style/nodules> ;
+    skos:definition "ferruginous nodules"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "ferruginous nodules"@en .
+
+<https://linked.data.gov.au/def/induration-style/gypcrete> a skos:Concept ;
+    skos:altLabel "DC50"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/gypseous_induration> ;
+    skos:definition "Completely cemented duricrust cemented mainly by gypsum."@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "gypcrete"@en .
+
+<https://linked.data.gov.au/def/induration-style/gypseous_induration> a skos:Concept ;
+    skos:altLabel "IG00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "The in situ cementation and/or replacement of regolith by gypsum."@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/gypcrete> ;
+    skos:prefLabel "gypseous induration"@en .
+
+<https://linked.data.gov.au/def/induration-style/humic_hardpan> a skos:Concept ;
+    skos:altLabel "DP70"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/humic_induration>,
+        <https://linked.data.gov.au/def/induration-style/partially_cemented_duricrust> ;
+    skos:definition "humic hardpan"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "humic hardpan"@en .
+
+<https://linked.data.gov.au/def/induration-style/humic_induration> a skos:Concept ;
+    skos:altLabel "IH00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "humic induration"@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/humic_hardpan> ;
+    skos:prefLabel "humic induration"@en .
+
+<https://linked.data.gov.au/def/induration-style/massive_ferricrete> a skos:Concept ;
+    skos:altLabel "DC41"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_induration> ;
+    skos:definition "massive ferricrete"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "massive ferricrete"@en .
+
+<https://linked.data.gov.au/def/induration-style/nodular_ferricrete> a skos:Concept ;
+    skos:altLabel "DC42"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_induration> ;
+    skos:definition "Ferricrete which is differentiated internally and gives the appearance of cemented nodules."@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "nodular ferricrete"@en .
+
+<https://linked.data.gov.au/def/induration-style/silcrete> a skos:Concept ;
+    skos:altLabel "DC60"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_induration> ;
+    skos:definition "silcrete"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "silcrete"@en .
+
+<https://linked.data.gov.au/def/induration-style/silcrete_pods> a skos:Concept ;
+    skos:altLabel "DC62"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_induration> ;
+    skos:definition "silcrete pods"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "silcrete pods"@en .
+
+<https://linked.data.gov.au/def/induration-style/silcrete_sheet> a skos:Concept ;
+    skos:altLabel "DC61"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_induration> ;
+    skos:definition "silcrete sheet"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "silcrete sheet"@en .
+
+<https://linked.data.gov.au/def/induration-style/siliceous_hardpan> a skos:Concept ;
+    skos:altLabel "DP60"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/partially_cemented_duricrust>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_induration> ;
+    skos:definition "siliceous hardpan"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "siliceous hardpan"@en .
+
+<https://linked.data.gov.au/def/induration-style/siliceous_moderately_cemented> a skos:Concept ;
+    skos:altLabel "DM60"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/moderately_cemented_duricrust>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_induration> ;
+    skos:definition "siliceous, moderately cemented"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "siliceous, moderately cemented"@en .
+
+<https://linked.data.gov.au/def/induration-style/siliceous_nodules> a skos:Concept ;
+    skos:altLabel "NO60"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/nodules>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_induration> ;
+    skos:definition "siliceous nodules"@en ;
+    skos:inScheme cs: ;
+    skos:prefLabel "siliceous nodules"@en .
+
+<https://linked.data.gov.au/def/induration-style/bauxitic_induration> a skos:Concept ;
+    skos:altLabel "IB00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "Cementing largely by aluminous materials."@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/bauxitic_nodules>,
+        <https://linked.data.gov.au/def/induration-style/bauxitic_partially_cemented> ;
+    skos:prefLabel "bauxitic induration"@en .
+
+<https://linked.data.gov.au/def/induration-style/calcareous_induration> a skos:Concept ;
+    skos:altLabel "IK00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "calcareous induration"@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/calcareous_moderately_cemented>,
+        <https://linked.data.gov.au/def/induration-style/calcareous_nodules> ;
+    skos:prefLabel "calcareous induration"@en .
+
+<https://linked.data.gov.au/def/induration-style/calcrete> a skos:Concept ;
+    skos:altLabel "DC20"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "Completely cemented duricrust cemented mainly by calcium carbonate."@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/calcrete_(bauxite)> ;
+    skos:prefLabel "calcrete"@en .
+
+<https://linked.data.gov.au/def/induration-style/clay_induration> a skos:Concept ;
+    skos:altLabel "IC00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "Induration of regolith by clay materials."@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/clay_hardpan>,
+        <https://linked.data.gov.au/def/induration-style/clay_nodules> ;
+    skos:prefLabel "clay induration"@en .
+
+<https://linked.data.gov.au/def/induration-style/moderately_cemented_duricrust> a skos:Concept ;
+    skos:altLabel "DM00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust> ;
+    skos:definition "moderately cemented duricrust"@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/calcareous_moderately_cemented>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_moderately_cemented>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_moderately_cemented> ;
+    skos:prefLabel "moderately cemented duricrust"@en .
+
+<https://linked.data.gov.au/def/induration-style/nodules> a skos:Concept ;
+    skos:altLabel "NO00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "Nodules are irregular to spherical units of regolith material that occur enclosed within the regolith, as lag, or in duricrusts.  They generally have rounded edges.  They are distinct because of a greater concentration of some constituent, a difference in internal fabric or a distinct boundary with the surrounding material.  It does not include fragments of weathered rock, or coarse sedimentary particles unless they have been modified."@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/bauxitic_nodules>,
+        <https://linked.data.gov.au/def/induration-style/calcareous_nodules>,
+        <https://linked.data.gov.au/def/induration-style/clay_nodules>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_nodules>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_nodules> ;
+    skos:prefLabel "nodules"@en .
+
+<https://linked.data.gov.au/def/induration-style/partially_cemented_duricrust> a skos:Concept ;
+    skos:altLabel "DP00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/duricrust> ;
+    skos:definition "partially cemented duricrust"@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/bauxitic_partially_cemented>,
+        <https://linked.data.gov.au/def/induration-style/clay_hardpan>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_hardpan>,
+        <https://linked.data.gov.au/def/induration-style/humic_hardpan>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_hardpan> ;
+    skos:prefLabel "partially cemented duricrust"@en .
+
+<https://linked.data.gov.au/def/induration-style/ferruginous_induration> a skos:Concept ;
+    skos:altLabel "IF00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "Cementing by iron to form ferricrete, sometimes referred to as lateritic duricrust."@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/ferricrete>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_hardpan>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_moderately_cemented>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_nodules>,
+        <https://linked.data.gov.au/def/induration-style/massive_ferricrete>,
+        <https://linked.data.gov.au/def/induration-style/nodular_ferricrete> ;
+    skos:prefLabel "ferruginous induration"@en .
+
+<https://linked.data.gov.au/def/induration-style/siliceous_induration> a skos:Concept ;
+    skos:altLabel "IS00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "siliceous induration"@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/silcrete>,
+        <https://linked.data.gov.au/def/induration-style/silcrete_pods>,
+        <https://linked.data.gov.au/def/induration-style/silcrete_sheet>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_hardpan>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_moderately_cemented>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_nodules> ;
+    skos:prefLabel "siliceous induration"@en .
+
+<https://linked.data.gov.au/def/induration-style/indurated_material> a skos:Concept ;
+    skos:altLabel "IN00"@en ;
+    skos:definition "Induration processes lead to either absolute or relative accumulation of a cementing agent, to form a duricrust.  Sometimes the cementing agent replaces regolith materials.  A duricrust is a hard crust formed by weathering processes."@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/bauxitic_induration>,
+        <https://linked.data.gov.au/def/induration-style/calcareous_induration>,
+        <https://linked.data.gov.au/def/induration-style/calcrete>,
+        <https://linked.data.gov.au/def/induration-style/clay_induration>,
+        <https://linked.data.gov.au/def/induration-style/duricrust>,
+        <https://linked.data.gov.au/def/induration-style/ferruginous_induration>,
+        <https://linked.data.gov.au/def/induration-style/gypseous_induration>,
+        <https://linked.data.gov.au/def/induration-style/humic_induration>,
+        <https://linked.data.gov.au/def/induration-style/nodules>,
+        <https://linked.data.gov.au/def/induration-style/siliceous_induration> ;
+    skos:prefLabel "indurated material"@en ;
+    skos:topConceptOf cs: .
+
+<https://linked.data.gov.au/def/induration-style/duricrust> a skos:Concept ;
+    skos:altLabel "DU00"@en ;
+    skos:broader <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:definition "Mass of hard material formed within the regolith by either relative or absolute accumulations of natural cements in sediment (which may be variably weathered), saprolite or partially weathered rock."@en ;
+    skos:inScheme cs: ;
+    skos:narrower <https://linked.data.gov.au/def/induration-style/calcrete>,
+        <https://linked.data.gov.au/def/induration-style/calcrete_(bauxite)>,
+        <https://linked.data.gov.au/def/induration-style/completely_cemented_duricrust>,
+        <https://linked.data.gov.au/def/induration-style/ferricrete>,
+        <https://linked.data.gov.au/def/induration-style/gypcrete>,
+        <https://linked.data.gov.au/def/induration-style/massive_ferricrete>,
+        <https://linked.data.gov.au/def/induration-style/moderately_cemented_duricrust>,
+        <https://linked.data.gov.au/def/induration-style/nodular_ferricrete>,
+        <https://linked.data.gov.au/def/induration-style/partially_cemented_duricrust>,
+        <https://linked.data.gov.au/def/induration-style/silcrete>,
+        <https://linked.data.gov.au/def/induration-style/silcrete_pods>,
+        <https://linked.data.gov.au/def/induration-style/silcrete_sheet> ;
+    skos:prefLabel "duricrust"@en .
+
+cs: a skos:ConceptScheme ;
+    dcterms:created "2021-06-07"^^xsd:date ;
+    dcterms:creator <https://linked.data.gov.au/org/ga> ;
+    dcterms:modified "2021-07-13"^^xsd:date ;
+    # dcterms:provenance "FGDM database"@en ;
+    dcterms:publisher <https://linked.data.gov.au/org/ga> ;
+    owl:versionInfo "1" ;
+    skos:definition "Vocabulary of terms to describe the character of induration of rocks and regolith materials."@en ;
+    skos:hasTopConcept <https://linked.data.gov.au/def/induration-style/ferruginous,_moderately_cemented>,
+        <https://linked.data.gov.au/def/induration-style/indurated_material> ;
+    skos:prefLabel "Induration Style"@en ;
+    dcat:contactPoint "Ollie Raymond" .
+

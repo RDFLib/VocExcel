@@ -19,7 +19,7 @@ Several forms of use of this tool do not require any installation - see the next
 2. create a virtual environment (see [the official venv documentation](https://docs.python.org/3/library/venv.html), or, simpler, [this tutorial for Windows](https://www.c-sharpcorner.com/article/steps-to-set-up-a-virtual-environment-for-python-development/))
 3. install the necessary packages in that environment
     * usually something like `pip install -r requirements.txt`
-4. run the script using the version of Python in your virtual environment
+4. run the script, `convert.py`, using the version of Python in your virtual environment
 
 Generating RDF from Excel
 -------------------------
@@ -35,13 +35,13 @@ Methods 1 & 2 all use the same options. See the section `Command Line Arguments`
 
 1. Windows command line
 ```````````````````````
-There is a Windows EXE file, ``vocexcel.exe``, in the ``vocexcel/bin/`` folder that can be used like this:
+There will soon be an Windows EXE file, ``vocexcel.exe``, in the ``vocexcel/bin/`` folder that can be used like this:
 
 ::
 
     c:\\Users\\nick> vocexcel.exe vocabulary-x.xlsx
 
-The command above will generate a vocabulary RDF file in the same directory as the ``vocexcel.exe`` program.
+The command above will generate either a vocabulary RDF file in the same directory as the input Excel file, or an Excel file from the RDF file, based on file endings.
 
 2. Shell command line script (Linux/Unix/Mac)
 ``````````````````````````````````````````
@@ -53,6 +53,8 @@ The script ``vocexcel/bin/vocexcel.sh`` can be run as a shell script on Linux/Un
 
 Note that to run this shell script, you need to have installed a Python environment that contains this program's dependencies which are all listed in ``requirements.txt``. The shell script then needs to be told where the Python environment is: see the ``PYTHON`` variable in the script.
 
+The script will work out, based on file endings, if this is an Excel to RDF or an RDF to Excel conversion.
+
 3. Python script
 ````````````````
 The Python script ``convert.py`` in the ``vocexcel/`` directory can be run on Windows/Unix/Linux/Mac systems like this:
@@ -61,22 +63,24 @@ The Python script ``convert.py`` in the ``vocexcel/`` directory can be run on Wi
 
     ~$ python convert.py vocabulary-x.xlsx
 
-As long as a Python environment containing the program's needed modules, listed in ``requirements.txt`` are installed.
+As long as a Python environment containing the program's needed modules, listed in ``requirements.txt`` are installed. As above, the script will work out, based on file endings, if this is an Excel to RDF or an RDF to Excel conversion.
 
 4. Python module
 ````````````````
-The converter program can be called from other Python programs, perhaps as part of a chain of processing. For this, you would need code like this:
+The converter program has two methods that can be called from other Python programs, perhaps as part of a chain of processing, for Excel to RDF and RDF to Excel: `rdf_to_excel()` & `excel_to_rdf()`. For this, you would need code like this:
 
 ::
 
     from vocexcel import convert
     from pathlib import Path
 
-    convert.convert_file(Path(".") / "path" / "to" /"vocab-file.xlsx")
+    convert.rdf_to_excel(Path(".") / "path" / "to" /"vocab-file.xlsx")
 
-This will create a file ``vocab-file.ttl`` in the same directory as the ``vocab-file.xlsx``.
+Or similar code for the reverse conversion, RDF to Excel using `convert.excel_to_rdf()`.
 
-There are several options for ``convert_file()``, just see the function itself in ``vocexcel/convert.py``.
+This will create an output file, ``vocab-file.ttl`` for Excel to RDF, in the same directory as the input file.
+
+There are several options for the conversion functions, just see the functions themselves in ``vocexcel/convert.py``.
 
 5. Online
 `````````

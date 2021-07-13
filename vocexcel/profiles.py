@@ -81,11 +81,3 @@ VOC_PUB_PROFILE = Profile(
 PROFILES = {
     "vocpub": VOC_PUB_PROFILE
 }
-
-
-def list_profiles():
-    s = ""
-    for k, v in PROFILES.items():
-        s += f"{k}:\t{v.uri}\n"
-
-    return s.rstrip()

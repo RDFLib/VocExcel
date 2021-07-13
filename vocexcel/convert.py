@@ -4,13 +4,25 @@ from typing import List, Tuple
 from typing import Literal
 
 from openpyxl import load_workbook
+from openpyxl import Workbook
 from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.utils import get_column_letter
 from pydantic.error_wrappers import ValidationError
 
 import models
 import profiles
+import pyshacl
 from __init__ import __version__
+
+
+RDF_FILE_ENDINGS = ["ttl", "rdf", "xml", "json-ld", "json", "nt", "n3"]
+EXCEL_FILE_ENDINGS = ["xlsx"]
+KNOWN_FILE_ENDINGS = RDF_FILE_ENDINGS + EXCEL_FILE_ENDINGS
+
+
+class ConversionError(Exception):
+    pass
 
 
 def split_and_tidy(cell_value: str):
@@ -47,9 +59,7 @@ def extract_concepts_and_collections(s: Worksheet) -> Tuple[List[models.Concept]
                         )
                         concepts.append(c)
                     except ValidationError as e:
-                        print(f"On Row {row}:")
-                        print(e)
-                        exit()
+                        raise ConversionError(f"Concept processing error, row {row}, error: {e}")
             elif process_collection:
                 if cell.value is None:
                     pass
@@ -64,58 +74,110 @@ def extract_concepts_and_collections(s: Worksheet) -> Tuple[List[models.Concept]
                         )
                         collections.append(c)
                     except ValidationError as e:
-                        print(f"On Row {row}:")
-                        print(e)
-                        exit()
+                        raise ConversionError(f"Collection processing error, row {row}, error: {e}")
             elif cell.value is None:
                 pass
 
     return concepts, collections
 
 
-def convert_file(excel_file_path: Path, sheet_name=None, output_format: Literal["file", "string", "graph"] = "file"):
-    wb = None
+def excel_to_rdf(
+        file_to_convert_path: Path,
+        sheet_name=None,
+        output_type: Literal["file", "string", "graph"] = "file",
+        output_file_path=None
+):
+    """Converts a sheet within an Excel workbook to an RDF file"""
+    if not file_to_convert_path.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
+        raise ValueError(
+            "Files for conversion to RDF must be Excel files ending .xlsx"
+        )
+    wb = load_workbook(filename=str(file_to_convert_path), data_only=True)
+    sheet = wb["vocabulary" if sheet_name is None else sheet_name]
+
+    # Vocabulary
     try:
-        wb = load_workbook(filename=str(excel_file_path), data_only=True)
-        sheet = wb["vocabulary" if sheet_name is None else sheet_name]
+        cs = models.ConceptScheme(
+            uri=sheet["B1"].value,
+            title=sheet["B2"].value,
+            description=sheet["B3"].value,
+            created=sheet["B4"].value,
+            modified=sheet["B5"].value,
+            creator=sheet["B6"].value,
+            publisher=sheet["B7"].value,
+            version=sheet["B8"].value,
+            provenance=sheet["B9"].value,
+            custodian=sheet["B10"].value,
+            pid=sheet["B11"].value,
+        )
+    except ValidationError as e:
+        raise ConversionError(f"ConceptScheme processing error: {e}")
 
-        # Vocabulary
-        try:
-            cs = models.ConceptScheme(
-                uri=sheet["B1"].value,
-                title=sheet["B2"].value,
-                description=sheet["B3"].value,
-                created=sheet["B4"].value,
-                modified=sheet["B5"].value,
-                creator=sheet["B6"].value,
-                publisher=sheet["B7"].value,
-                version=sheet["B8"].value,
-                provenance=sheet["B9"].value,
-                custodian=sheet["B10"].value,
-                pid=sheet["B11"].value,
-            )
-        except ValidationError as e:
-            print(e)
-            exit()
+    # Concepts & Collections
+    concepts, collections = extract_concepts_and_collections(sheet)
 
-        # Concepts & Collections
-        concepts, collections = extract_concepts_and_collections(sheet)
+    # Build the total vocab
+    v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
 
-        # Build the total vocab
-        v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
+    # Write out the file
+    if output_type == "graph":
+        return v.to_graph()
+    elif output_type == "string":
+        return v.to_graph().serialize()
+    else:  # output_format == "file":
+        if output_file_path is not None:
+            dest = output_file_path
+        else:
+            dest = file_to_convert_path.with_suffix(".ttl")
+        v.to_graph().serialize(destination=str(dest))
+        return dest
 
-        # Write out the file
-        if output_format == "graph":
-            return v.to_graph()
-        elif output_format == "string":
-            return v.to_graph().serialize()
-        else:  # output_format == "file":
-            dest = excel_file_path.name.replace("xlsx", "ttl")
-            print(f"Created vocab RDF file {dest}")
-            v.to_graph().serialize(destination=dest)
 
-    except InvalidFileException as e:
-        print("You supplied a path to a file that either doesn't exist or isn't an Excel file")
+def rdf_to_excel(
+        file_to_convert_path: Path,
+        profile="vocpub",
+        output_file_path=None
+):
+    if not file_to_convert_path.name.endswith(tuple(RDF_FILE_ENDINGS)):
+        raise ValueError(
+            "Files for conversion to Excel must end with one of the RDF file formats: '{}'"
+                .format("', '".join(RDF_FILE_ENDINGS))
+        )
+    if profile not in profiles.PROFILES.keys():
+        raise ValueError(
+            "The profile chosen for conversion must be one of '{}'. 'vocpub' is default"
+                .format("', '".join(profiles.PROFILES.keys()))
+        )
+
+    # validate the RDF file
+    r = pyshacl.validate(str(file_to_convert_path), shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"))
+    if not r[0]:
+        raise ConversionError(
+            f"The file you supplied is not valid according to the {profile} profile. The validation errors are:\n\n"
+            f"{r[2]}"
+        )
+
+    # the RDF is valid so extract data and create Excel
+
+    # wb = Workbook()
+    # ws1 = wb.active
+    # ws1.title = "range names"
+    # for row in range(1, 40):
+    #     ws1.append(range(600))
+    #
+    # ws2 = wb.create_sheet(title="Pi")
+    # ws2['F5'] = 3.14
+    # ws3 = wb.create_sheet(title="Data")
+    # for row in range(10, 20):
+    #     for col in range(27, 54):
+    #         _ = ws3.cell(column=col, row=row, value="{0}".format(get_column_letter(col)))
+    #
+    # if output_file_path is not None:
+    #     dest = output_file_path
+    # else:
+    #     dest = file_to_convert_path.with_suffix(".xlsx")
+    # wb.save(filename=dest)
+    # return dest
 
 
 def main(args=None):
@@ -124,7 +186,7 @@ def main(args=None):
     parser.add_argument(
         "-v",
         "--version",
-        help="The version of this copy of VocExel. Must still set an excel_file value to call this (can be fake)",
+        help="The version of this copy of VocExel. Must still set an file_to_convert value to call this (can be fake)",
         action="store_true"
     )
 
@@ -138,9 +200,9 @@ def main(args=None):
     )
 
     parser.add_argument(
-        "excel_file",
+        "file_to_convert",
         type=Path,
-        help="The Excel file to convert to a SKOS vocabulary in RDF",
+        help="The Excel file to convert to a SKOS vocabulary in RDF or an RDF file to convert to an Excel file",
     )
 
     parser.add_argument(
@@ -161,11 +223,18 @@ def main(args=None):
     )
 
     parser.add_argument(
-        "-of",
-        "--outputformat",
+        "-ot",
+        "--outputtype",
         help="The format of the vocabulary output.",
         choices=["file", "string"],
         default="file",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--outputfile",
+        help="An optionally-provided output file path.",
+        required=False
     )
 
     parser.add_argument(
@@ -177,21 +246,46 @@ def main(args=None):
 
     args = parser.parse_args()
 
+    print(args.outputfile)
+
     if args.listprofiles:
-        print(profiles.list_profiles())
+        s = "Profiles\nToken\tIRI\n-----\t-----\n"
+        for k, v in profiles.PROFILES.items():
+            s += f"{k}\t{v.uri}\n"
+
+        print(s.rstrip())
         exit()
     elif args.version:
         print(__version__)
         exit()
-    elif args.excel_file:
-        print(f"Processing file {args.excel_file}")
+    elif args.file_to_convert:
+        if not args.file_to_convert.name.endswith(tuple(KNOWN_FILE_ENDINGS)):
+            print("Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'"
+                  .format("', '".join(RDF_FILE_ENDINGS)))
+            exit()
 
-        try:
-            o = convert_file(args.excel_file, sheet_name=args.sheet, output_format=args.outputformat)
-            if args.outputformat == "string":
-                print(o)
-        except Exception as e:
-            print(e)
+        print(f"Processing file {args.file_to_convert}")
+
+        if args.file_to_convert.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
+            try:
+                o = excel_to_rdf(args.file_to_convert, sheet_name=args.sheet, output_type=args.outputtype, output_file_path=args.outputfile)
+                if args.outputtype == "string":
+                    print(o)
+                else:
+                    print(f"Output is file {o}")
+            except Exception as e:
+                print(e)
+                exit()
+        else:  # RDF file ending
+            try:
+                o = rdf_to_excel(args.file_to_convert, profile=args.profile, output_file_path=args.outputfile)
+                if args.outputtype == "string":
+                    print(o)
+                else:
+                    print(f"Output is file {o}")
+            except Exception as e:
+                print(e)
+                exit()
 
 
 if __name__ == "__main__":
