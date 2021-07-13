@@ -1,24 +1,34 @@
 import argparse
+import datetime
 from pathlib import Path
 from typing import List, Tuple
 from typing import Literal
 
 from openpyxl import load_workbook
 from openpyxl import Workbook
-from openpyxl.utils.exceptions import InvalidFileException
 from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.utils.exceptions import InvalidFileException
+
 from openpyxl.utils import get_column_letter
 from pydantic.error_wrappers import ValidationError
-
+from dateutil import parser
 import models
 import profiles
 import pyshacl
 from __init__ import __version__
 
 
-RDF_FILE_ENDINGS = ["ttl", "rdf", "xml", "json-ld", "json", "nt", "n3"]
+RDF_FILE_ENDINGS = {
+    ".ttl": "ttl",
+    ".rdf": "xml",
+    ".xml": "xml",
+    ".json-ld": "json-ld",
+    ".json": "json-ld",
+    ".nt": "nt",
+    ".n3": "n3"
+}
 EXCEL_FILE_ENDINGS = ["xlsx"]
-KNOWN_FILE_ENDINGS = RDF_FILE_ENDINGS + EXCEL_FILE_ENDINGS
+KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
 
 
 class ConversionError(Exception):
@@ -138,10 +148,10 @@ def rdf_to_excel(
         profile="vocpub",
         output_file_path=None
 ):
-    if not file_to_convert_path.name.endswith(tuple(RDF_FILE_ENDINGS)):
+    if not file_to_convert_path.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
         raise ValueError(
             "Files for conversion to Excel must end with one of the RDF file formats: '{}'"
-                .format("', '".join(RDF_FILE_ENDINGS))
+                .format("', '".join(RDF_FILE_ENDINGS.keys()))
         )
     if profile not in profiles.PROFILES.keys():
         raise ValueError(
@@ -158,26 +168,137 @@ def rdf_to_excel(
         )
 
     # the RDF is valid so extract data and create Excel
+    from rdflib import Graph, Namespace, URIRef, Literal
+    from rdflib.namespace import DCTERMS, PROV, RDF, RDFS, SKOS, OWL
 
-    # wb = Workbook()
-    # ws1 = wb.active
-    # ws1.title = "range names"
-    # for row in range(1, 40):
-    #     ws1.append(range(600))
-    #
-    # ws2 = wb.create_sheet(title="Pi")
-    # ws2['F5'] = 3.14
-    # ws3 = wb.create_sheet(title="Data")
-    # for row in range(10, 20):
-    #     for col in range(27, 54):
-    #         _ = ws3.cell(column=col, row=row, value="{0}".format(get_column_letter(col)))
-    #
-    # if output_file_path is not None:
-    #     dest = output_file_path
-    # else:
-    #     dest = file_to_convert_path.with_suffix(".xlsx")
-    # wb.save(filename=dest)
-    # return dest
+    g = Graph().parse(str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix])
+
+    wb = load_workbook(filename=(Path(__file__).parent / "blank.xlsx"))
+
+    holder = {
+        "hasTopConcept": [],
+        "provenance": None
+    }
+    for s in g.subjects(RDF.type, SKOS.ConceptScheme):
+        holder["uri"] = str(s)
+        for p, o in g.predicate_objects(s):
+            if p == SKOS.prefLabel:
+                holder["title"] = o.toPython()
+            elif p == SKOS.definition:
+                holder["description"] = str(o)
+            elif p == DCTERMS.created:
+                holder["created"] = o.toPython()
+            elif p == DCTERMS.modified:
+                holder["modified"] = o.toPython()
+            elif p == DCTERMS.creator:
+                holder["creator"] = models.ORGANISATIONS_INVERSE[o]
+            elif p == DCTERMS.publisher:
+                holder["publisher"] = models.ORGANISATIONS_INVERSE[o]
+            elif p == OWL.versionInfo:
+                holder["versionInfo"] = str(o)
+            elif p == DCTERMS.source:
+                holder["provenance"] = str(o)
+            elif p == DCTERMS.provenance:
+                holder["provenance"] = str(o)
+            elif p == PROV.wasDerivedFrom:
+                holder["provenance"] = str(o)
+            elif p == SKOS.hasTopConcept:
+                holder["hasTopConcept"].append(str(o))
+
+    from models import ConceptScheme, Concept, Collection
+    cs = ConceptScheme(
+        uri=holder["uri"],
+        title=holder["title"],
+        description=holder["description"],
+        created=holder["created"],
+        modified=holder["modified"],
+        creator=holder["creator"],
+        publisher=holder["publisher"],
+        version=holder["versionInfo"],
+        provenance=holder["provenance"],
+        custodian=None,
+        pid=None,
+    )
+    cs.to_excel(wb)
+
+    # infer inverses
+    for s, o in g.subject_objects(SKOS.broader):
+        g.add((o, SKOS.narrower, s))
+
+    row_no = 16
+    for s in g.subjects(RDF.type, SKOS.Concept):
+        holder = {
+            "uri": str(s),
+            "children": [],
+            "other_ids": [],
+            "home_vocab_uri": None,
+            "provenance": None,
+        }
+        for p, o in g.predicate_objects(s):
+            if p == SKOS.prefLabel:
+                holder["pref_label"] = o.toPython()
+            elif p == SKOS.definition:
+                holder["definition"] = str(o)
+            elif p == SKOS.narrower:
+                holder["children"].append(str(o))
+            elif p == SKOS.notation:
+                holder["other_ids"].append(str(o))
+            elif p == RDFS.isDefinedBy:
+                holder["home_vocab_uri"] = str(o)
+            elif p == DCTERMS.source:
+                holder["provenance"] = str(o)
+            elif p == DCTERMS.provenance:
+                holder["provenance"] = str(o)
+            elif p == PROV.wasDerivedFrom:
+                holder["provenance"] = str(o)
+
+        Concept(
+            uri=holder["uri"],
+            pref_label=holder["pref_label"],
+            definition=holder["definition"],
+            children=holder["children"],
+            other_ids=holder["other_ids"],
+            home_vocab_uri=holder["home_vocab_uri"],
+            provenance=holder["provenance"],
+        ).to_excel(wb, row_no)
+        row_no += 1
+
+    row_no += 2
+
+    for s in g.subjects(RDF.type, SKOS.Collection):
+        holder = {
+            "uri": str(s),
+            "members": [],
+        }
+        for p, o in g.predicate_objects(s):
+            if p == SKOS.prefLabel:
+                holder["pref_label"] = o.toPython()
+            elif p == SKOS.definition:
+                holder["definition"] = str(o)
+            elif p == SKOS.member:
+                holder["members"].append(str(o))
+            elif p == DCTERMS.source:
+                holder["provenance"] = str(o)
+            elif p == DCTERMS.provenance:
+                holder["provenance"] = str(o)
+            elif p == PROV.wasDerivedFrom:
+                holder["provenance"] = str(o)
+
+        Concept(
+            uri=holder["uri"],
+            pref_label=holder["pref_label"],
+            definition=holder["definition"],
+            children=holder["members"],
+            provenance=holder["provenance"],
+        ).to_excel(wb, row_no)
+        row_no += 1
+
+    if output_file_path is not None:
+        dest = output_file_path
+    else:
+        dest = file_to_convert_path.with_suffix(".xlsx")
+    wb.save(filename=dest)
+    return dest
 
 
 def main(args=None):
@@ -246,8 +367,6 @@ def main(args=None):
 
     args = parser.parse_args()
 
-    print(args.outputfile)
-
     if args.listprofiles:
         s = "Profiles\nToken\tIRI\n-----\t-----\n"
         for k, v in profiles.PROFILES.items():
@@ -261,7 +380,7 @@ def main(args=None):
     elif args.file_to_convert:
         if not args.file_to_convert.name.endswith(tuple(KNOWN_FILE_ENDINGS)):
             print("Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'"
-                  .format("', '".join(RDF_FILE_ENDINGS)))
+                  .format("', '".join(RDF_FILE_ENDINGS.keys())))
             exit()
 
         print(f"Processing file {args.file_to_convert}")

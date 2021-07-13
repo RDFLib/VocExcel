@@ -2,3 +2,4 @@ openpyxl
 git+https://github.com/RDFlib/rdflib.git#egg=rdflib
 pydantic
 pyshacl
+dateutils

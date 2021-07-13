@@ -1,9 +1,11 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, ValidationError, validator
 from pydantic import AnyHttpUrl
 import datetime
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
+from openpyxl import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 
 ORGANISATIONS = {
@@ -12,6 +14,14 @@ ORGANISATIONS = {
     "GGIC": URIRef("https://linked.data.gov.au/org/ggic"),
     "GSQ": URIRef("https://linked.data.gov.au/org/gsq"),
     "ICSM": URIRef("https://linked.data.gov.au/org/icsm"),
+}
+
+ORGANISATIONS_INVERSE = {
+    URIRef("https://linked.data.gov.au/org/cgi"): "CGI",
+    URIRef("https://linked.data.gov.au/org/ga"): "GA",
+    URIRef("https://linked.data.gov.au/org/ggic"): "GGIC",
+    URIRef("https://linked.data.gov.au/org/gsq"): "GSQ",
+    URIRef("https://linked.data.gov.au/org/icsm"): "ICSM",
 }
 
 
@@ -23,7 +33,7 @@ class ConceptScheme(BaseModel):
     modified: datetime.date = None
     creator: str
     publisher: str
-    version: str
+    version: str = None
     provenance: str
     custodian: str = None
     pid: AnyHttpUrl = None
@@ -71,6 +81,20 @@ class ConceptScheme(BaseModel):
 
         return g
 
+    def to_excel(self, wb: Workbook):
+        ws = wb.active
+        ws["B1"] = self.uri
+        ws["B2"] = self.title
+        ws["B3"] = self.description
+        ws["B4"] = self.created.isoformat()
+        ws["B5"] = self.modified.isoformat()
+        ws["B6"] = self.creator
+        ws["B7"] = self.publisher
+        ws["B8"] = self.version
+        ws["B9"] = self.provenance
+        # ws["B10"] = ""
+        # ws["B11"] = ""
+
 
 class Concept(BaseModel):
     uri: AnyHttpUrl
@@ -105,6 +129,17 @@ class Concept(BaseModel):
 
         return g
 
+    def to_excel(self, wb: Workbook, row_no: int):
+        ws = wb.active
+        ws[f"A{row_no}"] = self.uri
+        ws[f"B{row_no}"] = self.pref_label
+        ws[f"C{row_no}"] = self.alt_labels
+        ws[f"D{row_no}"] = self.definition
+        ws[f"E{row_no}"] = ",\\".join(self.children)
+        ws[f"F{row_no}"] = ",\\".join(self.other_ids)
+        ws[f"G{row_no}"] = self.home_vocab_uri
+        ws[f"H{row_no}"] = self.provenance
+
 
 class Collection(BaseModel):
     uri: AnyHttpUrl
@@ -125,6 +160,14 @@ class Collection(BaseModel):
             g.add((c, DCTERMS.provenance, Literal(self.provenance, lang="en")))
 
         return g
+
+    def to_excel(self, wb: Workbook, row_no: int):
+        ws = wb.active
+        ws[f"A{row_no}"] = self.uri
+        ws[f"B{row_no}"] = self.pref_label
+        ws[f"C{row_no}"] = self.definition
+        ws[f"D{row_no}"] = ",\n".join(self.members)
+        ws[f"E{row_no}"] = self.provenance
 
 
 class Vocabulary(BaseModel):
