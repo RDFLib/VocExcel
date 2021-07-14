@@ -17,8 +17,15 @@ def open_local(paths, mode="r", encoding="utf8"):
 with open_local(["README.rst"], encoding="utf-8") as readme:
     long_description = readme.read()
 
-with open_local(["requirements.txt"]) as req:
-    install_requires = req.read().split("\n")
+# with open_local(["requirements.txt"]) as req:
+#     install_requires = req.read().split("\n")
+install_requires = [
+    "openpyxl",
+    "rdflib @ git+https://github.com/RDFlib/rdflib.git#egg=rdflib",
+    "pydantic",
+    "pyshacl",
+    "dateutils"
+]
 
 setup(
     name="VocExcel",
