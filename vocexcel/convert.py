@@ -90,7 +90,8 @@ def excel_to_rdf(
         file_to_convert_path: Path,
         sheet_name=None,
         output_type: Literal["file", "string", "graph"] = "file",
-        output_file_path=None
+        output_file_path=None,
+        output_format: Literal["turtle", "xml", "json-ld"] = "turtle"
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
     if type(file_to_convert_path) is str:
@@ -130,7 +131,7 @@ def excel_to_rdf(
     if output_type == "graph":
         return v.to_graph()
     elif output_type == "string":
-        return v.to_graph().serialize()
+        return v.to_graph().serialize(format=output_format)
     else:  # output_format == "file":
         if output_file_path is not None:
             dest = output_file_path
