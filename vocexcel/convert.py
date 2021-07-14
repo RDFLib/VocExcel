@@ -1,21 +1,16 @@
 import argparse
-import datetime
 from pathlib import Path
 from typing import List, Tuple
 from typing import Literal
 
 from openpyxl import load_workbook
-from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.utils.exceptions import InvalidFileException
 
-from openpyxl.utils import get_column_letter
 from pydantic.error_wrappers import ValidationError
-from dateutil import parser
-import models
-import profiles
+from vocexcel import models
+from vocexcel import profiles
 import pyshacl
-from __init__ import __version__
+from vocexcel import __version__
 
 
 RDF_FILE_ENDINGS = {
@@ -98,6 +93,8 @@ def excel_to_rdf(
         output_file_path=None
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
+    if type(file_to_convert_path) is str:
+        file_to_convert_path = Path(file_to_convert_path)
     if not file_to_convert_path.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
         raise ValueError(
             "Files for conversion to RDF must be Excel files ending .xlsx"
@@ -148,6 +145,8 @@ def rdf_to_excel(
         profile="vocpub",
         output_file_path=None
 ):
+    if type(file_to_convert_path) is str:
+        file_to_convert_path = Path(file_to_convert_path)
     if not file_to_convert_path.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
         raise ValueError(
             "Files for conversion to Excel must end with one of the RDF file formats: '{}'"
