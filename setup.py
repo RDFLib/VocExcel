@@ -31,10 +31,10 @@ setup(
     name="VocExcel",
     packages=find_packages(),
     package_dir={"vocexcel": "vocexcel"},
-    # package_data={
-    #     "pylode": ["templates/*.html", "templates/*/*.html", "templates/*.md", "templates/*/*.md", "style/*.css"],
-    #     "img": ["pyLODE-250.png"]
-    # },
+    package_data={
+        "vocexcel": ["validator.vocpub.ttl", "blank.xlsx"],
+    },
+    include_package_data=True,
     version=__version__,
     description="Another Excel to RDF converter for SKOS vocabs, "
                 "but one that include profile-based validation of results",
