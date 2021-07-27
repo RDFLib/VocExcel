@@ -205,8 +205,8 @@ def rdf_to_excel(
             elif p == SKOS.hasTopConcept:
                 holder["hasTopConcept"].append(str(o))
 
-    from models import ConceptScheme, Concept, Collection
-    cs = ConceptScheme(
+    # from models import ConceptScheme, Concept, Collection
+    cs = models.ConceptScheme(
         uri=holder["uri"],
         title=holder["title"],
         description=holder["description"],
@@ -252,7 +252,7 @@ def rdf_to_excel(
             elif p == PROV.wasDerivedFrom:
                 holder["provenance"] = str(o)
 
-        Concept(
+        models.Concept(
             uri=holder["uri"],
             pref_label=holder["pref_label"],
             definition=holder["definition"],
@@ -284,7 +284,7 @@ def rdf_to_excel(
             elif p == PROV.wasDerivedFrom:
                 holder["provenance"] = str(o)
 
-        Concept(
+        models.Concept(
             uri=holder["uri"],
             pref_label=holder["pref_label"],
             definition=holder["definition"],

@@ -17,17 +17,24 @@ def open_local(paths, mode="r", encoding="utf8"):
 with open_local(["README.rst"], encoding="utf-8") as readme:
     long_description = readme.read()
 
-with open_local(["requirements.txt"]) as req:
-    install_requires = req.read().split("\n")
+# with open_local(["requirements.txt"]) as req:
+#     install_requires = req.read().split("\n")
+install_requires = [
+    "openpyxl",
+    "rdflib @ git+https://github.com/RDFlib/rdflib.git#egg=rdflib",
+    "pydantic",
+    "pyshacl",
+    "dateutils"
+]
 
 setup(
     name="VocExcel",
     packages=find_packages(),
     package_dir={"vocexcel": "vocexcel"},
-    # package_data={
-    #     "pylode": ["templates/*.html", "templates/*/*.html", "templates/*.md", "templates/*/*.md", "style/*.css"],
-    #     "img": ["pyLODE-250.png"]
-    # },
+    package_data={
+        "vocexcel": ["validator.vocpub.ttl", "blank.xlsx"],
+    },
+    include_package_data=True,
     version=__version__,
     description="Another Excel to RDF converter for SKOS vocabs, "
                 "but one that include profile-based validation of results",
