@@ -137,7 +137,7 @@ def excel_to_rdf(
             dest = output_file_path
         else:
             dest = file_to_convert_path.with_suffix(".ttl")
-        v.to_graph().serialize(destination=str(dest))
+        v.to_graph().serialize(destination=str(dest), format=output_format)
         return dest
 
 
@@ -359,6 +359,15 @@ def main(args=None):
     )
 
     parser.add_argument(
+        "-of",
+        "--outputformat",
+        help="An optionally-provided output format for RDF files. Only relevant in Excel-to-RDf conversions.",
+        required=False,
+        choices=["turtle", "xml", "json-ld"],
+        default="turtle"
+    )
+
+    parser.add_argument(
         "-s",
         "--sheet",
         help="The sheet within the target Excel Workbook to process",
@@ -387,7 +396,7 @@ def main(args=None):
 
         if args.file_to_convert.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
             try:
-                o = excel_to_rdf(args.file_to_convert, sheet_name=args.sheet, output_type=args.outputtype, output_file_path=args.outputfile)
+                o = excel_to_rdf(args.file_to_convert, sheet_name=args.sheet, output_type=args.outputtype, output_file_path=args.outputfile, output_format=args.outputformat)
                 if args.outputtype == "string":
                     print(o)
                 else:
