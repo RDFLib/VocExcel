@@ -136,7 +136,13 @@ def excel_to_rdf(
         if output_file_path is not None:
             dest = output_file_path
         else:
-            dest = file_to_convert_path.with_suffix(".ttl")
+            if output_format == "xml":
+                suffix = ".rdf"
+            elif  output_format == "json-ld":
+                suffix = ".json-ld"
+            else:
+                suffix = ".ttl"
+            dest = file_to_convert_path.with_suffix(suffix)
         v.to_graph().serialize(destination=str(dest), format=output_format)
         return dest
 
