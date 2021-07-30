@@ -220,8 +220,8 @@ def rdf_to_excel(
         modified=holder["modified"],
         creator=holder["creator"],
         publisher=holder["publisher"],
-        version=holder["versionInfo"],
-        provenance=holder["provenance"],
+        version=holder["versionInfo"] if holder.get("versionInfo") is not None else None,
+        provenance=holder["provenance"] if holder.get("provenance") is not None else None,
         custodian=None,
         pid=None,
     )
@@ -265,7 +265,7 @@ def rdf_to_excel(
             children=holder["children"],
             other_ids=holder["other_ids"],
             home_vocab_uri=holder["home_vocab_uri"],
-            provenance=holder["provenance"],
+            provenance=holder["provenance"] if holder.get("provenance") is not None else None,
         ).to_excel(wb, row_no)
         row_no += 1
 
@@ -290,12 +290,12 @@ def rdf_to_excel(
             elif p == PROV.wasDerivedFrom:
                 holder["provenance"] = str(o)
 
-        models.Concept(
+        models.Collection(
             uri=holder["uri"],
             pref_label=holder["pref_label"],
             definition=holder["definition"],
-            children=holder["members"],
-            provenance=holder["provenance"],
+            members=holder["members"],
+            provenance=holder["provenance"] if holder.get("provenance") is not None else None,
         ).to_excel(wb, row_no)
         row_no += 1
 

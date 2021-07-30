@@ -34,7 +34,7 @@ class ConceptScheme(BaseModel):
     creator: str
     publisher: str
     version: str = None
-    provenance: str
+    provenance: str = None
     custodian: str = None
     pid: AnyHttpUrl = None
 
