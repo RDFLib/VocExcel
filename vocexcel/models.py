@@ -33,8 +33,8 @@ class ConceptScheme(BaseModel):
     modified: datetime.date = None
     creator: str
     publisher: str
+    provenance: str
     version: str = None
-    provenance: str = None
     custodian: str = None
     pid: AnyHttpUrl = None
 
