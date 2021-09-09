@@ -3,3 +3,4 @@ rdflib>=6.0.0
 pydantic
 pyshacl
 dateutils
+colorama

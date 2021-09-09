@@ -2,9 +2,12 @@ import argparse
 from pathlib import Path
 from typing import List, Tuple
 from typing import Literal
+import logging
 
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
+
+from colorama import init, Fore, Style
 
 from pydantic.error_wrappers import ValidationError
 from vocexcel import models
@@ -150,7 +153,10 @@ def excel_to_rdf(
 def rdf_to_excel(
         file_to_convert_path: Path,
         profile="vocpub",
-        output_file_path=None
+        output_file_path=None,
+        error_level=1,
+        message_level=1,
+        log_file=None
 ):
     if type(file_to_convert_path) is str:
         file_to_convert_path = Path(file_to_convert_path)
@@ -164,13 +170,56 @@ def rdf_to_excel(
             "The profile chosen for conversion must be one of '{}'. 'vocpub' is default"
                 .format("', '".join(profiles.PROFILES.keys()))
         )
+    
+    allow_warnings = True if error_level > 1 else False
 
     # validate the RDF file
-    r = pyshacl.validate(str(file_to_convert_path), shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"))
-    if not r[0]:
+    r = pyshacl.validate(str(file_to_convert_path), shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"), allow_warnings=allow_warnings)
+    
+    validation_list = ["Validation Result" + element for element in r[2].split("Validation Result")[1:]]
+    
+    logging_level = logging.INFO
+
+    if message_level == 3:
+        logging_level = logging.ERROR
+    elif message_level == 2:
+        logging_level = logging.WARNING
+
+    if log_file:
+        logging.basicConfig(level=logging_level, format="%(message)s", filename=log_file)
+    else:
+        logging.basicConfig(level=logging_level, format="%(message)s")
+
+    info_list = []
+    warning_list = []
+    violation_list = []
+    for result in validation_list:
+        if "sh:Info" in result:
+            logging.info(log_msg(result, "INFO", log_file))
+            info_list.append(result)
+        elif "sh:Warning" in result:
+            logging.warning(log_msg(result, "WARNING", log_file))
+            warning_list.append(result)
+        elif "sh:Violation" in result:
+            logging.error(log_msg(result, "VIOLATION", log_file))
+            violation_list.append(result)
+        else:
+            raise Exception(
+                "SHACL severity not found in validation result."
+            )
+    
+    is_valid = False
+
+    if error_level == 3:
+        is_valid = False if len(violation_list) > 0 else True
+    elif error_level == 2:
+        is_valid = False if len(warning_list + violation_list) > 0 else True
+    else: # error_level == 1
+        is_valid = False if len(info_list + warning_list + violation_list) > 0 else True
+
+    if not is_valid:
         raise ConversionError(
-            f"The file you supplied is not valid according to the {profile} profile. The validation errors are:\n\n"
-            f"{r[2]}"
+            f"The file you supplied is not valid according to the {profile} profile."
         )
 
     # the RDF is valid so extract data and create Excel
@@ -306,6 +355,19 @@ def rdf_to_excel(
     wb.save(filename=dest)
     return dest
 
+def log_msg(message: str, level: str, log_file: str) -> str:
+    formatted_msg = ""
+    if log_file:
+        formatted_msg = f"{level}: {message}"
+    else:
+        if level == "INFO":
+            formatted_msg = Fore.BLUE + "INFO: " + Style.RESET_ALL + message
+        elif level == "WARNING":
+            formatted_msg = Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
+        elif level == "VIOLATION":
+            formatted_msg = Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
+    return formatted_msg
+
 
 def main(args=None):
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -380,6 +442,31 @@ def main(args=None):
         default="vocabulary",
     )
 
+    # 1 - info, 2 - warning, 3 - violation
+    # error severity level
+    parser.add_argument(
+        "-e",
+        "--errorlevel",
+        help="The minimum severity level which fails validation",
+        default=1,
+    )
+
+    # print severity level
+    parser.add_argument(
+        "-m",
+        "--messagelevel",
+        help="The minimum severity level printed to console",
+        default=1,
+    )
+
+    # log to file
+    parser.add_argument(
+        "-l",
+        "--logfile",
+        help="The file to write logging output to",
+        required=False,
+    )
+
     args = parser.parse_args()
 
     if args.listprofiles:
@@ -412,7 +499,7 @@ def main(args=None):
                 exit()
         else:  # RDF file ending
             try:
-                o = rdf_to_excel(args.file_to_convert, profile=args.profile, output_file_path=args.outputfile)
+                o = rdf_to_excel(args.file_to_convert, profile=args.profile, output_file_path=args.outputfile, error_level=int(args.errorlevel), message_level=int(args.messagelevel), log_file=args.logfile)
                 if args.outputtype == "string":
                     print(o)
                 else:

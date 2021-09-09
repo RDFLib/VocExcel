@@ -21,7 +21,7 @@ with open_local(["README.rst"], encoding="utf-8") as readme:
 #     install_requires = req.read().split("\n")
 install_requires = [
     "openpyxl",
-    "rdflib @ git+https://github.com/RDFlib/rdflib.git#egg=rdflib",
+    "rdflib>=6.0.0",
     "pydantic",
     "pyshacl",
     "dateutils"
