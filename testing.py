@@ -1,8 +1,8 @@
 from vocexcel import convert
 
-convert.rdf_to_excel("tests/eg-rdf-valid.ttl")
+convert.rdf_to_excel("tests/eg-valid.ttl", error_level=1, message_level=1)
 
-# convert.rdf_to_excel("tests/eg-rdf-valid.ttl", error_level=3, message_level=2, log_file="file.log")
+# convert.rdf_to_excel("tests/eg-valid.ttl", error_level=3, message_level=2, log_file="file.log")
 
 # message_list = []
 

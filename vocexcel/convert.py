@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from typing import Literal
 import logging
 
@@ -175,9 +175,7 @@ def rdf_to_excel(
 
     # validate the RDF file
     r = pyshacl.validate(str(file_to_convert_path), shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"), allow_warnings=allow_warnings)
-    
-    validation_list = ["Validation Result" + element for element in r[2].split("Validation Result")[1:]]
-    
+        
     logging_level = logging.INFO
 
     if message_level == 3:
@@ -193,20 +191,36 @@ def rdf_to_excel(
     info_list = []
     warning_list = []
     violation_list = []
-    for result in validation_list:
-        if "sh:Info" in result:
-            logging.info(log_msg(result, "INFO", log_file))
-            info_list.append(result)
-        elif "sh:Warning" in result:
-            logging.warning(log_msg(result, "WARNING", log_file))
-            warning_list.append(result)
-        elif "sh:Violation" in result:
-            logging.error(log_msg(result, "VIOLATION", log_file))
-            violation_list.append(result)
-        else:
-            raise Exception(
-                "SHACL severity not found in validation result."
-            )
+
+    results_graph = r[1]
+    from rdflib import Graph
+    from rdflib.namespace import RDF, SH
+    for report in results_graph.subjects(RDF.type, SH.ValidationReport):
+        for result in results_graph.objects(report, SH.result):
+            result_dict = {}
+            for p, o in results_graph.predicate_objects(result):
+                if p == SH.focusNode:
+                    result_dict["focusNode"] = str(o)
+                elif p == SH.resultMessage:
+                    result_dict["resultMessage"] = str(o)
+                elif p == SH.resultSeverity:
+                    result_dict["resultSeverity"] = str(o)
+                elif p == SH.sourceConstraintComponent:
+                    result_dict["sourceConstraintComponent"] = str(o)
+                elif p == SH.sourceShape:
+                    result_dict["sourceShape"] = str(o)
+                elif p == SH.value:
+                    result_dict["value"] = str(o)
+            result_message = log_msg(result_dict, log_file)
+            if result_dict["resultSeverity"] == str(SH.Info):
+                logging.info(result_message)
+                info_list.append(result_message)
+            elif result_dict["resultSeverity"] == str(SH.Warning):
+                logging.warning(result_message)
+                warning_list.append(result_message)
+            elif result_dict["resultSeverity"] == str(SH.Violation):
+                logging.error(result_message)
+                violation_list.append(result_message)
     
     is_valid = False
 
@@ -355,17 +369,22 @@ def rdf_to_excel(
     wb.save(filename=dest)
     return dest
 
-def log_msg(message: str, level: str, log_file: str) -> str:
+def log_msg(result: Dict, log_file: str) -> str:
+    from rdflib.namespace import SH
     formatted_msg = ""
-    if log_file:
-        formatted_msg = f"{level}: {message}"
-    else:
-        if level == "INFO":
-            formatted_msg = Fore.BLUE + "INFO: " + Style.RESET_ALL + message
-        elif level == "WARNING":
-            formatted_msg = Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
-        elif level == "VIOLATION":
-            formatted_msg = Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
+    message = f"""Validation Result in {result['sourceConstraintComponent'].split(str(SH))[1]} ({result['sourceConstraintComponent']}):
+\tSeverity: sh:{result['resultSeverity'].split(str(SH))[1]}
+\tSource Shape: <{result['sourceShape']}>
+\tFocus Node: <{result['focusNode']}>
+\tValue Node: <{result['value']}>
+\tMessage: {result['resultMessage']}
+"""
+    if result["resultSeverity"] == str(SH.Info):
+        formatted_msg = f"INFO: {message}" if log_file else Fore.BLUE + "INFO: " + Style.RESET_ALL + message
+    elif result["resultSeverity"] == str(SH.Warning):
+        formatted_msg = f"WARNING: {message}" if log_file else Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
+    elif result["resultSeverity"] == str(SH.Violation):
+        formatted_msg = f"VIOLATION: {message}" if log_file else Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
     return formatted_msg
 
 
