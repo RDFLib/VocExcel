@@ -20,10 +20,11 @@ RDF_FILE_ENDINGS = {
     ".json-ld": "json-ld",
     ".json": "json-ld",
     ".nt": "nt",
-    ".n3": "n3"
+    ".n3": "n3",
 }
 EXCEL_FILE_ENDINGS = ["xlsx"]
 KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
+template_version = "0.3.0"
 
 
 class ConversionError(Exception):
@@ -31,10 +32,16 @@ class ConversionError(Exception):
 
 
 def split_and_tidy(cell_value: str):
-    return [x.strip() for x in cell_value.strip().split(",")] if cell_value is not None else None
+    return (
+        [x.strip() for x in cell_value.strip().split(",")]
+        if cell_value is not None
+        else None
+    )
 
 
-def extract_concepts_and_collections(s: Worksheet) -> Tuple[List[models.Concept], List[models.Collection]]:
+def extract_concepts_and_collections(
+    s: Worksheet,
+) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
     process_concept = False
@@ -52,19 +59,39 @@ def extract_concepts_and_collections(s: Worksheet) -> Tuple[List[models.Concept]
                     pass
                 else:
                     try:
-                        c = models.Concept(
-                            uri=s[f"A{row}"].value,
-                            pref_label=s[f"B{row}"].value,
-                            alt_labels=split_and_tidy(s[f"C{row}"].value),
-                            definition=s[f"D{row}"].value,
-                            children=split_and_tidy(s[f"E{row}"].value),
-                            other_ids=split_and_tidy(s[f"F{row}"].value),
-                            home_vocab_uri=s[f"G{row}"].value,
-                            provenance=s[f"H{row}"].value
-                        )
+                        global template_version
+                        if template_version == "0.3.0":
+                            c = models.Concept(
+                                uri=s[f"A{row}"].value,
+                                pref_label=s[f"B{row}"].value,
+                                pl_language_code=split_and_tidy(s[f"C{row}"].value),  # new in 0.3.0
+                                alt_labels=split_and_tidy(s[f"D{row}"].value),
+                                definition=s[f"E{row}"].value,
+                                def_language_code=split_and_tidy(s[f"F{row}"].value),  # new in 0.3.0
+                                children=split_and_tidy(s[f"G{row}"].value),
+                                other_ids=split_and_tidy(s[f"H{row}"].value),
+                                home_vocab_uri=s[f"I{row}"].value,
+                                provenance=s[f"J{row}"].value,
+                            )
+                        elif template_version == "0.2.1":
+                            c = models.Concept(
+                                uri=s[f"A{row}"].value,
+                                pref_label=s[f"B{row}"].value,
+                                alt_labels=split_and_tidy(s[f"C{row}"].value),
+                                definition=s[f"D{row}"].value,
+                                children=split_and_tidy(s[f"E{row}"].value),
+                                other_ids=split_and_tidy(s[f"F{row}"].value),
+                                home_vocab_uri=s[f"G{row}"].value,
+                                provenance=s[f"H{row}"].value,
+                            )
+                        else:
+                            raise ConversionError("The version of the Excel template your are using is not recognised")
+
                         concepts.append(c)
                     except ValidationError as e:
-                        raise ConversionError(f"Concept processing error, row {row}, error: {e}")
+                        raise ConversionError(
+                            f"Concept processing error, row {row}, error: {e}"
+                        )
             elif process_collection:
                 if cell.value is None:
                     pass
@@ -75,11 +102,13 @@ def extract_concepts_and_collections(s: Worksheet) -> Tuple[List[models.Concept]
                             pref_label=s[f"B{row}"].value,
                             definition=s[f"C{row}"].value,
                             members=split_and_tidy(s[f"D{row}"].value),
-                            provenance=s[f"E{row}"].value
+                            provenance=s[f"E{row}"].value,
                         )
                         collections.append(c)
                     except ValidationError as e:
-                        raise ConversionError(f"Collection processing error, row {row}, error: {e}")
+                        raise ConversionError(
+                            f"Collection processing error, row {row}, error: {e}"
+                        )
             elif cell.value is None:
                 pass
 
@@ -87,20 +116,22 @@ def extract_concepts_and_collections(s: Worksheet) -> Tuple[List[models.Concept]
 
 
 def excel_to_rdf(
-        file_to_convert_path: Path,
-        sheet_name=None,
-        output_type: Literal["file", "string", "graph"] = "file",
-        output_file_path=None,
-        output_format: Literal["turtle", "xml", "json-ld"] = "turtle"
+    file_to_convert_path: Path,
+    sheet_name=None,
+    output_type: Literal["file", "string", "graph"] = "file",
+    output_file_path=None,
+    output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
     if type(file_to_convert_path) is str:
         file_to_convert_path = Path(file_to_convert_path)
     if not file_to_convert_path.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
-        raise ValueError(
-            "Files for conversion to RDF must be Excel files ending .xlsx"
-        )
+        raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
     wb = load_workbook(filename=str(file_to_convert_path), data_only=True)
+    pi = wb["program info"]
+    global template_version
+    template_version = pi["B2"].value
+
     sheet = wb["vocabulary" if sheet_name is None else sheet_name]
 
     # Vocabulary
@@ -138,7 +169,7 @@ def excel_to_rdf(
         else:
             if output_format == "xml":
                 suffix = ".rdf"
-            elif  output_format == "json-ld":
+            elif output_format == "json-ld":
                 suffix = ".json-ld"
             else:
                 suffix = ".ttl"
@@ -147,26 +178,27 @@ def excel_to_rdf(
         return dest
 
 
-def rdf_to_excel(
-        file_to_convert_path: Path,
-        profile="vocpub",
-        output_file_path=None
-):
+def rdf_to_excel(file_to_convert_path: Path, profile="vocpub", output_file_path=None):
     if type(file_to_convert_path) is str:
         file_to_convert_path = Path(file_to_convert_path)
     if not file_to_convert_path.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
         raise ValueError(
-            "Files for conversion to Excel must end with one of the RDF file formats: '{}'"
-                .format("', '".join(RDF_FILE_ENDINGS.keys()))
+            "Files for conversion to Excel must end with one of the RDF file formats: '{}'".format(
+                "', '".join(RDF_FILE_ENDINGS.keys())
+            )
         )
     if profile not in profiles.PROFILES.keys():
         raise ValueError(
-            "The profile chosen for conversion must be one of '{}'. 'vocpub' is default"
-                .format("', '".join(profiles.PROFILES.keys()))
+            "The profile chosen for conversion must be one of '{}'. 'vocpub' is default".format(
+                "', '".join(profiles.PROFILES.keys())
+            )
         )
 
     # validate the RDF file
-    r = pyshacl.validate(str(file_to_convert_path), shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"))
+    r = pyshacl.validate(
+        str(file_to_convert_path),
+        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
+    )
     if not r[0]:
         raise ConversionError(
             f"The file you supplied is not valid according to the {profile} profile. The validation errors are:\n\n"
@@ -177,14 +209,13 @@ def rdf_to_excel(
     from rdflib import Graph, Namespace, URIRef, Literal
     from rdflib.namespace import DCTERMS, PROV, RDF, RDFS, SKOS, OWL
 
-    g = Graph().parse(str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix])
+    g = Graph().parse(
+        str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix]
+    )
 
     wb = load_workbook(filename=(Path(__file__).parent / "blank.xlsx"))
 
-    holder = {
-        "hasTopConcept": [],
-        "provenance": None
-    }
+    holder = {"hasTopConcept": [], "provenance": None}
     for s in g.subjects(RDF.type, SKOS.ConceptScheme):
         holder["uri"] = str(s)
         for p, o in g.predicate_objects(s):
@@ -220,8 +251,12 @@ def rdf_to_excel(
         modified=holder["modified"],
         creator=holder["creator"],
         publisher=holder["publisher"],
-        version=holder["versionInfo"] if holder.get("versionInfo") is not None else None,
-        provenance=holder["provenance"] if holder.get("provenance") is not None else None,
+        version=holder["versionInfo"]
+        if holder.get("versionInfo") is not None
+        else None,
+        provenance=holder["provenance"]
+        if holder.get("provenance") is not None
+        else None,
         custodian=None,
         pid=None,
     )
@@ -265,7 +300,9 @@ def rdf_to_excel(
             children=holder["children"],
             other_ids=holder["other_ids"],
             home_vocab_uri=holder["home_vocab_uri"],
-            provenance=holder["provenance"] if holder.get("provenance") is not None else None,
+            provenance=holder["provenance"]
+            if holder.get("provenance") is not None
+            else None,
         ).to_excel(wb, row_no)
         row_no += 1
 
@@ -295,7 +332,9 @@ def rdf_to_excel(
             pref_label=holder["pref_label"],
             definition=holder["definition"],
             members=holder["members"],
-            provenance=holder["provenance"] if holder.get("provenance") is not None else None,
+            provenance=holder["provenance"]
+            if holder.get("provenance") is not None
+            else None,
         ).to_excel(wb, row_no)
         row_no += 1
 
@@ -308,13 +347,15 @@ def rdf_to_excel(
 
 
 def main(args=None):
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument(
         "-v",
         "--version",
         help="The version of this copy of VocExel. Must still set an file_to_convert value to call this (can be fake)",
-        action="store_true"
+        action="store_true",
     )
 
     parser.add_argument(
@@ -333,19 +374,16 @@ def main(args=None):
     )
 
     parser.add_argument(
-        "-val",
-        "--validate",
-        help="Validate output file",
-        action="store_true"
+        "-val", "--validate", help="Validate output file", action="store_true"
     )
 
     parser.add_argument(
         "-p",
         "--profile",
         help="A profile - a specified information model - for a vocabulary. This tool understands several profiles and"
-             "you can choose which one you want to convert the Excel file according to. The list of profiles - URIs "
-             "and their corresponding tokens - supported by VocExcel, can be found by running the program with the "
-             "flag -lp or --listprofiles.",
+        "you can choose which one you want to convert the Excel file according to. The list of profiles - URIs "
+        "and their corresponding tokens - supported by VocExcel, can be found by running the program with the "
+        "flag -lp or --listprofiles.",
         default="vocpub",
     )
 
@@ -361,7 +399,7 @@ def main(args=None):
         "-o",
         "--outputfile",
         help="An optionally-provided output file path.",
-        required=False
+        required=False,
     )
 
     parser.add_argument(
@@ -370,7 +408,7 @@ def main(args=None):
         help="An optionally-provided output format for RDF files. Only relevant in Excel-to-RDf conversions.",
         required=False,
         choices=["turtle", "xml", "json-ld"],
-        default="turtle"
+        default="turtle",
     )
 
     parser.add_argument(
@@ -394,15 +432,23 @@ def main(args=None):
         exit()
     elif args.file_to_convert:
         if not args.file_to_convert.name.endswith(tuple(KNOWN_FILE_ENDINGS)):
-            print("Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'"
-                  .format("', '".join(RDF_FILE_ENDINGS.keys())))
+            print(
+                "Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'"
+                .format("', '".join(RDF_FILE_ENDINGS.keys()))
+            )
             exit()
 
         print(f"Processing file {args.file_to_convert}")
 
         if args.file_to_convert.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
             try:
-                o = excel_to_rdf(args.file_to_convert, sheet_name=args.sheet, output_type=args.outputtype, output_file_path=args.outputfile, output_format=args.outputformat)
+                o = excel_to_rdf(
+                    args.file_to_convert,
+                    sheet_name=args.sheet,
+                    output_type=args.outputtype,
+                    output_file_path=args.outputfile,
+                    output_format=args.outputformat,
+                )
                 if args.outputtype == "string":
                     print(o)
                 else:
@@ -412,7 +458,11 @@ def main(args=None):
                 exit()
         else:  # RDF file ending
             try:
-                o = rdf_to_excel(args.file_to_convert, profile=args.profile, output_file_path=args.outputfile)
+                o = rdf_to_excel(
+                    args.file_to_convert,
+                    profile=args.profile,
+                    output_file_path=args.outputfile,
+                )
                 if args.outputtype == "string":
                     print(o)
                 else:

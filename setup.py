@@ -7,10 +7,7 @@ from vocexcel import __version__
 
 
 def open_local(paths, mode="r", encoding="utf8"):
-    path = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)),
-        *paths
-    )
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), *paths)
     return codecs.open(path, mode, encoding)
 
 
@@ -24,7 +21,7 @@ install_requires = [
     "rdflib @ git+https://github.com/RDFlib/rdflib.git#egg=rdflib",
     "pydantic",
     "pyshacl",
-    "dateutils"
+    "dateutils",
 ]
 
 setup(
@@ -37,11 +34,13 @@ setup(
     include_package_data=True,
     version=__version__,
     description="Another Excel to RDF converter for SKOS vocabs, "
-                "but one that include profile-based validation of results",
+    "but one that include profile-based validation of results",
     author="Nicholas J. Car",
     author_email="nicholas.car@surroundaustralia.com",
     url="https://github.com/surroundaustralia/vocexcel",
-    download_url="https://github.com/surroundaustralia/vocexcel/archive/v{:s}.tar.gz".format(__version__),
+    download_url="https://github.com/surroundaustralia/vocexcel/archive/v{:s}.tar.gz".format(
+        __version__
+    ),
     license="LICENSE",
     keywords=["SKOS", "vocabulary", "Excel", "converter", "validate", "profile"],
     long_description=long_description,
@@ -71,5 +70,5 @@ setup(
         "Source": "https://github.com/surroundaustralia/vocexcel/",
     },
     install_requires=install_requires,
-    long_description_content_type="text/x-rst"
+    long_description_content_type="text/x-rst",
 )
