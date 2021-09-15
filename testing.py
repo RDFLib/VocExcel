@@ -1,6 +1,7 @@
 from vocexcel import convert
 
 convert.rdf_to_excel("tests/eg-valid.ttl", error_level=1, message_level=1)
+# convert.excel_to_rdf("tests/eg-invalid.xlsx")
 
 # convert.rdf_to_excel("tests/eg-valid.ttl", error_level=3, message_level=2, log_file="file.log")
 

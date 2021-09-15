@@ -211,27 +211,28 @@ def rdf_to_excel(
                     result_dict["sourceShape"] = str(o)
                 elif p == SH.value:
                     result_dict["value"] = str(o)
-            result_message = log_msg(result_dict, log_file)
+            result_message_formatted = log_msg(result_dict, log_file)
+            result_message = log_msg(result_dict, "placeholder")
             if result_dict["resultSeverity"] == str(SH.Info):
-                logging.info(result_message)
+                logging.info(result_message_formatted)
                 info_list.append(result_message)
             elif result_dict["resultSeverity"] == str(SH.Warning):
-                logging.warning(result_message)
+                logging.warning(result_message_formatted)
                 warning_list.append(result_message)
             elif result_dict["resultSeverity"] == str(SH.Violation):
-                logging.error(result_message)
+                logging.error(result_message_formatted)
                 violation_list.append(result_message)
     
-    is_valid = False
+    error_messages = []
 
     if error_level == 3:
-        is_valid = False if len(violation_list) > 0 else True
+        error_messages = violation_list
     elif error_level == 2:
-        is_valid = False if len(warning_list + violation_list) > 0 else True
+        error_messages = warning_list + violation_list
     else: # error_level == 1
-        is_valid = False if len(info_list + warning_list + violation_list) > 0 else True
-
-    if not is_valid:
+        error_messages = info_list + warning_list + violation_list
+    
+    if len(error_messages) > 0:
         raise ConversionError(
             f"The file you supplied is not valid according to the {profile} profile."
         )
