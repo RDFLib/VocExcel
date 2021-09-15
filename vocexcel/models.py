@@ -1,12 +1,11 @@
-from typing import List, Optional
-from pydantic import BaseModel, ValidationError, validator
-from pydantic import AnyHttpUrl
 import datetime
+from typing import List
+
+from openpyxl import Workbook
+from pydantic import AnyHttpUrl
+from pydantic import BaseModel, validator
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
-from openpyxl import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
-
 
 ORGANISATIONS = {
     "CGI": URIRef("https://linked.data.gov.au/org/cgi"),
@@ -41,13 +40,17 @@ class ConceptScheme(BaseModel):
     @validator("creator")
     def creator_must_be_from_list(cls, v):
         if v not in ORGANISATIONS.keys():
-            raise ValueError(f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}")
+            raise ValueError(
+                f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
+            )
         return v
 
     @validator("publisher")
     def publisher_must_be_from_list(cls, v):
         if v not in ORGANISATIONS.keys():
-            raise ValueError(f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}")
+            raise ValueError(
+                f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
+            )
         return v
 
     def to_graph(self):
@@ -60,7 +63,15 @@ class ConceptScheme(BaseModel):
         if self.modified is not None:
             g.add((v, DCTERMS.modified, Literal(self.created, datatype=XSD.date)))
         else:
-            g.add((v, DCTERMS.modified, Literal(datetime.datetime.now().strftime("%Y-%m-%d"), datatype=XSD.date)))
+            g.add(
+                (
+                    v,
+                    DCTERMS.modified,
+                    Literal(
+                        datetime.datetime.now().strftime("%Y-%m-%d"), datatype=XSD.date
+                    ),
+                )
+            )
         g.add((v, DCTERMS.creator, ORGANISATIONS[self.creator]))
         g.add((v, DCTERMS.publisher, ORGANISATIONS[self.publisher]))
         if self.version is not None:
@@ -73,7 +84,10 @@ class ConceptScheme(BaseModel):
 
         # bind non-core prefixes
         g.bind("cs", v)
-        g.bind("", str(v).split("#")[0] if "#" in str(v) else "/".join(str(v).split("/")[:-1]))
+        g.bind(
+            "",
+            str(v).split("#")[0] if "#" in str(v) else "/".join(str(v).split("/")[:-1]),
+        )
         g.bind("dcat", DCAT)
         g.bind("dcterms", DCTERMS)
         g.bind("skos", SKOS)
@@ -97,24 +111,32 @@ class ConceptScheme(BaseModel):
 
 
 class Concept(BaseModel):
-    uri: AnyHttpUrl
+    uri: str
     pref_label: str
     alt_labels: List[str] = None
+    pl_language_code: List[str] = None
     definition: str
-    children: List[AnyHttpUrl] = None
+    def_language_code: List[str] = None
+    children: List[str] = None
     other_ids: List[str] = None
-    home_vocab_uri: AnyHttpUrl = None
+    home_vocab_uri: str = None
     provenance: str = None
 
     def to_graph(self):
         g = Graph()
         c = URIRef(self.uri)
         g.add((c, RDF.type, SKOS.Concept))
-        g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang="en")))
+        if self.pl_language_code is None:
+            self.pl_language_code = ["en"]
+        for lang_code in self.pl_language_code:
+            g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang=lang_code)))
         if self.alt_labels is not None:
             for alt_label in self.alt_labels:
                 g.add((c, SKOS.altLabel, Literal(alt_label, lang="en")))
-        g.add((c, SKOS.definition, Literal(self.definition, lang="en")))
+        if self.def_language_code is None:
+            self.def_language_code = ["en"]
+        for lang_code in self.def_language_code:
+            g.add((c, SKOS.definition, Literal(self.definition, lang=lang_code)))
         if self.children is not None:
             for child in self.children:
                 g.add((c, SKOS.narrower, URIRef(child)))
@@ -142,11 +164,16 @@ class Concept(BaseModel):
 
 
 class Collection(BaseModel):
-    uri: AnyHttpUrl
+    uri: str
     pref_label: str
     definition: str
-    members: List[AnyHttpUrl]
+    members: List[str]
     provenance: str = None
+
+    @validator("members")
+    def members_must_by_iris(cls, v):
+        if not v[0].startswith("http"):
+            raise ValueError("The members of a Collection must be a list of IRIs")
 
     def to_graph(self):
         g = Graph()
@@ -189,7 +216,7 @@ class Vocabulary(BaseModel):
         # create as Top Concepts those Concepts that have no skos:narrower properties with them as objects
         for s in g.subjects(SKOS.inScheme, cs):
             is_tc = True
-            for o in g.objects(s, SKOS.broader):
+            for _ in g.objects(s, SKOS.broader):
                 is_tc = False
             if is_tc:
                 g.add((cs, SKOS.hasTopConcept, s))

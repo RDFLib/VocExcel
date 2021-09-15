@@ -15,7 +15,7 @@ def test_vocabulary_valid():
         version="",
         provenance="Derived from the 2011-09 version of CGI Borehole start point list",
         custodian="Vance Kelly",
-        pid="http://pid.geoscience.gov.au/dataset/ga/114541"
+        pid="http://pid.geoscience.gov.au/dataset/ga/114541",
     )
 
 
@@ -32,7 +32,7 @@ def test_vocabulary_invalid_uri():
             version="",
             provenance="Derived from the 2011-09 version of CGI Borehole start point list",
             custodian="Vance Kelly",
-            pid="http://pid.geoscience.gov.au/dataset/ga/114541"
+            pid="http://pid.geoscience.gov.au/dataset/ga/114541",
         )
 
 
@@ -49,7 +49,7 @@ def test_vocabulary_invalid_created_date():
             version="",
             provenance="Derived from the 2011-09 version of CGI Borehole start point list",
             custodian="Vance Kelly",
-            pid="http://pid.geoscience.gov.au/dataset/ga/114541"
+            pid="http://pid.geoscience.gov.au/dataset/ga/114541",
         )
 
 
@@ -66,5 +66,5 @@ def test_vocabulary_invalid_publisher():
             version="",
             provenance="Derived from the 2011-09 version of CGI Borehole start point list",
             custodian="Vance Kelly",
-            pid="http://pid.geoscience.gov.au/dataset/ga/114541"
+            pid="http://pid.geoscience.gov.au/dataset/ga/114541",
         )

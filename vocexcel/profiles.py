@@ -9,16 +9,17 @@ class Profile:
     This definition of Profiles is from The Profiles Vocabulary: https://www.w3.org/TR/dx-prof/ and objects created
     using this class are intended for use as prof:Profile instances.
     """
+
     def __init__(
-            self,
-            uri,
-            label,
-            comment,
-            mediatypes,
-            default_mediatype,
-            languages=None,
-            default_language='en',
-            is_profile_of=None
+        self,
+        uri,
+        label,
+        comment,
+        mediatypes,
+        default_mediatype,
+        languages=None,
+        default_language="en",
+        is_profile_of=None,
     ):
         """
         Constructor
@@ -45,7 +46,7 @@ class Profile:
         self.comment = comment
         self.mediatypes = mediatypes
         self.default_mediatype = default_mediatype
-        self.languages = languages if languages is not None else ['en']
+        self.languages = languages if languages is not None else ["en"]
         self.default_language = default_language
         self.is_profile_of = is_profile_of
 
@@ -54,11 +55,11 @@ class Profile:
 
 
 RDF_MEDIA_TYPES = [
-    'text/turtle',
-    'application/rdf+xml',
-    'application/ld+json',
-    'text/n3',
-    'application/n-triples'
+    "text/turtle",
+    "application/rdf+xml",
+    "application/ld+json",
+    "text/n3",
+    "application/n-triples",
 ]
 
 
@@ -74,10 +75,8 @@ VOC_PUB_PROFILE = Profile(
     HTML_MEDIA_TYPE,
     languages=["en"],
     default_language="en",
-    is_profile_of=["https://www.w3.org/TR/skos-reference/"]
+    is_profile_of=["https://www.w3.org/TR/skos-reference/"],
 )
 
 
-PROFILES = {
-    "vocpub": VOC_PUB_PROFILE
-}
+PROFILES = {"vocpub": VOC_PUB_PROFILE}
