@@ -22,6 +22,7 @@ install_requires = [
     "pydantic",
     "pyshacl",
     "dateutils",
+    "colorama"
 ]
 
 setup(

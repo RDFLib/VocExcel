@@ -221,7 +221,7 @@ def rdf_to_excel(
         logging_level = logging.WARNING
 
     if log_file:
-        logging.basicConfig(level=logging_level, format="%(message)s", filename=log_file)
+        logging.basicConfig(level=logging_level, format="%(message)s", filename=log_file, force=True)
     else:
         logging.basicConfig(level=logging_level, format="%(message)s")
 
