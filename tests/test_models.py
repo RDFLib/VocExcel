@@ -1,4 +1,7 @@
 import pytest
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel.models import *
 from pydantic.error_wrappers import ValidationError
 
@@ -68,3 +71,25 @@ def test_vocabulary_invalid_publisher():
             custodian="Vance Kelly",
             pid="http://pid.geoscience.gov.au/dataset/ga/114541",
         )
+
+
+def test_concept():
+    # uri
+    # pref_label
+    # alt_labels
+    # pl_language_code
+    # definition
+    # def_language_code
+    # children
+    # other_ids
+    # home_vocab_uri
+    # provenance
+    c = Concept(
+        uri="https://example.com/thing/x",
+        pref_label="Thing X",
+        definition="Fake def for Thing X"
+    )
+    print(c.to_graph().serialize())
+
+
+test_concept()
