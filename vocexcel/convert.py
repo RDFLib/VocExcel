@@ -1,20 +1,16 @@
 import argparse
-from pathlib import Path
-from typing import List, Tuple, Dict
-from typing import Literal
 import logging
+from pathlib import Path
+from typing import List, Tuple, Dict, Literal
 
+import pyshacl
+from colorama import Fore, Style
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
-
-from colorama import init, Fore, Style
-
 from pydantic.error_wrappers import ValidationError
-from vocexcel import models
-from vocexcel import profiles
-import pyshacl
-from vocexcel import __version__
 
+import models
+import profiles
 
 RDF_FILE_ENDINGS = {
     ".ttl": "ttl",
@@ -27,7 +23,7 @@ RDF_FILE_ENDINGS = {
 }
 EXCEL_FILE_ENDINGS = ["xlsx"]
 KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
-template_version = "0.3.0"
+template_version = "0.4.0"
 
 
 class ConversionError(Exception):
@@ -75,6 +71,7 @@ def extract_concepts_and_collections(
                                 other_ids=split_and_tidy(s[f"H{row}"].value),
                                 home_vocab_uri=s[f"I{row}"].value,
                                 provenance=s[f"J{row}"].value,
+                                template_version=template_version
                             )
                         elif template_version == "0.2.1":
                             c = models.Concept(
@@ -230,7 +227,6 @@ def rdf_to_excel(
     violation_list = []
 
     results_graph = r[1]
-    from rdflib import Graph
     from rdflib.namespace import RDF, SH
     for report in results_graph.subjects(RDF.type, SH.ValidationReport):
         for result in results_graph.objects(report, SH.result):
@@ -275,7 +271,7 @@ def rdf_to_excel(
         )
 
     # the RDF is valid so extract data and create Excel
-    from rdflib import Graph, Namespace, URIRef, Literal
+    from rdflib import Graph
     from rdflib.namespace import DCTERMS, PROV, RDF, RDFS, SKOS, OWL
 
     g = Graph().parse(
@@ -413,6 +409,7 @@ def rdf_to_excel(
         dest = file_to_convert_path.with_suffix(".xlsx")
     wb.save(filename=dest)
     return dest
+
 
 def log_msg(result: Dict, log_file: str) -> str:
     from rdflib.namespace import SH
