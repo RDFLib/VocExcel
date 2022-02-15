@@ -14,6 +14,7 @@ try:
     import profiles
 except:
     import sys
+
     sys.path.append("..")
     from vocexcel import models
     from vocexcel import profiles
@@ -57,7 +58,11 @@ def extract_concepts_and_collections(
             row = cell.row
             global template_version
             if template_version == "0.4.0":
-                if cell.value is None or cell.value == "Concepts" or cell.value == "Concept IRI*":
+                if (
+                    cell.value is None
+                    or cell.value == "Concepts"
+                    or cell.value == "Concept IRI*"
+                ):
                     pass
                 else:
                     c = models.Concept(
@@ -103,15 +108,19 @@ def extract_concepts_and_collections(
                             c = models.Concept(
                                 uri=s[f"A{row}"].value,
                                 pref_label=s[f"B{row}"].value,
-                                pl_language_code=split_and_tidy(s[f"C{row}"].value),  # new in 0.3.0
+                                pl_language_code=split_and_tidy(
+                                    s[f"C{row}"].value
+                                ),  # new in 0.3.0
                                 alt_labels=split_and_tidy(s[f"D{row}"].value),
                                 definition=s[f"E{row}"].value,
-                                def_language_code=split_and_tidy(s[f"F{row}"].value),  # new in 0.3.0
+                                def_language_code=split_and_tidy(
+                                    s[f"F{row}"].value
+                                ),  # new in 0.3.0
                                 children=split_and_tidy(s[f"G{row}"].value),
                                 other_ids=split_and_tidy(s[f"H{row}"].value),
                                 home_vocab_uri=s[f"I{row}"].value,
                                 provenance=s[f"J{row}"].value,
-                                template_version=template_version
+                                template_version=template_version,
                             )
                         elif template_version == "0.2.1":
                             c = models.Concept(
@@ -125,7 +134,9 @@ def extract_concepts_and_collections(
                                 provenance=s[f"H{row}"].value,
                             )
                         else:
-                            raise ConversionError("The version of the Excel template your are using is not recognised")
+                            raise ConversionError(
+                                "The version of the Excel template your are using is not recognised"
+                            )
 
                         concepts.append(c)
                     except ValidationError as e:
@@ -169,8 +180,6 @@ def excel_to_rdf(
         raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
     wb = load_workbook(filename=str(file_to_convert_path), data_only=True)
 
-
-
     try:
         pi = wb["program info"]
         global template_version
@@ -185,14 +194,11 @@ def excel_to_rdf(
             concept_sheet = wb["Concepts"]
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
-            concepts, collections = extract_concepts_and_collections(concept_sheet, additional_concept_sheet, collection_sheet)
+            concepts, collections = extract_concepts_and_collections(
+                concept_sheet, additional_concept_sheet, collection_sheet
+            )
         except NameError as err:
             print(err)
-
-
-
-
-
 
     # Vocabulary
     try:
@@ -236,12 +242,12 @@ def excel_to_rdf(
 
 
 def rdf_to_excel(
-        file_to_convert_path: Path,
-        profile="vocpub",
-        output_file_path=None,
-        error_level=1,
-        message_level=1,
-        log_file=None
+    file_to_convert_path: Path,
+    profile="vocpub",
+    output_file_path=None,
+    error_level=1,
+    message_level=1,
+    log_file=None,
 ):
     if type(file_to_convert_path) is str:
         file_to_convert_path = Path(file_to_convert_path)
@@ -257,16 +263,16 @@ def rdf_to_excel(
                 "', '".join(profiles.PROFILES.keys())
             )
         )
-    
+
     allow_warnings = True if error_level > 1 else False
 
     # validate the RDF file
     r = pyshacl.validate(
-        str(file_to_convert_path), 
-        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"), 
-        allow_warnings=allow_warnings
+        str(file_to_convert_path),
+        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
+        allow_warnings=allow_warnings,
     )
-        
+
     logging_level = logging.INFO
 
     if message_level == 3:
@@ -275,7 +281,9 @@ def rdf_to_excel(
         logging_level = logging.WARNING
 
     if log_file:
-        logging.basicConfig(level=logging_level, format="%(message)s", filename=log_file, force=True)
+        logging.basicConfig(
+            level=logging_level, format="%(message)s", filename=log_file, force=True
+        )
     else:
         logging.basicConfig(level=logging_level, format="%(message)s")
 
@@ -285,6 +293,7 @@ def rdf_to_excel(
 
     results_graph = r[1]
     from rdflib.namespace import RDF, SH
+
     for report in results_graph.subjects(RDF.type, SH.ValidationReport):
         for result in results_graph.objects(report, SH.result):
             result_dict = {}
@@ -312,16 +321,16 @@ def rdf_to_excel(
             elif result_dict["resultSeverity"] == str(SH.Violation):
                 logging.error(result_message_formatted)
                 violation_list.append(result_message)
-    
+
     error_messages = []
 
     if error_level == 3:
         error_messages = violation_list
     elif error_level == 2:
         error_messages = warning_list + violation_list
-    else: # error_level == 1
+    else:  # error_level == 1
         error_messages = info_list + warning_list + violation_list
-    
+
     if len(error_messages) > 0:
         raise ConversionError(
             f"The file you supplied is not valid according to the {profile} profile."
@@ -470,6 +479,7 @@ def rdf_to_excel(
 
 def log_msg(result: Dict, log_file: str) -> str:
     from rdflib.namespace import SH
+
     formatted_msg = ""
     message = f"""Validation Result in {result['sourceConstraintComponent'].split(str(SH))[1]} ({result['sourceConstraintComponent']}):
 \tSeverity: sh:{result['resultSeverity'].split(str(SH))[1]}
@@ -479,11 +489,23 @@ def log_msg(result: Dict, log_file: str) -> str:
 \tMessage: {result['resultMessage']}
 """
     if result["resultSeverity"] == str(SH.Info):
-        formatted_msg = f"INFO: {message}" if log_file else Fore.BLUE + "INFO: " + Style.RESET_ALL + message
+        formatted_msg = (
+            f"INFO: {message}"
+            if log_file
+            else Fore.BLUE + "INFO: " + Style.RESET_ALL + message
+        )
     elif result["resultSeverity"] == str(SH.Warning):
-        formatted_msg = f"WARNING: {message}" if log_file else Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
+        formatted_msg = (
+            f"WARNING: {message}"
+            if log_file
+            else Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
+        )
     elif result["resultSeverity"] == str(SH.Violation):
-        formatted_msg = f"VIOLATION: {message}" if log_file else Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
+        formatted_msg = (
+            f"VIOLATION: {message}"
+            if log_file
+            else Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
+        )
     return formatted_msg
 
 
@@ -600,8 +622,9 @@ def main(args=None):
     elif args.file_to_convert:
         if not args.file_to_convert.name.endswith(tuple(KNOWN_FILE_ENDINGS)):
             print(
-                "Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'"
-                .format("', '".join(RDF_FILE_ENDINGS.keys()))
+                "Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'".format(
+                    "', '".join(RDF_FILE_ENDINGS.keys())
+                )
             )
             exit()
 
@@ -626,12 +649,12 @@ def main(args=None):
         else:  # RDF file ending
             try:
                 o = rdf_to_excel(
-                    args.file_to_convert, 
-                    profile=args.profile, 
-                    output_file_path=args.outputfile, 
-                    error_level=int(args.errorlevel), 
-                    message_level=int(args.messagelevel), 
-                    log_file=args.logfile
+                    args.file_to_convert,
+                    profile=args.profile,
+                    output_file_path=args.outputfile,
+                    error_level=int(args.errorlevel),
+                    message_level=int(args.messagelevel),
+                    log_file=args.logfile,
                 )
                 if args.outputtype == "string":
                     print(o)

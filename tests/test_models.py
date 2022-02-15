@@ -1,6 +1,7 @@
 import pytest
 from pathlib import Path
 import sys
+
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel.models import *
 from pydantic.error_wrappers import ValidationError
@@ -87,9 +88,9 @@ def test_concept():
     c = Concept(
         uri="https://example.com/thing/x",
         pref_label="Thing X",
-        definition="Fake def for Thing X"
+        definition="Fake def for Thing X",
     )
     print(c.to_graph().serialize())
 
 
-test_concept()
+print(test_vocabulary_valid())

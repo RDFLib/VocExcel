@@ -126,8 +126,6 @@ class ConceptScheme(BaseModel):
         # ws["B11"] = ""
 
 
-
-
 class Concept(BaseModel):
     uri: str
     pref_label: str
@@ -205,8 +203,8 @@ class Collection(BaseModel):
 
     # @validator("members")
     # def members_must_by_iris(cls, v):
-      #  if not v[0].startswith("http"):
-       #     raise ValueError("The members of a Collection must be a list of IRIs")
+    #  if not v[0].startswith("http"):
+    #     raise ValueError("The members of a Collection must be a list of IRIs")
 
     def to_graph(self):
         g = Graph()

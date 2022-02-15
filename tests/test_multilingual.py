@@ -2,6 +2,7 @@ try:
     from vocexcel import convert
 except:
     import sys
+
     sys.path.append("..")
     from vocexcel import convert
 

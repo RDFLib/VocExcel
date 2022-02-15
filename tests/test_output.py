@@ -2,6 +2,7 @@ try:
     from vocexcel import convert
 except:
     import sys
+
     sys.path.append("..")
     from vocexcel import convert
 
@@ -36,6 +37,7 @@ def test_example_complex():
             f'The title (preferredLabel) of the "example - complex" sheet vocab in '
             f'the VocExcel-template.ttl is {s} but should be "Particle Type"'
         )
+
 
 if __name__ == "__main__":
     test_example_complex()
