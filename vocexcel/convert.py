@@ -57,7 +57,7 @@ def extract_concepts_and_collections(
             row = cell.row
             global template_version
             if template_version == "0.4.0":
-                if cell.value is None or cell.value == "Concepts" or cell.value == "Concept IRI":
+                if cell.value is None or cell.value == "Concepts" or cell.value == "Concept IRI*":
                     pass
                 else:
                     c = models.Concept(
@@ -177,8 +177,7 @@ def excel_to_rdf(
         template_version = pi["B2"].value
         sheet = wb["vocabulary" if sheet_name is None else sheet_name]
         concepts, collections = extract_concepts_and_collections(sheet, sheet, sheet)
-    except Exception as problem:
-        print(problem)
+    except Exception:
         try:
             intro_sheet = wb["Introduction"]
             template_version = intro_sheet["J11"].value
