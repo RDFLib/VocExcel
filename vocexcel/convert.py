@@ -49,24 +49,27 @@ def extract_concepts_and_collections(
         for cell in col:
             row = cell.row
             if template_version == "0.4.0":
-                c = models.Concept(
-                    uri=s[f"A{row}"].value,
-                    pref_label=s[f"B{row}"].value,
-                    pl_language_code=split_and_tidy(s[f"C{row}"].value),  # new in 0.4.0
-                    alt_labels=split_and_tidy(s[f"D{row}"].value),
-                    definition=s[f"E{row}"].value,
-                    def_language_code=split_and_tidy(s[f"F{row}"].value),  # new in 0.4.0
-                    children=split_and_tidy(s[f"G{row}"].value),
-                    other_ids=split_and_tidy(s[f"H{row}"].value),
-                    home_vocab_uri=s[f"I{row}"].value,
-                    provenance=s[f"J{row}"].value,
-                    related_match=a[f"B{row}"].value,
-                    close_match=a[f"C{row}"].value,
-                    exact_match=a[f"D{row}"].value,
-                    narrow_match=a[f"E{row}"].value,
-                    broad_match=a[f"F{row}"].value,
-                    template_version=template_version
-                )
+                if cell.value is None:
+                    pass
+                else:
+                    c = models.Concept(
+                        uri=s[f"A{row}"].value,
+                        pref_label=s[f"B{row}"].value,
+                        pl_language_code=split_and_tidy(s[f"C{row}"].value),  # new in 0.4.0
+                        alt_labels=split_and_tidy(s[f"D{row}"].value),
+                        definition=s[f"E{row}"].value,
+                        def_language_code=split_and_tidy(s[f"F{row}"].value),  # new in 0.4.0
+                        children=split_and_tidy(s[f"G{row}"].value),
+                        other_ids=split_and_tidy(s[f"H{row}"].value),
+                        home_vocab_uri=s[f"I{row}"].value,
+                        provenance=s[f"J{row}"].value,
+                        related_match=a[f"B{row}"].value,
+                        close_match=a[f"C{row}"].value,
+                        exact_match=a[f"D{row}"].value,
+                        narrow_match=a[f"E{row}"].value,
+                        broad_match=a[f"F{row}"].value,
+                    )
+                concepts.append(c)
             if cell.value == "Concept URI":
                 process_concept = True
             elif cell.value == "Collection URI":
