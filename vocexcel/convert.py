@@ -57,32 +57,37 @@ def extract_concepts_and_collections(
             row = cell.row
             global template_version
             if template_version == "0.4.0":
-                c = models.Concept(
-                    uri=s[f"A{row}"].value,
-                    pref_label=s[f"B{row}"].value,
-                    pl_language_code=split_and_tidy(s[f"C{row}"].value),  # new in 0.4.0
-                    alt_labels=split_and_tidy(s[f"D{row}"].value),
-                    definition=s[f"E{row}"].value,
-                    def_language_code=split_and_tidy(s[f"F{row}"].value),  # new in 0.4.0
-                    children=split_and_tidy(s[f"G{row}"].value),
-                    other_ids=split_and_tidy(s[f"H{row}"].value),
-                    home_vocab_uri=s[f"I{row}"].value,
-                    provenance=s[f"J{row}"].value,
-                    related_match=a[f"B{row}"].value,
-                    close_match=a[f"C{row}"].value,
-                    exact_match=a[f"D{row}"].value,
-                    narrow_match=a[f"E{row}"].value,
-                    broad_match=a[f"F{row}"].value,
-                )
-                col = models.Collection(
-                    uri=b[f"A{row}"].value,
-                    pref_label=b[f"B{row}"].value,
-                    definition=b[f"C{row}"].value,
-                    members=split_and_tidy(b[f"D{row}"].value),
-                    provenance=b[f"E{row}"].value,
-                )
-                concepts.append(c)
-                collections.append(col)
+                if cell.value is None or cell.value == "Concepts" or cell.value == "Concept IRI":
+                    pass
+                else:
+                    c = models.Concept(
+                        uri=s[f"A{row}"].value,
+                        pref_label=s[f"B{row}"].value,
+                        pl_language_code=split_and_tidy(s[f"C{row}"].value),
+                        alt_labels=split_and_tidy(s[f"F{row}"].value),
+                        definition=s[f"D{row}"].value,
+                        def_language_code=split_and_tidy(s[f"E{row}"].value),
+                        children=split_and_tidy(s[f"G{row}"].value),
+                        home_vocab_uri=s[f"I{row}"].value,
+                        provenance=s[f"H{row}"].value,
+                        related_match=a[f"B{row}"].value,
+                        close_match=a[f"C{row}"].value,
+                        exact_match=a[f"D{row}"].value,
+                        narrow_match=a[f"E{row}"].value,
+                        broad_match=a[f"F{row}"].value,
+                    )
+                    concepts.append(c)
+                    if b[f"B{row}"].value is not None:
+                        col = models.Collection(
+                            uri=b[f"A{row}"].value,
+                            pref_label=b[f"B{row}"].value,
+                            definition=b[f"C{row}"].value,
+                            members=split_and_tidy(b[f"D{row}"].value),
+                            provenance=b[f"E{row}"].value,
+                        )
+                        collections.append(col)
+                    else:
+                        pass
         else:
             if cell.value == "Concept URI":
                 process_concept = True
@@ -163,13 +168,16 @@ def excel_to_rdf(
     if not file_to_convert_path.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
         raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
     wb = load_workbook(filename=str(file_to_convert_path), data_only=True)
+
+
+
     try:
         pi = wb["program info"]
         global template_version
         template_version = pi["B2"].value
         sheet = wb["vocabulary" if sheet_name is None else sheet_name]
         concepts, collections = extract_concepts_and_collections(sheet, sheet, sheet)
-    except NameError as problem:
+    except Exception as problem:
         print(problem)
         try:
             intro_sheet = wb["Introduction"]
@@ -177,25 +185,30 @@ def excel_to_rdf(
             sheet = wb["Concept Scheme"]
             concept_sheet = wb["Concepts"]
             additional_concept_sheet = wb["Additional Concept Features"]
-            collection_sheet = wb["Collection"]
+            collection_sheet = wb["Collections"]
             concepts, collections = extract_concepts_and_collections(concept_sheet, additional_concept_sheet, collection_sheet)
         except NameError as err:
             print(err)
 
+
+
+
+
+
     # Vocabulary
     try:
         cs = models.ConceptScheme(
-            uri=sheet["B1"].value,
-            title=sheet["B2"].value,
-            description=sheet["B3"].value,
-            created=sheet["B4"].value,
-            modified=sheet["B5"].value,
-            creator=sheet["B6"].value,
-            publisher=sheet["B7"].value,
-            version=sheet["B8"].value,
-            provenance=sheet["B9"].value,
-            custodian=sheet["B10"].value,
-            pid=sheet["B11"].value,
+            uri=sheet["B2"].value,
+            title=sheet["B3"].value,
+            description=sheet["B4"].value,
+            created=sheet["B5"].value,
+            modified=sheet["B6"].value,
+            creator=sheet["B7"].value,
+            publisher=sheet["B8"].value,
+            version=sheet["B9"].value,
+            provenance=sheet["B10"].value,
+            custodian=sheet["B11"].value,
+            pid=sheet["B12"].value,
         )
     except ValidationError as e:
         raise ConversionError(f"ConceptScheme processing error: {e}")
