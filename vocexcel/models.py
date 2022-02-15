@@ -7,6 +7,7 @@ from pydantic import BaseModel, validator
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
 
+
 ORGANISATIONS = {
     "CGI": URIRef("https://linked.data.gov.au/org/cgi"),
     "GA": URIRef("https://linked.data.gov.au/org/ga"),
@@ -97,6 +98,21 @@ class ConceptScheme(BaseModel):
 
     def to_excel(self, wb: Workbook):
         ws = wb.active
+        # concept_scheme_sheet = wb["Concept Scheme"]
+        # if convert.template_version == "0.4.0":
+        #     concept_scheme_sheet = wb["Concept Scheme"]
+        #     concept_scheme_sheet["B2"] = self.uri
+        #     concept_scheme_sheet["B3"] = self.title
+        #     concept_scheme_sheet["B4"] = self.description
+        #     concept_scheme_sheet["B5"] = self.created.isoformat()
+        #     concept_scheme_sheet["B6"] = self.modified.isoformat()
+        #     concept_scheme_sheet["B7"] = self.creator
+        #     concept_scheme_sheet["B8"] = self.publisher
+        #     concept_scheme_sheet["B9"] = self.version
+        #     concept_scheme_sheet["B10"] = self.provenance
+        #     concept_scheme_sheet["B11"] = self.custodian
+        #     concept_scheme_sheet["B12"] = self.pid
+
         ws["B1"] = self.uri
         ws["B2"] = self.title
         ws["B3"] = self.description
@@ -110,6 +126,8 @@ class ConceptScheme(BaseModel):
         # ws["B11"] = ""
 
 
+
+
 class Concept(BaseModel):
     uri: str
     pref_label: str
@@ -121,6 +139,11 @@ class Concept(BaseModel):
     other_ids: List[str] = None
     home_vocab_uri: str = None
     provenance: str = None
+    related_match: str = None
+    close_match: str = None
+    exact_match: str = None
+    narrow_match: str = None
+    broad_match: str = None
 
     def to_graph(self):
         g = Graph()
@@ -148,6 +171,16 @@ class Concept(BaseModel):
             g.add((c, RDFS.isDefinedBy, URIRef(self.home_vocab_uri)))
         if self.provenance is not None:
             g.add((c, DCTERMS.provenance, Literal(self.provenance, lang="en")))
+        if self.related_match is not None:
+            g.add((c, SKOS.relatedMatch, URIRef(self.close_match)))
+        if self.close_match is not None:
+            g.add((c, SKOS.closeMatch, URIRef(self.close_match)))
+        if self.exact_match is not None:
+            g.add((c, SKOS.exactMatch, URIRef(self.exact_match)))
+        if self.narrow_match is not None:
+            g.add((c, SKOS.narrowMatch, URIRef(self.close_match)))
+        if self.broad_match is not None:
+            g.add((c, SKOS.broadMatch, URIRef(self.exact_match)))
 
         return g
 
