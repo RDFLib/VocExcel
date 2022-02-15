@@ -9,8 +9,15 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic.error_wrappers import ValidationError
 
-import models
-import profiles
+try:
+    import models
+    import profiles
+except:
+    import sys
+    sys.path.append("..")
+    from vocexcel import models
+    from vocexcel import profiles
+
 
 RDF_FILE_ENDINGS = {
     ".ttl": "ttl",
@@ -74,8 +81,8 @@ def extract_concepts_and_collections(
                     members=split_and_tidy(b[f"D{row}"].value),
                     provenance=b[f"E{row}"].value,
                 )
-            concepts.append(c)
-            collections.append(col)
+                concepts.append(c)
+                collections.append(col)
         else:
             if cell.value == "Concept URI":
                 process_concept = True
@@ -87,7 +94,6 @@ def extract_concepts_and_collections(
                     pass
                 else:
                     try:
-                        global template_version
                         if template_version == "0.3.0":
                             c = models.Concept(
                                 uri=s[f"A{row}"].value,
@@ -162,16 +168,19 @@ def excel_to_rdf(
         global template_version
         template_version = pi["B2"].value
         sheet = wb["vocabulary" if sheet_name is None else sheet_name]
-        concepts, collections = extract_concepts_and_collections(sheet)
-    except NameError:
-        intro_sheet = wb["Introduction"]
-        global template_version
-        template_version = intro_sheet["J11"].value
-        sheet = wb["Concept Scheme"]
-        concept_sheet = wb["Concepts"]
-        additional_concept_sheet = wb["Additional Concept Features"]
-        collection_sheet = wb["Collection"]
-        concepts, collections = extract_concepts_and_collections(concept_sheet, additional_concept_sheet, collection_sheet)
+        concepts, collections = extract_concepts_and_collections(sheet, sheet, sheet)
+    except NameError as problem:
+        print(problem)
+        try:
+            intro_sheet = wb["Introduction"]
+            template_version = intro_sheet["J11"].value
+            sheet = wb["Concept Scheme"]
+            concept_sheet = wb["Concepts"]
+            additional_concept_sheet = wb["Additional Concept Features"]
+            collection_sheet = wb["Collection"]
+            concepts, collections = extract_concepts_and_collections(concept_sheet, additional_concept_sheet, collection_sheet)
+        except NameError as err:
+            print(err)
 
     # Vocabulary
     try:
