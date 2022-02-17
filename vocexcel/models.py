@@ -137,11 +137,11 @@ class Concept(BaseModel):
     other_ids: List[str] = None
     home_vocab_uri: str = None
     provenance: str = None
-    related_match: str = None
-    close_match: str = None
-    exact_match: str = None
-    narrow_match: str = None
-    broad_match: str = None
+    related_match: List[str] = None
+    close_match: List[str] = None
+    exact_match: List[str] = None
+    narrow_match: List[str] = None
+    broad_match: List[str] = None
 
     def to_graph(self):
         g = Graph()
