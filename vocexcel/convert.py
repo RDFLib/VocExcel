@@ -9,6 +9,8 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic.error_wrappers import ValidationError
 
+from vocexcel.models import Collection
+
 try:
     import models
     import profiles
@@ -18,7 +20,6 @@ except:
     sys.path.append("..")
     from vocexcel import models
     from vocexcel import profiles
-
 
 RDF_FILE_ENDINGS = {
     ".ttl": "ttl",
@@ -46,8 +47,33 @@ def split_and_tidy(cell_value: str):
     )
 
 
+# this is a new function to iterate over the collection sheet in template version 0.4.0
+def extract_collections(s: Worksheet) -> list[Collection]:
+    collections: list[Collection] = []
+    for col in s.iter_cols(max_col=1):
+        for cell in col:
+            row = cell.row
+            if cell.value is None or cell.value == "Collections" or cell.value == "Collection URI":
+                pass
+            else:
+                try:
+                    c = models.Collection(
+                        uri=s[f"A{row}"].value,
+                        pref_label=s[f"B{row}"].value,
+                        definition=s[f"C{row}"].value,
+                        members=split_and_tidy(s[f"D{row}"].value),
+                        provenance=s[f"E{row}"].value,
+                    )
+                    collections.append(c)
+                except ValidationError as e:
+                    raise ConversionError(
+                        f"Collection processing error, row {row}, error: {e}"
+                    )
+    return collections
+
+
 def extract_concepts_and_collections(
-    s: Worksheet, a: Worksheet, b: Worksheet
+        s: Worksheet, a: Worksheet
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
@@ -59,9 +85,9 @@ def extract_concepts_and_collections(
             global template_version
             if template_version == "0.4.0":
                 if (
-                    cell.value is None
-                    or cell.value == "Concepts"
-                    or cell.value == "Concept IRI*"
+                        cell.value is None
+                        or cell.value == "Concepts"
+                        or cell.value == "Concept IRI*"
                 ):
                     pass
                 else:
@@ -82,17 +108,6 @@ def extract_concepts_and_collections(
                         broad_match=a[f"F{row}"].value,
                     )
                     concepts.append(c)
-                    if b[f"B{row}"].value is not None:
-                        col = models.Collection(
-                            uri=b[f"A{row}"].value,
-                            pref_label=b[f"B{row}"].value,
-                            definition=b[f"C{row}"].value,
-                            members=split_and_tidy(b[f"D{row}"].value),
-                            provenance=b[f"E{row}"].value,
-                        )
-                        collections.append(col)
-                    else:
-                        pass
         else:
             if cell.value == "Concept URI":
                 process_concept = True
@@ -167,11 +182,11 @@ def extract_concepts_and_collections(
 
 
 def excel_to_rdf(
-    file_to_convert_path: Path,
-    sheet_name=None,
-    output_type: Literal["file", "string", "graph"] = "file",
-    output_file_path=None,
-    output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
+        file_to_convert_path: Path,
+        sheet_name=None,
+        output_type: Literal["file", "string", "graph"] = "file",
+        output_file_path=None,
+        output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
     if type(file_to_convert_path) is str:
@@ -185,7 +200,7 @@ def excel_to_rdf(
         global template_version
         template_version = pi["B2"].value
         sheet = wb["vocabulary" if sheet_name is None else sheet_name]
-        concepts, collections = extract_concepts_and_collections(sheet, sheet, sheet)
+        concepts, collections = extract_concepts_and_collections(sheet, sheet)
     except Exception:
         try:
             intro_sheet = wb["Introduction"]
@@ -195,9 +210,9 @@ def excel_to_rdf(
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
             concepts, collections = extract_concepts_and_collections(
-                concept_sheet, additional_concept_sheet, collection_sheet
-            )
-        except NameError as err:
+                concept_sheet, additional_concept_sheet)
+            collections = extract_collections(collection_sheet)
+        except Exception as err:
             print(err)
 
     # Vocabulary
@@ -242,12 +257,12 @@ def excel_to_rdf(
 
 
 def rdf_to_excel(
-    file_to_convert_path: Path,
-    profile="vocpub",
-    output_file_path=None,
-    error_level=1,
-    message_level=1,
-    log_file=None,
+        file_to_convert_path: Path,
+        profile="vocpub",
+        output_file_path=None,
+        error_level=1,
+        message_level=1,
+        log_file=None,
 ):
     if type(file_to_convert_path) is str:
         file_to_convert_path = Path(file_to_convert_path)
@@ -525,8 +540,8 @@ def main(args=None):
         "-lp",
         "--listprofiles",
         help="This flag, if set, must be the only flag supplied. It will cause the program to list all the vocabulary"
-        " profiles that this converter, indicating both their URI and their short token for use with the"
-        " -p (--profile) flag when converting Excel files",
+             " profiles that this converter, indicating both their URI and their short token for use with the"
+             " -p (--profile) flag when converting Excel files",
         action="store_true",
     )
 
@@ -544,9 +559,9 @@ def main(args=None):
         "-p",
         "--profile",
         help="A profile - a specified information model - for a vocabulary. This tool understands several profiles and"
-        "you can choose which one you want to convert the Excel file according to. The list of profiles - URIs "
-        "and their corresponding tokens - supported by VocExcel, can be found by running the program with the "
-        "flag -lp or --listprofiles.",
+             "you can choose which one you want to convert the Excel file according to. The list of profiles - URIs "
+             "and their corresponding tokens - supported by VocExcel, can be found by running the program with the "
+             "flag -lp or --listprofiles.",
         default="vocpub",
     )
 
