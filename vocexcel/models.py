@@ -201,10 +201,11 @@ class Collection(BaseModel):
     members: List[str]
     provenance: str = None
 
-    # @validator("members")
-    # def members_must_by_iris(cls, v):
-    #  if not v[0].startswith("http"):
-    #     raise ValueError("The members of a Collection must be a list of IRIs")
+    @validator("members")
+    def members_must_by_iris(cls, v):
+        if not v[0].startswith("http"):
+            raise ValueError("The members of a Collection must be a list of IRIs")
+        return v
 
     def to_graph(self):
         g = Graph()
