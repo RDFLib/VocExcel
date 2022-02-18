@@ -32,7 +32,9 @@ RDF_FILE_ENDINGS = {
 }
 EXCEL_FILE_ENDINGS = ["xlsx"]
 KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
-template_version = "0.4.0"
+
+KNOWN_TEMPLATE_VERSIONS = ["0.4.0", "0.2.1", "0.3.0"]
+template_version = None
 
 
 class ConversionError(Exception):
@@ -48,8 +50,42 @@ def split_and_tidy(cell_value: str):
 
 
 # this is a new function to iterate over the collection sheet in template version 0.4.0
-def extract_collections(s: Worksheet) -> list[Collection]:
-    collections: list[Collection] = []
+def extract_concepts_and_collections_new_template(q: Worksheet, r: Worksheet, s: Worksheet,) -> Tuple[
+    List[models.Concept], List[models.Collection]]:
+    concepts = []
+    collections = []
+    # Iterating over the concept page and the additional concept page
+    for col in q.iter_cols(max_col=1):
+        for cell in col:
+            row = cell.row
+            if cell.value is None or cell.value == "Concepts" or cell.value == "Concepts IRI*":
+                pass
+            else:
+                try:
+                    c = models.Concept(
+                        uri=q[f"A{row}"].value,
+                        pref_label=q[f"B{row}"].value,
+                        pl_language_code=split_and_tidy(q[f"C{row}"].value),
+                        definition=q[f"D{row}"].value,
+                        def_language_code=split_and_tidy(q[f"E{row}"].value),
+                        alt_labels=split_and_tidy(q[f"F{row}"].value),
+                        children=split_and_tidy(q[f"G{row}"].value),
+                        home_vocab_uri=q[f"H{row}"].value,
+                        provenance=q[f"I{row}"].value,
+                        # additional concept features sheets
+                        related_match=r[f"B{row}"].value,
+                        close_match=r[f"C{row}"].value,
+                        exact_match=r[f"D{row}"].value,
+                        narrow_match=r[f"E{row}"].value,
+                        broader_match=r[f"F{row}"].value,
+                    )
+                    concepts.append(c)
+                except ValidationError as e:
+                    raise ConversionError(
+                        f"Concept processing error, row {row}, error: {e}"
+                    )
+
+    # iterating over the collections page
     for col in s.iter_cols(max_col=1):
         for cell in col:
             row = cell.row
@@ -69,11 +105,12 @@ def extract_collections(s: Worksheet) -> list[Collection]:
                     raise ConversionError(
                         f"Collection processing error, row {row}, error: {e}"
                     )
-    return collections
+    return concepts, collections
 
 
+# THis is the old function to iterate over the concept and collection sheet from the old template
 def extract_concepts_and_collections(
-        s: Worksheet, a: Worksheet
+        s: Worksheet,
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
@@ -82,33 +119,6 @@ def extract_concepts_and_collections(
     for col in s.iter_cols(max_col=1):
         for cell in col:
             row = cell.row
-            global template_version
-            if template_version == "0.4.0":
-                if (
-                        cell.value is None
-                        or cell.value == "Concepts"
-                        or cell.value == "Concept IRI*"
-                ):
-                    pass
-                else:
-                    c = models.Concept(
-                        uri=s[f"A{row}"].value,
-                        pref_label=s[f"B{row}"].value,
-                        pl_language_code=split_and_tidy(s[f"C{row}"].value),
-                        alt_labels=split_and_tidy(s[f"F{row}"].value),
-                        definition=s[f"D{row}"].value,
-                        def_language_code=split_and_tidy(s[f"E{row}"].value),
-                        children=split_and_tidy(s[f"G{row}"].value),
-                        home_vocab_uri=s[f"I{row}"].value,
-                        provenance=s[f"H{row}"].value,
-                        related_match=a[f"B{row}"].value,
-                        close_match=a[f"C{row}"].value,
-                        exact_match=a[f"D{row}"].value,
-                        narrow_match=a[f"E{row}"].value,
-                        broad_match=a[f"F{row}"].value,
-                    )
-                    concepts.append(c)
-        else:
             if cell.value == "Concept URI":
                 process_concept = True
             elif cell.value == "Collection URI":
@@ -195,26 +205,47 @@ def excel_to_rdf(
         raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
     wb = load_workbook(filename=str(file_to_convert_path), data_only=True)
 
+    # selecting template version
     try:
-        pi = wb["program info"]
-        global template_version
-        template_version = pi["B2"].value
-        sheet = wb["vocabulary" if sheet_name is None else sheet_name]
-        concepts, collections = extract_concepts_and_collections(sheet, sheet)
-    except Exception:
-        try:
-            intro_sheet = wb["Introduction"]
+        # The code will try and load the introduction page of the new Vocexcel template, if it fails it'll try the old
+        intro_sheet = wb["Introduction"]
+        if intro_sheet["J11"].value in KNOWN_TEMPLATE_VERSIONS:
+            global template_version
             template_version = intro_sheet["J11"].value
+    except Exception:
+        pass
+    try:
+        # older template version
+        pi = wb["program info"]
+        if pi["B2"].value in KNOWN_TEMPLATE_VERSIONS:
+            global template_version
+            template_version = pi["B2"].value
+    except Exception:
+        pass
+
+    # test that we have a valid template variable.
+    global template_version
+    if template_version not in KNOWN_TEMPLATE_VERSIONS:
+        raise ValueError(f"Unknown Template Version. Known Template Versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)},"
+                         f" you supplied {template_version}")
+
+    # Here what's going on is the code will attempt to load up a sheet and set the concepts or collections variables
+    if template_version is "0.3.0" or template_version is "0.2.1":
+        try:
+            sheet = wb["vocabulary" if sheet_name is None else sheet_name]
+            concepts, collections = extract_concepts_and_collections(sheet)
+        except Exception:
+            pass
+    if template_version is "0.4.0":
+        try:
             sheet = wb["Concept Scheme"]
             concept_sheet = wb["Concepts"]
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
-            concepts, collections = extract_concepts_and_collections(
-                concept_sheet, additional_concept_sheet)
-            collections = extract_collections(collection_sheet)
-        except Exception as err:
-            print(err)
-
+            concepts, collections = extract_concepts_and_collections_new_template(
+                concept_sheet, additional_concept_sheet, collection_sheet)
+        except Exception:
+            pass
     # Vocabulary
     try:
         cs = models.ConceptScheme(
