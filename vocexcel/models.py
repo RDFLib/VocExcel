@@ -170,15 +170,20 @@ class Concept(BaseModel):
         if self.provenance is not None:
             g.add((c, DCTERMS.provenance, Literal(self.provenance, lang="en")))
         if self.related_match is not None:
-            g.add((c, SKOS.relatedMatch, URIRef(self.close_match)))
+            for related_match in self.related_match:
+                g.add((c, SKOS.relatedMatch, URIRef(related_match)))
         if self.close_match is not None:
-            g.add((c, SKOS.closeMatch, URIRef(self.close_match)))
+            for close_match in self.close_match:
+                g.add((c, SKOS.closeMatch, URIRef(close_match)))
         if self.exact_match is not None:
-            g.add((c, SKOS.exactMatch, URIRef(self.exact_match)))
+            for exact_match in self.exact_match:
+                g.add((c, SKOS.exactMatch, URIRef(exact_match)))
         if self.narrow_match is not None:
-            g.add((c, SKOS.narrowMatch, URIRef(self.close_match)))
+            for narrow_match in self.narrow_match:
+                g.add((c, SKOS.narrowMatch, URIRef(narrow_match)))
         if self.broad_match is not None:
-            g.add((c, SKOS.broadMatch, URIRef(self.exact_match)))
+            for broad_match in self.broad_match:
+             g.add((c, SKOS.broadMatch, URIRef(broad_match)))
 
         return g
 
