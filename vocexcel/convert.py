@@ -231,7 +231,8 @@ def excel_to_rdf(
         try:
             sheet = wb["vocabulary" if sheet_name is None else sheet_name]
             concepts, collections = extract_concepts_and_collections(sheet)
-        except Exception:
+        except Exception as err:
+            print(err)
             pass
         else:
             # Vocabulary
@@ -281,7 +282,8 @@ def excel_to_rdf(
             collection_sheet = wb["Collections"]
             concepts, collections = extract_concepts_and_collections_new_template(
                 concept_sheet, additional_concept_sheet, collection_sheet)
-        except Exception:
+        except Exception as err:
+            print(err)
             pass
         else:
             # Vocabulary
