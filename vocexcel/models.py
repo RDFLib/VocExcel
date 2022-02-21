@@ -183,7 +183,7 @@ class Concept(BaseModel):
                 g.add((c, SKOS.narrowMatch, URIRef(narrow_match)))
         if self.broad_match is not None:
             for broad_match in self.broad_match:
-             g.add((c, SKOS.broadMatch, URIRef(broad_match)))
+                g.add((c, SKOS.broadMatch, URIRef(broad_match)))
 
         return g
 
