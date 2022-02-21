@@ -9,7 +9,6 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic.error_wrappers import ValidationError
 
-from vocexcel.models import Collection
 
 try:
     import models
@@ -50,7 +49,7 @@ def split_and_tidy(cell_value: str):
 
 
 # this is a new function to iterate over the collection sheet in template version 0.4.0
-def extract_concepts_and_collections_new_template(q: Worksheet, r: Worksheet, s: Worksheet,) -> Tuple[
+def extract_concepts_and_collections_new_template(q: Worksheet, r: Worksheet, s: Worksheet, ) -> Tuple[
     List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
@@ -206,11 +205,11 @@ def excel_to_rdf(
     wb = load_workbook(filename=str(file_to_convert_path), data_only=True)
 
     # selecting template version
+    global template_version
     try:
         # The code will try and load the introduction page of the new Vocexcel template, if it fails it'll try the old
         intro_sheet = wb["Introduction"]
         if intro_sheet["J11"].value in KNOWN_TEMPLATE_VERSIONS:
-            global template_version
             template_version = intro_sheet["J11"].value
     except Exception:
         pass
@@ -218,25 +217,63 @@ def excel_to_rdf(
         # older template version
         pi = wb["program info"]
         if pi["B2"].value in KNOWN_TEMPLATE_VERSIONS:
-            global template_version
             template_version = pi["B2"].value
     except Exception:
         pass
 
     # test that we have a valid template variable.
-    global template_version
     if template_version not in KNOWN_TEMPLATE_VERSIONS:
         raise ValueError(f"Unknown Template Version. Known Template Versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)},"
                          f" you supplied {template_version}")
 
-    # Here what's going on is the code will attempt to load up a sheet and set the concepts or collections variables
-    if template_version is "0.3.0" or template_version is "0.2.1":
+    # Here the vocabulary should be made based on the various template versions.
+    elif template_version == "0.3.0" or template_version == "0.2.1":
         try:
             sheet = wb["vocabulary" if sheet_name is None else sheet_name]
             concepts, collections = extract_concepts_and_collections(sheet)
         except Exception:
             pass
-    if template_version is "0.4.0":
+        else:
+            # Vocabulary
+            try:
+                cs = models.ConceptScheme(
+                    uri=sheet["B2"].value,
+                    title=sheet["B3"].value,
+                    description=sheet["B4"].value,
+                    created=sheet["B5"].value,
+                    modified=sheet["B6"].value,
+                    creator=sheet["B7"].value,
+                    publisher=sheet["B8"].value,
+                    version=sheet["B9"].value,
+                    provenance=sheet["B10"].value,
+                    custodian=sheet["B11"].value,
+                    pid=sheet["B12"].value,
+                )
+            except ValidationError as e:
+                raise ConversionError(f"ConceptScheme processing error: {e}")
+            # Build the total vocab
+            v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
+
+            # Write out the file
+            if output_type == "graph":
+                return v.to_graph()
+            elif output_type == "string":
+                return v.to_graph().serialize(format=output_format)
+            else:  # output_format == "file":
+                if output_file_path is not None:
+                    dest = output_file_path
+                else:
+                    if output_format == "xml":
+                        suffix = ".rdf"
+                    elif output_format == "json-ld":
+                        suffix = ".json-ld"
+                    else:
+                        suffix = ".ttl"
+                    dest = file_to_convert_path.with_suffix(suffix)
+                v.to_graph().serialize(destination=str(dest), format=output_format)
+                return dest
+
+    elif template_version == "0.4.0":
         try:
             sheet = wb["Concept Scheme"]
             concept_sheet = wb["Concepts"]
@@ -246,45 +283,48 @@ def excel_to_rdf(
                 concept_sheet, additional_concept_sheet, collection_sheet)
         except Exception:
             pass
-    # Vocabulary
-    try:
-        cs = models.ConceptScheme(
-            uri=sheet["B2"].value,
-            title=sheet["B3"].value,
-            description=sheet["B4"].value,
-            created=sheet["B5"].value,
-            modified=sheet["B6"].value,
-            creator=sheet["B7"].value,
-            publisher=sheet["B8"].value,
-            version=sheet["B9"].value,
-            provenance=sheet["B10"].value,
-            custodian=sheet["B11"].value,
-            pid=sheet["B12"].value,
-        )
-    except ValidationError as e:
-        raise ConversionError(f"ConceptScheme processing error: {e}")
-
-    # Build the total vocab
-    v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
-
-    # Write out the file
-    if output_type == "graph":
-        return v.to_graph()
-    elif output_type == "string":
-        return v.to_graph().serialize(format=output_format)
-    else:  # output_format == "file":
-        if output_file_path is not None:
-            dest = output_file_path
         else:
-            if output_format == "xml":
-                suffix = ".rdf"
-            elif output_format == "json-ld":
-                suffix = ".json-ld"
-            else:
-                suffix = ".ttl"
-            dest = file_to_convert_path.with_suffix(suffix)
-        v.to_graph().serialize(destination=str(dest), format=output_format)
-        return dest
+            # Vocabulary
+            try:
+                cs = models.ConceptScheme(
+                    uri=sheet["B2"].value,
+                    title=sheet["B3"].value,
+                    description=sheet["B4"].value,
+                    created=sheet["B5"].value,
+                    modified=sheet["B6"].value,
+                    creator=sheet["B7"].value,
+                    publisher=sheet["B8"].value,
+                    version=sheet["B9"].value,
+                    provenance=sheet["B10"].value,
+                    custodian=sheet["B11"].value,
+                    pid=sheet["B12"].value,
+                )
+            except ValidationError as e:
+                raise ConversionError(f"ConceptScheme processing error: {e}")
+            # Build the total vocab
+            v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
+
+            # Write out the file
+            if output_type == "graph":
+                return v.to_graph()
+            elif output_type == "string":
+                return v.to_graph().serialize(format=output_format)
+            else:  # output_format == "file":
+                if output_file_path is not None:
+                    destination = output_file_path
+                else:
+                    if output_format == "xml":
+                        suffix = ".rdf"
+                    elif output_format == "json-ld":
+                        suffix = ".json-ld"
+                    else:
+                        suffix = ".ttl"
+                    destination = file_to_convert_path.with_suffix(suffix)
+                v.to_graph().serialize(destination=str(destination), format=output_format)
+                return destination
+
+    else:
+        print("A problem has occurred")
 
 
 def rdf_to_excel(
