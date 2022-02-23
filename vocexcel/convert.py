@@ -39,7 +39,8 @@ template_version = None
 class ConversionError(Exception):
     pass
 
-
+# note this may not work in list of things that contain commas. Need to consider revising
+# to allow comma-seperated values where it'll split in commas but not in things enclosed in quotes.
 def split_and_tidy(cell_value: str):
     return (
         [x.strip() for x in cell_value.strip().split(",")]
@@ -57,7 +58,7 @@ def extract_concepts_and_collections_new_template(q: Worksheet, r: Worksheet, s:
     for col in q.iter_cols(max_col=1):
         for cell in col:
             row = cell.row
-            if cell.value is None or cell.value == "Concepts" or cell.value == "Concepts IRI*":
+            if cell.value is None or cell.value == "Concepts" or cell.value == "Concept IRI*":
                 pass
             else:
                 try:
@@ -72,11 +73,11 @@ def extract_concepts_and_collections_new_template(q: Worksheet, r: Worksheet, s:
                         home_vocab_uri=q[f"H{row}"].value,
                         provenance=q[f"I{row}"].value,
                         # additional concept features sheets
-                        related_match=r[f"B{row}"].value,
-                        close_match=r[f"C{row}"].value,
-                        exact_match=r[f"D{row}"].value,
-                        narrow_match=r[f"E{row}"].value,
-                        broader_match=r[f"F{row}"].value,
+                        related_match=split_and_tidy(r[f"B{row}"].value),
+                        close_match=split_and_tidy(r[f"C{row}"].value),
+                        exact_match=split_and_tidy(r[f"D{row}"].value),
+                        narrow_match=split_and_tidy(r[f"E{row}"].value),
+                        broader_match=split_and_tidy(r[f"F{row}"].value),
                     )
                     concepts.append(c)
                 except ValidationError as e:
