@@ -167,8 +167,8 @@ class Concept(BaseModel):
                 g.add((c, SKOS.notation, Literal(other_id)))
         if self.home_vocab_uri is not None:
             g.add((c, RDFS.isDefinedBy, URIRef(self.home_vocab_uri)))
-        if self.provenance is not None:
-            g.add((c, DCTERMS.provenance, Literal(self.provenance, lang="en")))
+        # if self.provenance is not None:
+        #     g.add((c, DCTERMS.provenance, Literal(self.provenance, lang="en")))
         if self.related_match is not None:
             for related_match in self.related_match:
                 g.add((c, SKOS.relatedMatch, URIRef(related_match)))
