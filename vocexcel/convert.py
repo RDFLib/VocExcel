@@ -239,17 +239,17 @@ def excel_to_rdf(
             # Vocabulary
             try:
                 cs = models.ConceptScheme(
-                    uri=sheet["B2"].value,
-                    title=sheet["B3"].value,
-                    description=sheet["B4"].value,
-                    created=sheet["B5"].value,
-                    modified=sheet["B6"].value,
-                    creator=sheet["B7"].value,
-                    publisher=sheet["B8"].value,
-                    version=sheet["B9"].value,
-                    provenance=sheet["B10"].value,
-                    custodian=sheet["B11"].value,
-                    pid=sheet["B12"].value,
+                    uri=sheet["B1"].value,
+                    title=sheet["B2"].value,
+                    description=sheet["B3"].value,
+                    created=sheet["B4"].value,
+                    modified=sheet["B5"].value,
+                    creator=sheet["B6"].value,
+                    publisher=sheet["B7"].value,
+                    version=sheet["B8"].value,
+                    provenance=sheet["B9"].value,
+                    custodian=sheet["B10"].value,
+                    pid=sheet["B11"].value,
                 )
             except ValidationError as e:
                 raise ConversionError(f"ConceptScheme processing error: {e}")
