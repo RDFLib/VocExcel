@@ -14,6 +14,7 @@ ORGANISATIONS = {
     "GGIC": URIRef("https://linked.data.gov.au/org/ggic"),
     "GSQ": URIRef("https://linked.data.gov.au/org/gsq"),
     "ICSM": URIRef("https://linked.data.gov.au/org/icsm"),
+    "DES": URIRef("https://linked.data.gov.au/org/des"),
 }
 
 ORGANISATIONS_INVERSE = {
@@ -22,6 +23,7 @@ ORGANISATIONS_INVERSE = {
     URIRef("https://linked.data.gov.au/org/ggic"): "GGIC",
     URIRef("https://linked.data.gov.au/org/gsq"): "GSQ",
     URIRef("https://linked.data.gov.au/org/icsm"): "ICSM",
+    URIRef("https://linked.data.gov.au/org/des"): "DES",
 }
 
 
@@ -38,21 +40,21 @@ class ConceptScheme(BaseModel):
     custodian: str = None
     pid: str = None
 
-    @validator("creator")
-    def creator_must_be_from_list(cls, v):
-        if v not in ORGANISATIONS.keys():
-            raise ValueError(
-                f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
-            )
-        return v
+    # @validator("creator")
+    # def creator_must_be_from_list(cls, v):
+    #     if v not in ORGANISATIONS.keys():
+    #         raise ValueError(
+    #             f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
+    #         )
+    #     return v
 
-    @validator("publisher")
-    def publisher_must_be_from_list(cls, v):
-        if v not in ORGANISATIONS.keys():
-            raise ValueError(
-                f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
-            )
-        return v
+    # @validator("publisher")
+    # def publisher_must_be_from_list(cls, v):
+    #     if v not in ORGANISATIONS.keys():
+    #         raise ValueError(
+    #             f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
+    #         )
+    #     return v
 
     def to_graph(self):
         g = Graph()
@@ -193,8 +195,8 @@ class Concept(BaseModel):
         ws[f"B{row_no}"] = self.pref_label
         ws[f"C{row_no}"] = self.alt_labels
         ws[f"D{row_no}"] = self.definition
-        ws[f"E{row_no}"] = ",\\".join(self.children)
-        ws[f"F{row_no}"] = ",\\".join(self.other_ids)
+        ws[f"E{row_no}"] = ",\n".join(self.children)
+        ws[f"F{row_no}"] = ",\n".join(self.other_ids)
         ws[f"G{row_no}"] = self.home_vocab_uri
         ws[f"H{row_no}"] = self.provenance
 

@@ -224,6 +224,9 @@ def rdf_to_excel(
 
     wb = load_workbook(filename=(Path(__file__).parent / "blank.xlsx"))
 
+    # openpyxl's default active sheet seems to be the last visited one in Excel
+    wb.active = wb["vocabulary"]
+
     holder = {"hasTopConcept": [], "provenance": None}
     for s in g.subjects(RDF.type, SKOS.ConceptScheme):
         holder["uri"] = str(s)
@@ -237,9 +240,9 @@ def rdf_to_excel(
             elif p == DCTERMS.modified:
                 holder["modified"] = o.toPython()
             elif p == DCTERMS.creator:
-                holder["creator"] = models.ORGANISATIONS_INVERSE[o]
+                holder["creator"] = models.ORGANISATIONS_INVERSE[o] if models.ORGANISATIONS_INVERSE.get(o) else str(o)
             elif p == DCTERMS.publisher:
-                holder["publisher"] = models.ORGANISATIONS_INVERSE[o]
+                holder["publisher"] = models.ORGANISATIONS_INVERSE[o] if models.ORGANISATIONS_INVERSE.get(o) else str(o)
             elif p == OWL.versionInfo:
                 holder["versionInfo"] = str(o)
             elif p == DCTERMS.source:
