@@ -1,3 +1,5 @@
+import pytest
+
 from pathlib import Path
 import sys
 from rdflib import Graph, URIRef, Literal
@@ -5,6 +7,7 @@ from rdflib.namespace import SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel import convert
+from vocexcel.utils import ConversionError
 
 
 def test_simple():
@@ -41,3 +44,13 @@ def test_complex():
     )
     # tidy up
     Path("040_complex_valid.ttl").unlink()
+
+
+def test_empty_template():
+    assert Path(Path(__file__).parent.parent / "templates" / "VocExcel-template_040.xlsx").is_file()
+    with pytest.raises(ConversionError) as e:
+        convert.excel_to_rdf(
+            Path(__file__).parent.parent / "templates" / "VocExcel-template_040.xlsx",
+            output_type="file",
+        )
+    assert "7 validation errors for ConceptScheme" in str(e)
