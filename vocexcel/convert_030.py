@@ -8,7 +8,7 @@ from vocexcel.utils import split_and_tidy, ConversionError
 
 
 def extract_concepts_and_collections(
-        s: Worksheet,
+    s: Worksheet,
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []

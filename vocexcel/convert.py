@@ -7,11 +7,23 @@ import pyshacl
 from colorama import Fore, Style
 from pydantic.error_wrappers import ValidationError
 
-from vocexcel.convert_021 import extract_concepts_and_collections as extract_concepts_and_collections_021
-from vocexcel.convert_030 import extract_concepts_and_collections as extract_concepts_and_collections_030
-from vocexcel.convert_040 import extract_concepts_and_collections as extract_concepts_and_collections_040
-from vocexcel.utils import ConversionError, load_workbook, get_template_version, KNOWN_FILE_ENDINGS, \
-    RDF_FILE_ENDINGS, KNOWN_TEMPLATE_VERSIONS
+from vocexcel.convert_021 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_021,
+)
+from vocexcel.convert_030 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_030,
+)
+from vocexcel.convert_040 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_040,
+)
+from vocexcel.utils import (
+    ConversionError,
+    load_workbook,
+    get_template_version,
+    KNOWN_FILE_ENDINGS,
+    RDF_FILE_ENDINGS,
+    KNOWN_TEMPLATE_VERSIONS,
+)
 
 try:
     import models
@@ -28,11 +40,11 @@ TEMPLATE_VERSION = None
 
 
 def excel_to_rdf(
-        file_to_convert_path: Path,
-        sheet_name=None,
-        output_type: Literal["file", "string", "graph"] = "file",
-        output_file_path=None,
-        output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
+    file_to_convert_path: Path,
+    sheet_name=None,
+    output_type: Literal["file", "string", "graph"] = "file",
+    output_file_path=None,
+    output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
     wb = load_workbook(file_to_convert_path)
@@ -40,8 +52,10 @@ def excel_to_rdf(
 
     # test that we have a valid template variable.
     if template_version not in KNOWN_TEMPLATE_VERSIONS:
-        raise ValueError(f"Unknown Template Version. Known Template Versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)},"
-                         f" you supplied {template_version}")
+        raise ValueError(
+            f"Unknown Template Version. Known Template Versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)},"
+            f" you supplied {template_version}"
+        )
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
     elif template_version == "0.3.0" or template_version == "0.2.1":
@@ -77,7 +91,8 @@ def excel_to_rdf(
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
             concepts, collections = extract_concepts_and_collections_040(
-                concept_sheet, additional_concept_sheet, collection_sheet)
+                concept_sheet, additional_concept_sheet, collection_sheet
+            )
 
             cs = models.ConceptScheme(
                 uri=sheet["B2"].value,
@@ -119,12 +134,12 @@ def excel_to_rdf(
 
 
 def rdf_to_excel(
-        file_to_convert_path: Path,
-        profile="vocpub",
-        output_file_path=None,
-        error_level=1,
-        message_level=1,
-        log_file=None,
+    file_to_convert_path: Path,
+    profile="vocpub",
+    output_file_path=None,
+    error_level=1,
+    message_level=1,
+    log_file=None,
 ):
     if type(file_to_convert_path) is str:
         file_to_convert_path = Path(file_to_convert_path)
@@ -239,9 +254,17 @@ def rdf_to_excel(
             elif p == DCTERMS.modified:
                 holder["modified"] = o.toPython()
             elif p == DCTERMS.creator:
-                holder["creator"] = models.ORGANISATIONS_INVERSE[o] if models.ORGANISATIONS_INVERSE.get(o) else str(o)
+                holder["creator"] = (
+                    models.ORGANISATIONS_INVERSE[o]
+                    if models.ORGANISATIONS_INVERSE.get(o)
+                    else str(o)
+                )
             elif p == DCTERMS.publisher:
-                holder["publisher"] = models.ORGANISATIONS_INVERSE[o] if models.ORGANISATIONS_INVERSE.get(o) else str(o)
+                holder["publisher"] = (
+                    models.ORGANISATIONS_INVERSE[o]
+                    if models.ORGANISATIONS_INVERSE.get(o)
+                    else str(o)
+                )
             elif p == OWL.versionInfo:
                 holder["versionInfo"] = str(o)
             elif p == DCTERMS.source:
@@ -405,8 +428,8 @@ def main(args=None):
         "-lp",
         "--listprofiles",
         help="This flag, if set, must be the only flag supplied. It will cause the program to list all the vocabulary"
-             " profiles that this converter, indicating both their URI and their short token for use with the"
-             " -p (--profile) flag when converting Excel files",
+        " profiles that this converter, indicating both their URI and their short token for use with the"
+        " -p (--profile) flag when converting Excel files",
         action="store_true",
     )
 
@@ -424,9 +447,9 @@ def main(args=None):
         "-p",
         "--profile",
         help="A profile - a specified information model - for a vocabulary. This tool understands several profiles and"
-             "you can choose which one you want to convert the Excel file according to. The list of profiles - URIs "
-             "and their corresponding tokens - supported by VocExcel, can be found by running the program with the "
-             "flag -lp or --listprofiles.",
+        "you can choose which one you want to convert the Excel file according to. The list of profiles - URIs "
+        "and their corresponding tokens - supported by VocExcel, can be found by running the program with the "
+        "flag -lp or --listprofiles.",
         default="vocpub",
     )
 

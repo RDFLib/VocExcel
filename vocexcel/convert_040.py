@@ -8,15 +8,22 @@ from vocexcel.utils import split_and_tidy, ConversionError
 
 
 # this is a new function to iterate over the collection sheet in template version 0.4.0
-def extract_concepts_and_collections(q: Worksheet, r: Worksheet, s: Worksheet, ) -> Tuple[
-    List[models.Concept], List[models.Collection]]:
+def extract_concepts_and_collections(
+    q: Worksheet,
+    r: Worksheet,
+    s: Worksheet,
+) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
     # Iterating over the concept page and the additional concept page
     for col in q.iter_cols(max_col=1):
         for cell in col:
             row = cell.row
-            if cell.value is None or cell.value == "Concepts" or cell.value == "Concept IRI*":
+            if (
+                cell.value is None
+                or cell.value == "Concepts"
+                or cell.value == "Concept IRI*"
+            ):
                 pass
             else:
                 try:
@@ -30,7 +37,6 @@ def extract_concepts_and_collections(q: Worksheet, r: Worksheet, s: Worksheet, )
                         children=split_and_tidy(q[f"G{row}"].value),
                         provenance=q[f"H{row}"].value,
                         home_vocab_uri=q[f"I{row}"].value,
-
                         # additional concept features sheets
                         related_match=split_and_tidy(r[f"B{row}"].value),
                         close_match=split_and_tidy(r[f"C{row}"].value),
@@ -48,7 +54,11 @@ def extract_concepts_and_collections(q: Worksheet, r: Worksheet, s: Worksheet, )
     for col in s.iter_cols(max_col=1):
         for cell in col:
             row = cell.row
-            if cell.value is None or cell.value == "Collections" or cell.value == "Collection URI":
+            if (
+                cell.value is None
+                or cell.value == "Collections"
+                or cell.value == "Collection URI"
+            ):
                 pass
             else:
                 try:
@@ -65,4 +75,3 @@ def extract_concepts_and_collections(q: Worksheet, r: Worksheet, s: Worksheet, )
                         f"Collection processing error, row {row}, error: {e}"
                     )
     return concepts, collections
-
