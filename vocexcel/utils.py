@@ -1,10 +1,24 @@
 from pathlib import Path
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
+
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
+RDF_FILE_ENDINGS = {
+    ".ttl": "ttl",
+    ".rdf": "xml",
+    ".xml": "xml",
+    ".json-ld": "json-ld",
+    ".json": "json-ld",
+    ".nt": "nt",
+    ".n3": "n3",
+}
+KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
 KNOWN_TEMPLATE_VERSIONS = ["0.4.0", "0.2.1", "0.3.0"]
+
+
+class ConversionError(Exception):
+    pass
 
 
 def load_workbook(file_path: Path) -> Workbook:
@@ -32,7 +46,9 @@ def get_template_version(wb: Workbook) -> str:
         pass
 
     # if we get here, the template version is either unknown or can't be located
-    raise Exception("The version of the Excel template you are using cannot be determined")
+    raise Exception(
+        "The version of the Excel template you are using cannot be determined"
+    )
 
 
 def split_and_tidy(cell_value: str):
@@ -43,19 +59,3 @@ def split_and_tidy(cell_value: str):
         if cell_value is not None
         else None
     )
-
-
-class ConversionError(Exception):
-    pass
-
-
-RDF_FILE_ENDINGS = {
-    ".ttl": "ttl",
-    ".rdf": "xml",
-    ".xml": "xml",
-    ".json-ld": "json-ld",
-    ".json": "json-ld",
-    ".nt": "nt",
-    ".n3": "n3",
-}
-KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
