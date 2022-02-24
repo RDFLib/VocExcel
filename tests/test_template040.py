@@ -1,21 +1,39 @@
-import pytest
 from pathlib import Path
 import sys
+from rdflib import Graph, URIRef, Literal
+from rdflib.namespace import SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel import convert
 
 
-def test_baddata_poor_additional_concepts_example():
-    with pytest.raises(Exception) as exc_info:
-        convert.excel_to_rdf(
-            Path(__file__).parent / "040_baddata.xlsx",
-            output_type="file",
-        )
-
-
 def test_simple():
     convert.excel_to_rdf(
-        Path(__file__).parent / "040_baddata.xlsx",
+        Path(__file__).parent / "040_simple_valid.xlsx",
         output_type="file",
     )
+    g = Graph().parse("040_simple_valid.ttl")
+    assert len(g) == 138
+    assert (
+        URIRef("http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"),
+        SKOS.prefLabel,
+        Literal("Particle Type", lang="en")
+    )
+    # tidy up
+    Path("040_simple_valid.ttl").unlink()
+
+
+def test_complex():
+    convert.excel_to_rdf(
+        Path(__file__).parent / "040_complex_valid.xlsx",
+        output_type="file",
+    )
+    g = Graph().parse("040_complex_valid.ttl")
+    assert len(g) == 131
+    assert (
+        URIRef("http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"),
+        SKOS.prefLabel,
+        Literal("Particle Type", lang="en")
+    )
+    # tidy up
+    Path("040_complex_valid.ttl").unlink()

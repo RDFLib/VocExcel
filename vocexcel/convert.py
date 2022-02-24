@@ -10,6 +10,7 @@ from pydantic.error_wrappers import ValidationError
 
 from vocexcel.convert_021 import extract_concepts_and_collections as extract_concepts_and_collections_021
 from vocexcel.convert_030 import extract_concepts_and_collections as extract_concepts_and_collections_030
+from vocexcel.convert_040 import extract_concepts_and_collections as extract_concepts_and_collections_040
 from vocexcel.utils import split_and_tidy, ConversionError, load_workbook, get_template_version, KNOWN_FILE_ENDINGS, \
     RDF_FILE_ENDINGS, KNOWN_TEMPLATE_VERSIONS
 
@@ -23,66 +24,8 @@ except:
     from vocexcel import models
     from vocexcel import profiles
 
+
 TEMPLATE_VERSION = None
-
-
-# this is a new function to iterate over the collection sheet in template version 0.4.0
-def extract_concepts_and_collections_new_template(q: Worksheet, r: Worksheet, s: Worksheet, ) -> Tuple[
-    List[models.Concept], List[models.Collection]]:
-    concepts = []
-    collections = []
-    # Iterating over the concept page and the additional concept page
-    for col in q.iter_cols(max_col=1):
-        for cell in col:
-            row = cell.row
-            if cell.value is None or cell.value == "Concepts" or cell.value == "Concept IRI*":
-                pass
-            else:
-                try:
-                    c = models.Concept(
-                        uri=q[f"A{row}"].value,
-                        pref_label=q[f"B{row}"].value,
-                        pl_language_code=split_and_tidy(q[f"C{row}"].value),
-                        definition=q[f"D{row}"].value,
-                        def_language_code=split_and_tidy(q[f"E{row}"].value),
-                        alt_labels=split_and_tidy(q[f"F{row}"].value),
-                        children=split_and_tidy(q[f"G{row}"].value),
-                        home_vocab_uri=q[f"H{row}"].value,
-                        provenance=q[f"I{row}"].value,
-                        # additional concept features sheets
-                        related_match=split_and_tidy(r[f"B{row}"].value),
-                        close_match=split_and_tidy(r[f"C{row}"].value),
-                        exact_match=split_and_tidy(r[f"D{row}"].value),
-                        narrow_match=split_and_tidy(r[f"E{row}"].value),
-                        broader_match=split_and_tidy(r[f"F{row}"].value),
-                    )
-                    concepts.append(c)
-                except ValidationError as e:
-                    raise ConversionError(
-                        f"Concept processing error, row {row}, error: {e}"
-                    )
-
-    # iterating over the collections page
-    for col in s.iter_cols(max_col=1):
-        for cell in col:
-            row = cell.row
-            if cell.value is None or cell.value == "Collections" or cell.value == "Collection URI":
-                pass
-            else:
-                try:
-                    c = models.Collection(
-                        uri=s[f"A{row}"].value,
-                        pref_label=s[f"B{row}"].value,
-                        definition=s[f"C{row}"].value,
-                        members=split_and_tidy(s[f"D{row}"].value),
-                        provenance=s[f"E{row}"].value,
-                    )
-                    collections.append(c)
-                except ValidationError as e:
-                    raise ConversionError(
-                        f"Collection processing error, row {row}, error: {e}"
-                    )
-    return concepts, collections
 
 
 def excel_to_rdf(
@@ -134,29 +77,24 @@ def excel_to_rdf(
             concept_sheet = wb["Concepts"]
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
-            concepts, collections = extract_concepts_and_collections_new_template(
+            concepts, collections = extract_concepts_and_collections_040(
                 concept_sheet, additional_concept_sheet, collection_sheet)
-        except Exception as err:
-            print(err)
-            pass
-        else:
-            # Vocabulary
-            try:
-                cs = models.ConceptScheme(
-                    uri=sheet["B2"].value,
-                    title=sheet["B3"].value,
-                    description=sheet["B4"].value,
-                    created=sheet["B5"].value,
-                    modified=sheet["B6"].value,
-                    creator=sheet["B7"].value,
-                    publisher=sheet["B8"].value,
-                    version=sheet["B9"].value,
-                    provenance=sheet["B10"].value,
-                    custodian=sheet["B11"].value,
-                    pid=sheet["B12"].value,
-                )
-            except ValidationError as e:
-                raise ConversionError(f"ConceptScheme processing error: {e}")
+
+            cs = models.ConceptScheme(
+                uri=sheet["B2"].value,
+                title=sheet["B3"].value,
+                description=sheet["B4"].value,
+                created=sheet["B5"].value,
+                modified=sheet["B6"].value,
+                creator=sheet["B7"].value,
+                publisher=sheet["B8"].value,
+                version=sheet["B9"].value,
+                provenance=sheet["B10"].value,
+                custodian=sheet["B11"].value,
+                pid=sheet["B12"].value,
+            )
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
 
     # Build the total vocab
     v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
