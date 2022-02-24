@@ -1,7 +1,7 @@
 from pathlib import Path
+
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
-
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {

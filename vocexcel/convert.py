@@ -1,17 +1,16 @@
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Tuple, Dict, Literal
+from typing import Dict, Literal
 
 import pyshacl
 from colorama import Fore, Style
-from openpyxl.worksheet.worksheet import Worksheet
 from pydantic.error_wrappers import ValidationError
 
 from vocexcel.convert_021 import extract_concepts_and_collections as extract_concepts_and_collections_021
 from vocexcel.convert_030 import extract_concepts_and_collections as extract_concepts_and_collections_030
 from vocexcel.convert_040 import extract_concepts_and_collections as extract_concepts_and_collections_040
-from vocexcel.utils import split_and_tidy, ConversionError, load_workbook, get_template_version, KNOWN_FILE_ENDINGS, \
+from vocexcel.utils import ConversionError, load_workbook, get_template_version, KNOWN_FILE_ENDINGS, \
     RDF_FILE_ENDINGS, KNOWN_TEMPLATE_VERSIONS
 
 try:

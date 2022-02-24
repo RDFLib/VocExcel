@@ -2,11 +2,9 @@ import datetime
 from typing import List
 
 from openpyxl import Workbook
-from pydantic import AnyHttpUrl
 from pydantic import BaseModel, validator
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
-
 
 ORGANISATIONS = {
     "CGI": URIRef("https://linked.data.gov.au/org/cgi"),
