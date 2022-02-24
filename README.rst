@@ -7,7 +7,9 @@ How to use
 
 Creating vocabularies
 ---------------------
-The file *VocExcel-template.xlsx* in this repository contains the Excel template to be used to create vocabularies. The template contains notes on use, examples of simple & complex vocabularies and lookup lists of values (e.g. organisations). Vocab authors only need this file to create vocabulary content by filling it out.
+The file *VocExcel-template_040.xlsx* in this repository's *templates/* folder is the Excel template to be used to create vocabularies. The template contains notes on use, examples of simple & complex vocabularies and lookup lists of values (e.g. organisations). Vocab authors only need this file to create vocabulary content by filling it out.
+
+There are other versions of template in the *templates/* folder. You are free to use any of them however the latest is usually the greatest!
 
 Use one Excel workbook per vocabulary.
 
