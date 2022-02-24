@@ -1,12 +1,8 @@
-try:
-    from vocexcel import convert
-except:
-    import sys
-
-    sys.path.append("..")
-    from vocexcel import convert
-
 from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent.absolute()))
+from vocexcel import convert
 from rdflib import URIRef
 from rdflib.namespace import SKOS
 
