@@ -26,7 +26,7 @@ ORGANISATIONS_INVERSE = {
 
 
 class ConceptScheme(BaseModel):
-    uri: AnyHttpUrl
+    uri: str
     title: str
     description: str
     created: datetime.date
@@ -36,7 +36,7 @@ class ConceptScheme(BaseModel):
     provenance: str
     version: str = None
     custodian: str = None
-    pid: AnyHttpUrl = None
+    pid: str = None
 
     @validator("creator")
     def creator_must_be_from_list(cls, v):
