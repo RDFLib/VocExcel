@@ -18,12 +18,10 @@ def test_simple():
     g = Graph().parse("040_simple_valid.ttl")
     assert len(g) == 138
     assert (
-        URIRef(
-            "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
-        ),
+        URIRef("http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"),
         SKOS.prefLabel,
         Literal("Particle Type", lang="en"),
-    )
+    ) in g, "PrefLabel for vocab is not correct"
     # tidy up
     Path("040_simple_valid.ttl").unlink()
 
@@ -36,12 +34,10 @@ def test_complex():
     g = Graph().parse("040_complex_valid.ttl")
     assert len(g) == 131
     assert (
-        URIRef(
-            "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
-        ),
+        URIRef("http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"),
         SKOS.prefLabel,
         Literal("Particle Type", lang="en"),
-    )
+    ) in g, "PrefLabel for vocab is not correct"
     # tidy up
     Path("040_complex_valid.ttl").unlink()
 
