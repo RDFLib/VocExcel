@@ -1,118 +1,42 @@
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Tuple, Dict, Literal
+from typing import Dict, Literal
 
 import pyshacl
 from colorama import Fore, Style
-from openpyxl import load_workbook
-from openpyxl.worksheet.worksheet import Worksheet
 from pydantic.error_wrappers import ValidationError
 
-import models
-import profiles
+from vocexcel.convert_021 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_021,
+)
+from vocexcel.convert_030 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_030,
+)
+from vocexcel.convert_040 import (
+    extract_concepts_and_collections as extract_concepts_and_collections_040,
+)
+from vocexcel.utils import (
+    ConversionError,
+    load_workbook,
+    get_template_version,
+    KNOWN_FILE_ENDINGS,
+    RDF_FILE_ENDINGS,
+    KNOWN_TEMPLATE_VERSIONS,
+)
 
-RDF_FILE_ENDINGS = {
-    ".ttl": "ttl",
-    ".rdf": "xml",
-    ".xml": "xml",
-    ".json-ld": "json-ld",
-    ".json": "json-ld",
-    ".nt": "nt",
-    ".n3": "n3",
-}
-EXCEL_FILE_ENDINGS = ["xlsx"]
-KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
-template_version = "0.4.0"
+try:
+    import models
+    import profiles
+except:
+    import sys
+
+    sys.path.append("..")
+    from vocexcel import models
+    from vocexcel import profiles
 
 
-class ConversionError(Exception):
-    pass
-
-
-def split_and_tidy(cell_value: str):
-    return (
-        [x.strip() for x in cell_value.strip().split(",")]
-        if cell_value is not None
-        else None
-    )
-
-
-def extract_concepts_and_collections(
-    s: Worksheet,
-) -> Tuple[List[models.Concept], List[models.Collection]]:
-    concepts = []
-    collections = []
-    process_concept = False
-    process_collection = False
-    for col in s.iter_cols(max_col=1):
-        for cell in col:
-            row = cell.row
-            if cell.value == "Concept URI":
-                process_concept = True
-            elif cell.value == "Collection URI":
-                process_concept = False
-                process_collection = True
-            elif process_concept:
-                if cell.value is None:
-                    pass
-                else:
-                    try:
-                        global template_version
-                        if template_version == "0.3.0":
-                            c = models.Concept(
-                                uri=s[f"A{row}"].value,
-                                pref_label=s[f"B{row}"].value,
-                                pl_language_code=split_and_tidy(s[f"C{row}"].value),  # new in 0.3.0
-                                alt_labels=split_and_tidy(s[f"D{row}"].value),
-                                definition=s[f"E{row}"].value,
-                                def_language_code=split_and_tidy(s[f"F{row}"].value),  # new in 0.3.0
-                                children=split_and_tidy(s[f"G{row}"].value),
-                                other_ids=split_and_tidy(s[f"H{row}"].value),
-                                home_vocab_uri=s[f"I{row}"].value,
-                                provenance=s[f"J{row}"].value,
-                                template_version=template_version
-                            )
-                        elif template_version == "0.2.1":
-                            c = models.Concept(
-                                uri=s[f"A{row}"].value,
-                                pref_label=s[f"B{row}"].value,
-                                alt_labels=split_and_tidy(s[f"C{row}"].value),
-                                definition=s[f"D{row}"].value,
-                                children=split_and_tidy(s[f"E{row}"].value),
-                                other_ids=split_and_tidy(s[f"F{row}"].value),
-                                home_vocab_uri=s[f"G{row}"].value,
-                                provenance=s[f"H{row}"].value,
-                            )
-                        else:
-                            raise ConversionError("The version of the Excel template your are using is not recognised")
-
-                        concepts.append(c)
-                    except ValidationError as e:
-                        raise ConversionError(
-                            f"Concept processing error, row {row}, error: {e}"
-                        )
-            elif process_collection:
-                if cell.value is None:
-                    pass
-                else:
-                    try:
-                        c = models.Collection(
-                            uri=s[f"A{row}"].value,
-                            pref_label=s[f"B{row}"].value,
-                            definition=s[f"C{row}"].value,
-                            members=split_and_tidy(s[f"D{row}"].value),
-                            provenance=s[f"E{row}"].value,
-                        )
-                        collections.append(c)
-                    except ValidationError as e:
-                        raise ConversionError(
-                            f"Collection processing error, row {row}, error: {e}"
-                        )
-            elif cell.value is None:
-                pass
-
-    return concepts, collections
+TEMPLATE_VERSION = None
 
 
 def excel_to_rdf(
@@ -123,37 +47,68 @@ def excel_to_rdf(
     output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
-    if type(file_to_convert_path) is str:
-        file_to_convert_path = Path(file_to_convert_path)
-    if not file_to_convert_path.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
-        raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
-    wb = load_workbook(filename=str(file_to_convert_path), data_only=True)
-    pi = wb["program info"]
-    global template_version
-    template_version = pi["B2"].value
+    wb = load_workbook(file_to_convert_path)
+    template_version = get_template_version(wb)
 
-    sheet = wb["vocabulary" if sheet_name is None else sheet_name]
-
-    # Vocabulary
-    try:
-        cs = models.ConceptScheme(
-            uri=sheet["B1"].value,
-            title=sheet["B2"].value,
-            description=sheet["B3"].value,
-            created=sheet["B4"].value,
-            modified=sheet["B5"].value,
-            creator=sheet["B6"].value,
-            publisher=sheet["B7"].value,
-            version=sheet["B8"].value,
-            provenance=sheet["B9"].value,
-            custodian=sheet["B10"].value,
-            pid=sheet["B11"].value,
+    # test that we have a valid template variable.
+    if template_version not in KNOWN_TEMPLATE_VERSIONS:
+        raise ValueError(
+            f"Unknown Template Version. Known Template Versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)},"
+            f" you supplied {template_version}"
         )
-    except ValidationError as e:
-        raise ConversionError(f"ConceptScheme processing error: {e}")
 
-    # Concepts & Collections
-    concepts, collections = extract_concepts_and_collections(sheet)
+    # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
+    elif template_version == "0.3.0" or template_version == "0.2.1":
+        sheet = wb["vocabulary" if sheet_name is None else sheet_name]
+        # read from the vocabulary sheet of the workbook unless given a specific sheet
+
+        if template_version == "0.2.1":
+            concepts, collections = extract_concepts_and_collections_021(sheet)
+        elif template_version == "0.3.0":
+            concepts, collections = extract_concepts_and_collections_030(sheet)
+
+        try:
+            cs = models.ConceptScheme(
+                uri=sheet["B1"].value,
+                title=sheet["B2"].value,
+                description=sheet["B3"].value,
+                created=sheet["B4"].value,
+                modified=sheet["B5"].value,
+                creator=sheet["B6"].value,
+                publisher=sheet["B7"].value,
+                version=sheet["B8"].value,
+                provenance=sheet["B9"].value,
+                custodian=sheet["B10"].value,
+                pid=sheet["B11"].value,
+            )
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
+
+    elif template_version == "0.4.0":
+        try:
+            sheet = wb["Concept Scheme"]
+            concept_sheet = wb["Concepts"]
+            additional_concept_sheet = wb["Additional Concept Features"]
+            collection_sheet = wb["Collections"]
+            concepts, collections = extract_concepts_and_collections_040(
+                concept_sheet, additional_concept_sheet, collection_sheet
+            )
+
+            cs = models.ConceptScheme(
+                uri=sheet["B2"].value,
+                title=sheet["B3"].value,
+                description=sheet["B4"].value,
+                created=sheet["B5"].value,
+                modified=sheet["B6"].value,
+                creator=sheet["B7"].value,
+                publisher=sheet["B8"].value,
+                version=sheet["B9"].value,
+                provenance=sheet["B10"].value,
+                custodian=sheet["B11"].value,
+                pid=sheet["B12"].value,
+            )
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
 
     # Build the total vocab
     v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
@@ -179,12 +134,12 @@ def excel_to_rdf(
 
 
 def rdf_to_excel(
-        file_to_convert_path: Path,
-        profile="vocpub",
-        output_file_path=None,
-        error_level=1,
-        message_level=1,
-        log_file=None
+    file_to_convert_path: Path,
+    profile="vocpub",
+    output_file_path=None,
+    error_level=1,
+    message_level=1,
+    log_file=None,
 ):
     if type(file_to_convert_path) is str:
         file_to_convert_path = Path(file_to_convert_path)
@@ -200,16 +155,16 @@ def rdf_to_excel(
                 "', '".join(profiles.PROFILES.keys())
             )
         )
-    
+
     allow_warnings = True if error_level > 1 else False
 
     # validate the RDF file
     r = pyshacl.validate(
-        str(file_to_convert_path), 
-        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"), 
-        allow_warnings=allow_warnings
+        str(file_to_convert_path),
+        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
+        allow_warnings=allow_warnings,
     )
-        
+
     logging_level = logging.INFO
 
     if message_level == 3:
@@ -218,7 +173,9 @@ def rdf_to_excel(
         logging_level = logging.WARNING
 
     if log_file:
-        logging.basicConfig(level=logging_level, format="%(message)s", filename=log_file, force=True)
+        logging.basicConfig(
+            level=logging_level, format="%(message)s", filename=log_file, force=True
+        )
     else:
         logging.basicConfig(level=logging_level, format="%(message)s")
 
@@ -228,6 +185,7 @@ def rdf_to_excel(
 
     results_graph = r[1]
     from rdflib.namespace import RDF, SH
+
     for report in results_graph.subjects(RDF.type, SH.ValidationReport):
         for result in results_graph.objects(report, SH.result):
             result_dict = {}
@@ -255,16 +213,16 @@ def rdf_to_excel(
             elif result_dict["resultSeverity"] == str(SH.Violation):
                 logging.error(result_message_formatted)
                 violation_list.append(result_message)
-    
+
     error_messages = []
 
     if error_level == 3:
         error_messages = violation_list
     elif error_level == 2:
         error_messages = warning_list + violation_list
-    else: # error_level == 1
+    else:  # error_level == 1
         error_messages = info_list + warning_list + violation_list
-    
+
     if len(error_messages) > 0:
         raise ConversionError(
             f"The file you supplied is not valid according to the {profile} profile."
@@ -296,9 +254,17 @@ def rdf_to_excel(
             elif p == DCTERMS.modified:
                 holder["modified"] = o.toPython()
             elif p == DCTERMS.creator:
-                holder["creator"] = models.ORGANISATIONS_INVERSE[o] if models.ORGANISATIONS_INVERSE.get(o) else str(o)
+                holder["creator"] = (
+                    models.ORGANISATIONS_INVERSE[o]
+                    if models.ORGANISATIONS_INVERSE.get(o)
+                    else str(o)
+                )
             elif p == DCTERMS.publisher:
-                holder["publisher"] = models.ORGANISATIONS_INVERSE[o] if models.ORGANISATIONS_INVERSE.get(o) else str(o)
+                holder["publisher"] = (
+                    models.ORGANISATIONS_INVERSE[o]
+                    if models.ORGANISATIONS_INVERSE.get(o)
+                    else str(o)
+                )
             elif p == OWL.versionInfo:
                 holder["versionInfo"] = str(o)
             elif p == DCTERMS.source:
@@ -416,6 +382,7 @@ def rdf_to_excel(
 
 def log_msg(result: Dict, log_file: str) -> str:
     from rdflib.namespace import SH
+
     formatted_msg = ""
     message = f"""Validation Result in {result['sourceConstraintComponent'].split(str(SH))[1]} ({result['sourceConstraintComponent']}):
 \tSeverity: sh:{result['resultSeverity'].split(str(SH))[1]}
@@ -425,11 +392,23 @@ def log_msg(result: Dict, log_file: str) -> str:
 \tMessage: {result['resultMessage']}
 """
     if result["resultSeverity"] == str(SH.Info):
-        formatted_msg = f"INFO: {message}" if log_file else Fore.BLUE + "INFO: " + Style.RESET_ALL + message
+        formatted_msg = (
+            f"INFO: {message}"
+            if log_file
+            else Fore.BLUE + "INFO: " + Style.RESET_ALL + message
+        )
     elif result["resultSeverity"] == str(SH.Warning):
-        formatted_msg = f"WARNING: {message}" if log_file else Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
+        formatted_msg = (
+            f"WARNING: {message}"
+            if log_file
+            else Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
+        )
     elif result["resultSeverity"] == str(SH.Violation):
-        formatted_msg = f"VIOLATION: {message}" if log_file else Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
+        formatted_msg = (
+            f"VIOLATION: {message}"
+            if log_file
+            else Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
+        )
     return formatted_msg
 
 
@@ -540,13 +519,15 @@ def main(args=None):
         print(s.rstrip())
         exit()
     elif args.version:
-        print(__version__)
+        # not sure what to do here, just removing the errors
+        print(TEMPLATE_VERSION)
         exit()
     elif args.file_to_convert:
         if not args.file_to_convert.name.endswith(tuple(KNOWN_FILE_ENDINGS)):
             print(
-                "Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'"
-                .format("', '".join(RDF_FILE_ENDINGS.keys()))
+                "Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'".format(
+                    "', '".join(RDF_FILE_ENDINGS.keys())
+                )
             )
             exit()
 
@@ -571,12 +552,12 @@ def main(args=None):
         else:  # RDF file ending
             try:
                 o = rdf_to_excel(
-                    args.file_to_convert, 
-                    profile=args.profile, 
-                    output_file_path=args.outputfile, 
-                    error_level=int(args.errorlevel), 
-                    message_level=int(args.messagelevel), 
-                    log_file=args.logfile
+                    args.file_to_convert,
+                    profile=args.profile,
+                    output_file_path=args.outputfile,
+                    error_level=int(args.errorlevel),
+                    message_level=int(args.messagelevel),
+                    log_file=args.logfile,
                 )
                 if args.outputtype == "string":
                     print(o)

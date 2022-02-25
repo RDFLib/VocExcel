@@ -1,18 +1,15 @@
-try:
-    from vocexcel import convert
-except:
-    import sys
-    sys.path.append("..")
-    from vocexcel import convert
-
 from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent.absolute()))
+from vocexcel import convert
 from rdflib import URIRef
 from rdflib.namespace import SKOS
 
 
 def test_example_complex():
     g = convert.excel_to_rdf(
-        Path(__file__).parent.parent / "VocExcel-template.xlsx",
+        Path(__file__).parent.parent / "templates" / "VocExcel-template_030.xlsx",
         sheet_name="example - complex",
         output_type="graph",
     )
@@ -36,6 +33,7 @@ def test_example_complex():
             f'The title (preferredLabel) of the "example - complex" sheet vocab in '
             f'the VocExcel-template.ttl is {s} but should be "Particle Type"'
         )
+
 
 if __name__ == "__main__":
     test_example_complex()

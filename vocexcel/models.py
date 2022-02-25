@@ -2,7 +2,6 @@ import datetime
 from typing import List
 
 from openpyxl import Workbook
-from pydantic import AnyHttpUrl
 from pydantic import BaseModel, validator
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
@@ -27,7 +26,7 @@ ORGANISATIONS_INVERSE = {
 
 
 class ConceptScheme(BaseModel):
-    uri: AnyHttpUrl
+    uri: str
     title: str
     description: str
     created: datetime.date
@@ -37,7 +36,7 @@ class ConceptScheme(BaseModel):
     provenance: str
     version: str = None
     custodian: str = None
-    pid: AnyHttpUrl = None
+    pid: str = None
 
     # @validator("creator")
     # def creator_must_be_from_list(cls, v):
@@ -99,6 +98,21 @@ class ConceptScheme(BaseModel):
 
     def to_excel(self, wb: Workbook):
         ws = wb.active
+        # concept_scheme_sheet = wb["Concept Scheme"]
+        # if convert.template_version == "0.4.0":
+        #     concept_scheme_sheet = wb["Concept Scheme"]
+        #     concept_scheme_sheet["B2"] = self.uri
+        #     concept_scheme_sheet["B3"] = self.title
+        #     concept_scheme_sheet["B4"] = self.description
+        #     concept_scheme_sheet["B5"] = self.created.isoformat()
+        #     concept_scheme_sheet["B6"] = self.modified.isoformat()
+        #     concept_scheme_sheet["B7"] = self.creator
+        #     concept_scheme_sheet["B8"] = self.publisher
+        #     concept_scheme_sheet["B9"] = self.version
+        #     concept_scheme_sheet["B10"] = self.provenance
+        #     concept_scheme_sheet["B11"] = self.custodian
+        #     concept_scheme_sheet["B12"] = self.pid
+
         ws["B1"] = self.uri
         ws["B2"] = self.title
         ws["B3"] = self.description
@@ -123,6 +137,11 @@ class Concept(BaseModel):
     other_ids: List[str] = None
     home_vocab_uri: str = None
     provenance: str = None
+    related_match: List[str] = None
+    close_match: List[str] = None
+    exact_match: List[str] = None
+    narrow_match: List[str] = None
+    broad_match: List[str] = None
 
     def to_graph(self):
         g = Graph()
@@ -148,8 +167,23 @@ class Concept(BaseModel):
                 g.add((c, SKOS.notation, Literal(other_id)))
         if self.home_vocab_uri is not None:
             g.add((c, RDFS.isDefinedBy, URIRef(self.home_vocab_uri)))
-        if self.provenance is not None:
-            g.add((c, DCTERMS.provenance, Literal(self.provenance, lang="en")))
+        # if self.provenance is not None:
+        #     g.add((c, DCTERMS.provenance, Literal(self.provenance, lang="en")))
+        if self.related_match is not None:
+            for related_match in self.related_match:
+                g.add((c, SKOS.relatedMatch, URIRef(related_match)))
+        if self.close_match is not None:
+            for close_match in self.close_match:
+                g.add((c, SKOS.closeMatch, URIRef(close_match)))
+        if self.exact_match is not None:
+            for exact_match in self.exact_match:
+                g.add((c, SKOS.exactMatch, URIRef(exact_match)))
+        if self.narrow_match is not None:
+            for narrow_match in self.narrow_match:
+                g.add((c, SKOS.narrowMatch, URIRef(narrow_match)))
+        if self.broad_match is not None:
+            for broad_match in self.broad_match:
+                g.add((c, SKOS.broadMatch, URIRef(broad_match)))
 
         return g
 
@@ -176,6 +210,7 @@ class Collection(BaseModel):
     def members_must_by_iris(cls, v):
         if not v[0].startswith("http"):
             raise ValueError("The members of a Collection must be a list of IRIs")
+        return v
 
     def to_graph(self):
         g = Graph()

@@ -18,11 +18,11 @@ with open_local(["README.rst"], encoding="utf-8") as readme:
 #     install_requires = req.read().split("\n")
 install_requires = [
     "openpyxl",
-    "rdflib>=6.0.0",
+    "rdflib>=6.1.1",
     "pydantic",
     "pyshacl",
     "dateutils",
-    "colorama"
+    "colorama",
 ]
 
 setup(
@@ -30,7 +30,8 @@ setup(
     packages=find_packages(),
     package_dir={"vocexcel": "vocexcel"},
     package_data={
-        "vocexcel": ["validator.vocpub.ttl", "blank.xlsx"],
+        "vocexcel": ["validator.vocpub.ttl"],
+        "templates": ["VocExcel-template_040.xlsx"],
     },
     include_package_data=True,
     version=__version__,
