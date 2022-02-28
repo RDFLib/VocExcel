@@ -38,21 +38,21 @@ class ConceptScheme(BaseModel):
     custodian: str = None
     pid: str = None
 
-    # @validator("creator")
-    # def creator_must_be_from_list(cls, v):
-    #     if v not in ORGANISATIONS.keys():
-    #         raise ValueError(
-    #             f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
-    #         )
-    #     return v
+    @validator("creator")
+    def creator_must_be_from_list(cls, v):
+        if v not in ORGANISATIONS.keys():
+            raise ValueError(
+                f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
+            )
+        return v
 
-    # @validator("publisher")
-    # def publisher_must_be_from_list(cls, v):
-    #     if v not in ORGANISATIONS.keys():
-    #         raise ValueError(
-    #             f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
-    #         )
-    #     return v
+    @validator("publisher")
+    def publisher_must_be_from_list(cls, v):
+        if v not in ORGANISATIONS.keys():
+            raise ValueError(
+                f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
+            )
+        return v
 
     def to_graph(self):
         g = Graph()
