@@ -5,6 +5,7 @@ from openpyxl import Workbook
 from pydantic import BaseModel, validator
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
+from .utils import all_strings_in_list_are_iris
 
 ORGANISATIONS = {
     "CGI": URIRef("https://linked.data.gov.au/org/cgi"),
@@ -142,6 +143,16 @@ class Concept(BaseModel):
     exact_match: List[str] = None
     narrow_match: List[str] = None
     broad_match: List[str] = None
+
+    @validator("children")
+    def each_child_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+
+    @validator("related_match")
+    def each_rm_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
 
     def to_graph(self):
         g = Graph()

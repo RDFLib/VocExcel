@@ -93,4 +93,53 @@ def test_concept():
     print(c.to_graph().serialize())
 
 
-print(test_vocabulary_valid())
+def test_concept_iri():
+    # this is testing that children list elements are IRIs, not just ordinary strings
+    # uri
+    # pref_label
+    # alt_labels
+    # pl_language_code
+    # definition
+    # def_language_code
+    # children
+    # other_ids
+    # home_vocab_uri
+    # provenance
+    with pytest.raises(ValidationError) as e:
+        c = Concept(
+            uri="https://example.com/thing/x",
+            pref_label="Thing X",
+            definition="Fake def for Thing X",
+            children=["broken iri", "http://example.com/working-iri"]  # non-IRI string
+        )
+
+    with pytest.raises(ValidationError) as e:
+        c = Concept(
+            uri="https://example.com/thing/x",
+            pref_label="Thing X",
+            definition="Fake def for Thing X",
+            children=["ftp://example.com/working-iri", "http://example.com/working-iri"]  # IRI starts ftp
+        )
+
+    with pytest.raises(ValidationError) as e:
+        c = Concept(
+            uri="https://example.com/thing/x",
+            pref_label="Thing X",
+            definition="Fake def for Thing X",
+            children=["http://example.com/ working-iri", "http://example.com/working-iri"]  # space in IRI
+        )
+
+    # valid children, invalid related_match
+    with pytest.raises(ValidationError) as e:
+        c = Concept(
+            uri="https://example.com/thing/x",
+            pref_label="Thing X",
+            definition="Fake def for Thing X",
+            related_match=[
+                "http://example.com/working-iri/rm/1",
+                "http://example.com/working-iri/rm/ 2",  # space
+                "ftp://example.com/working-iri/rm/3"  # starts ftp
+            ],
+            children=["http://example.com/working-iri/c/1", "http://example.com/working-iri/c/2"]
+        )
+    print(e)

@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from typing import Tuple
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
 
@@ -59,3 +59,33 @@ def split_and_tidy(cell_value: str):
         if cell_value is not None
         else None
     )
+
+
+def string_is_http_iri(s: str) -> Tuple[bool, str]:
+    # returns (True, None) if the string (sort of) is an IRI
+    # returns (False, message) otherwise
+    messages = []
+    if not s.startswith("http"):
+        messages.append("HTTP IRIs must start with 'http' or 'https'")
+
+    if " " in s:
+        messages.append("IRIs cannot contain spaces")
+
+    if len(messages) > 0:
+        return False, " and ".join(messages)
+    else:
+        return True, ""
+
+
+def all_strings_in_list_are_iris(l_: []) -> Tuple[bool, str]:
+    messages = []
+    if l_ is not None:
+        for item in l_:
+            r = string_is_http_iri(item)
+            if not r[0]:
+                messages.append(f"Item {item} failed with messages {r[1]}")
+
+    if len(messages) > 0:
+        return False, " and ".join(messages)
+    else:
+        return True, ""
