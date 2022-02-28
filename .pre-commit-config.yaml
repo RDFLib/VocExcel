@@ -1,0 +1,21 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/psf/black
+    rev: 19.3b0
+    hooks:
+    -   id: black
+        entry: bash -c 'black . && git add -u' --
+- repo: local
+  hooks:
+  - id: update-requirements-txt
+    name: update-requirements-txt
+    description: 'Generate requirements.txt based on poetry.lock'
+    entry: poetry
+    args: [export, --format, requirements.txt, --output, requirements.txt]
+    language: system
+    pass_filenames: false
