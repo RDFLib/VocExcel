@@ -20,10 +20,10 @@ Installation
 Several forms of use of this tool do not require any installation - see the next section. However, to run the tool as a Python script or a module, you will need to:
 
 1. have Python (3.6+) installed on your computer
-2. create a virtual environment (see [the official venv documentation](https://docs.python.org/3/library/venv.html), or, simpler, [this tutorial for Windows](https://www.c-sharpcorner.com/article/steps-to-set-up-a-virtual-environment-for-python-development/))
+2. create a poetry environment
 3. install the necessary packages in that environment
-    * usually something like `pip install -r requirements.txt`
-4. run the script, `convert.py`, using the version of Python in your virtual environment
+    * when running a poetry environment, some IDE's like python will automatically install the pyproject.toml else, there would have to be a manual install with something like 'poetry install'
+4. run the script, `convert.py`, using the version of Python in your poetry environment
 
 Generating RDF from Excel
 -------------------------
@@ -43,7 +43,7 @@ There will soon be an Windows EXE file, ``vocexcel.exe``, in the ``vocexcel/bin/
 
 ::
 
-    c:\\Users\\nick> vocexcel.exe vocabulary-x.xlsx
+    c:\\Users\\user> vocexcel.exe vocabulary-x.xlsx
 
 The command above will generate either a vocabulary RDF file in the same directory as the input Excel file, or an Excel file from the RDF file, based on file endings.
 
