@@ -7,11 +7,13 @@ How to use
 
 Creating vocabularies
 ---------------------
-The file *VocExcel-template_040.xlsx* in this repository's *templates/* folder is the Excel template to be used to create vocabularies. The template contains notes on use, examples of simple & complex vocabularies and lookup lists of values (e.g. organisations). Vocab authors only need this file to create vocabulary content by filling it out.
+The file *VocExcel-template_040.xlsx* in this repository's *templates/* folder is the Excel template to be used to create vocabularies. The template contains all the basics needed to understand what to do including: a *Read Me* sheet which has notes on use, examples of various vocabularies, and lookup lists of values (e.g. organisations). Vocab authors only need this file to create vocabulary content by filling it out.
 
-There are other versions of template in the *templates/* folder. You are free to use any of them however the latest is usually the greatest!
+*Note: the example sheets for version 0.4.0 are in the tests folder. There includes both complex and simple valid vocabularies*
 
-Use one Excel workbook per vocabulary.
+There are other versions of template in the *templates/* folder. You are free to use any of them however the latest is usually the greatest! Currently the validation tool supports versions 0.3.0 and 0.2.1.
+
+Use one Excel workbook per vocabulary. The recommendation in completing a vocabulary is to go through the read me sheet in version 0.4.0, reference your work with the example sheets,
 
 Installation
 ------------
@@ -149,6 +151,12 @@ Contact
 | *Data System Architect*
 | `SURROUND Australia Pty Ltd <https://surroundaustralia.com>`_
 | nicholas.car@surroundaustralia.com
+
+| *Supporting Developer*:
+| **Peter Philips**
+| *Analyst Programmer*
+| `SURROUND Australia Pty Ltd <https://surroundaustralia.com>`_
+| peter.philips@surroundaustralia.com
 
 | **Company support**:
 | info@surroundaustralia.com
