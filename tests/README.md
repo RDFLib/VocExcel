@@ -10,6 +10,14 @@ The valid Excel and RDF files here should convert without errors. The invalid on
 * **eg-invalid2.xlsx**
     * _Error: Concept processing error, row 17, error: 1 validation error for Concept uri URL invalid, extra characters found after valid URL: ' xxx' (type=value_error.url.extra; extra= xxx)_
     * the Concept on line 17 has an invalid URI!
+* **040_complexexample_invalid.xlsx**
+    * In this case, this file has cells containing invalid data. There are numbers instead of URI's in the children and close match cells
+    * children
+      Item 1 failed with messages HTTP IRIs must start with 'http' or 'https' (type=assertion_error)
+      close_match
+      Item 1 failed with messages HTTP IRIs must start with 'http' or 'https' and Item 2 failed with messages HTTP IRIs must start with 'http' or 'https' and Item 3 failed with messages HTTP IRIs must start with '
+      http' or 'https' and Item 4 failed with messages HTTP IRIs must start with 'http' or 'https' (type=assertion_error)
+
 
 ### RDF to Excel
 * **eg-invalid.ttl**

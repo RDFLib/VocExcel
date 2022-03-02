@@ -15,7 +15,7 @@ def test_simple():
         Path(__file__).parent / "040_simple_valid.xlsx", output_type="file"
     )
     g = Graph().parse("040_simple_valid.ttl")
-    assert len(g) == 138
+    assert len(g) == 111
     assert (
         URIRef(
             "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
@@ -32,7 +32,7 @@ def test_complex():
         Path(__file__).parent / "040_complex_valid.xlsx", output_type="file"
     )
     g = Graph().parse("040_complex_valid.ttl")
-    assert len(g) == 131
+    assert len(g) == 111
     assert (
         URIRef(
             "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
@@ -54,3 +54,20 @@ def test_empty_template():
             output_type="file",
         )
     assert "7 validation errors for ConceptScheme" in str(e)
+
+
+# this includes code for testing invlaid template
+# def test_invalid_template():
+#     convert.excel_to_rdf(
+#         Path(__file__).parent / "040_complexexample_invalid.xlsx", output_type="file"
+#     )
+#     g = Graph().parse("040_complexexample_invalid.ttl")
+#     assert (
+#                URIRef(
+#                    "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
+#                ),
+#                SKOS.prefLabel,
+#                Literal("Particle Type", lang="en"),
+#            ) in g, "PrefLabel for vocab is not correct"
+#     # tidy up
+#     Path("040_complex_valid.ttl").unlink()

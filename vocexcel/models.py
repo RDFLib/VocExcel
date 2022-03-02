@@ -150,12 +150,12 @@ class Concept(BaseModel):
         assert r[0], r[1]
 
     @validator("narrow_match")
-    def each_rm_must_be_an_iri(cls, elem):
+    def each_nm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
 
     @validator("broad_match")
-    def each_rm_must_be_an_iri(cls, elem):
+    def each_bm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
 
