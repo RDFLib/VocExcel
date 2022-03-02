@@ -343,10 +343,7 @@ def rdf_to_excel(
     row_no += 2
 
     for s in g.subjects(RDF.type, SKOS.Collection):
-        holder = {
-            "uri": str(s),
-            "members": [],
-        }
+        holder = {"uri": str(s), "members": []}
         for p, o in g.predicate_objects(s):
             if p == SKOS.prefLabel:
                 holder["pref_label"] = o.toPython()
@@ -503,10 +500,7 @@ def main(args=None):
 
     # log to file
     parser.add_argument(
-        "-l",
-        "--logfile",
-        help="The file to write logging output to",
-        required=False,
+        "-l", "--logfile", help="The file to write logging output to", required=False
     )
 
     args = parser.parse_args()

@@ -99,21 +99,6 @@ class ConceptScheme(BaseModel):
 
     def to_excel(self, wb: Workbook):
         ws = wb.active
-        # concept_scheme_sheet = wb["Concept Scheme"]
-        # if convert.template_version == "0.4.0":
-        #     concept_scheme_sheet = wb["Concept Scheme"]
-        #     concept_scheme_sheet["B2"] = self.uri
-        #     concept_scheme_sheet["B3"] = self.title
-        #     concept_scheme_sheet["B4"] = self.description
-        #     concept_scheme_sheet["B5"] = self.created.isoformat()
-        #     concept_scheme_sheet["B6"] = self.modified.isoformat()
-        #     concept_scheme_sheet["B7"] = self.creator
-        #     concept_scheme_sheet["B8"] = self.publisher
-        #     concept_scheme_sheet["B9"] = self.version
-        #     concept_scheme_sheet["B10"] = self.provenance
-        #     concept_scheme_sheet["B11"] = self.custodian
-        #     concept_scheme_sheet["B12"] = self.pid
-
         ws["B1"] = self.uri
         ws["B2"] = self.title
         ws["B3"] = self.description
@@ -150,6 +135,26 @@ class Concept(BaseModel):
         assert r[0], r[1]
 
     @validator("related_match")
+    def each_rm_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+
+    @validator("close_match")
+    def each_cm_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+
+    @validator("exact_match")
+    def each_em_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+
+    @validator("narrow_match")
+    def each_rm_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+
+    @validator("broad_match")
     def each_rm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]

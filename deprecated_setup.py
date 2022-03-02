@@ -46,11 +46,7 @@ setup(
     license="LICENSE",
     keywords=["SKOS", "vocabulary", "Excel", "converter", "validate", "profile"],
     long_description=long_description,
-    entry_points={
-        "console_scripts": [
-            "vocexcel = vocexcel.convert:main",
-        ]
-    },
+    entry_points={"console_scripts": ["vocexcel = vocexcel.convert:main"]},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Utilities",

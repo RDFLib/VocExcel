@@ -12,13 +12,14 @@ from vocexcel.utils import ConversionError
 
 def test_simple():
     convert.excel_to_rdf(
-        Path(__file__).parent / "040_simple_valid.xlsx",
-        output_type="file",
+        Path(__file__).parent / "040_simple_valid.xlsx", output_type="file"
     )
     g = Graph().parse("040_simple_valid.ttl")
     assert len(g) == 138
     assert (
-        URIRef("http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"),
+        URIRef(
+            "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
+        ),
         SKOS.prefLabel,
         Literal("Particle Type", lang="en"),
     ) in g, "PrefLabel for vocab is not correct"
@@ -28,13 +29,14 @@ def test_simple():
 
 def test_complex():
     convert.excel_to_rdf(
-        Path(__file__).parent / "040_complex_valid.xlsx",
-        output_type="file",
+        Path(__file__).parent / "040_complex_valid.xlsx", output_type="file"
     )
     g = Graph().parse("040_complex_valid.ttl")
     assert len(g) == 131
     assert (
-        URIRef("http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"),
+        URIRef(
+            "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
+        ),
         SKOS.prefLabel,
         Literal("Particle Type", lang="en"),
     ) in g, "PrefLabel for vocab is not correct"
@@ -43,7 +45,9 @@ def test_complex():
 
 
 def test_empty_template():
-    assert Path(Path(__file__).parent.parent / "templates" / "VocExcel-template_040.xlsx").is_file()
+    assert Path(
+        Path(__file__).parent.parent / "templates" / "VocExcel-template_040.xlsx"
+    ).is_file()
     with pytest.raises(ConversionError) as e:
         convert.excel_to_rdf(
             Path(__file__).parent.parent / "templates" / "VocExcel-template_040.xlsx",

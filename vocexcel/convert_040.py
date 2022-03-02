@@ -9,9 +9,7 @@ from vocexcel.utils import split_and_tidy, ConversionError
 
 # this is a new function to iterate over the collection sheet in template version 0.4.0
 def extract_concepts_and_collections(
-    q: Worksheet,
-    r: Worksheet,
-    s: Worksheet,
+    q: Worksheet, r: Worksheet, s: Worksheet
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
