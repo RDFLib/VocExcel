@@ -151,12 +151,12 @@ Contact
 | *Data System Architect*
 | `SURROUND Australia Pty Ltd <https://surroundaustralia.com>`_
 | nicholas.car@surroundaustralia.com
-
+|
 | *Supporting Developer*:
 | **Peter Philips**
 | *Analyst Programmer*
 | `SURROUND Australia Pty Ltd <https://surroundaustralia.com>`_
 | peter.philips@surroundaustralia.com
-
+|
 | **Company support**:
 | info@surroundaustralia.com
