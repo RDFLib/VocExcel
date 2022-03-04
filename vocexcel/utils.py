@@ -57,7 +57,7 @@ def split_and_tidy(cell_value: str):
     return (
         [x.strip() for x in cell_value.strip().split(",")]
         if cell_value is not None
-        else None
+        else []
     )
 
 

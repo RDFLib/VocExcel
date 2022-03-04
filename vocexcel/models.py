@@ -115,19 +115,19 @@ class ConceptScheme(BaseModel):
 class Concept(BaseModel):
     uri: str
     pref_label: str
-    alt_labels: List[str] = None
-    pl_language_code: List[str] = None
+    alt_labels: List[str] = []
+    pl_language_code: List[str] = []
     definition: str
-    def_language_code: List[str] = None
-    children: List[str] = None
-    other_ids: List[str] = None
+    def_language_code: List[str] = []
+    children: List[str] = []
+    other_ids: List[str] = []
     home_vocab_uri: str = None
     provenance: str = None
-    related_match: List[str] = None
-    close_match: List[str] = None
-    exact_match: List[str] = None
-    narrow_match: List[str] = None
-    broad_match: List[str] = None
+    related_match: List[str] = []
+    close_match: List[str] = []
+    exact_match: List[str] = []
+    narrow_match: List[str] = []
+    broad_match: List[str] = []
 
     @validator("children")
     def each_child_must_be_an_iri(cls, elem):
@@ -172,8 +172,7 @@ class Concept(BaseModel):
                 g.add((c, SKOS.altLabel, Literal(alt_label, lang="en")))
         if self.def_language_code is None:
             self.def_language_code = ["en"]
-        for lang_code in self.def_language_code:
-            g.add((c, SKOS.definition, Literal(self.definition, lang=lang_code)))
+        g.add((c, SKOS.definition, Literal(self.definition)))
         if self.children is not None:
             for child in self.children:
                 g.add((c, SKOS.narrower, URIRef(child)))
