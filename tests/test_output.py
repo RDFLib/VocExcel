@@ -17,10 +17,10 @@ def test_example_complex():
     top_concepts = 0
     for s, o in g.subject_objects(SKOS.topConceptOf):
         top_concepts += 1
-    assert top_concepts == 5, (
+    assert top_concepts == 3, (
         f'Processing the test vocab ("example - complex" sheet in workbook '
-        f"VocExcel-template.ttl) has yielded {top_concepts} top concepts but it should have"
-        f"yielded 5"
+        f"VocExcel-template.ttl) has yielded {top_concepts} top concepts but it should have "
+        f"yielded 3"
     )
 
     for o in g.objects(
