@@ -236,7 +236,7 @@ def rdf_to_excel(
         str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix]
     )
 
-    wb = load_workbook(filename=(Path(__file__).parent / "blank.xlsx"))
+    wb = load_workbook(file_path=(Path(__file__).parent / "blank.xlsx"))
 
     # openpyxl's default active sheet seems to be the last visited one in Excel
     wb.active = wb["vocabulary"]
