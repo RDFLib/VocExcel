@@ -89,8 +89,27 @@ def test_concept():
         uri="https://example.com/thing/x",
         pref_label="Thing X",
         definition="Fake def for Thing X",
+        children=["https://example.com/thing/y", "https://example.com/thing/z"],
+        other_ids=["XX", "XXX"],
+        close_match=["https://example.com/thing/other", "https://example.com/thing/otherother"],
     )
-    print(c.to_graph().serialize())
+    actual = c.to_graph()
+    expected = Graph().parse(data="""@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://example.com/thing/y> skos:broader <https://example.com/thing/x> .
+
+<https://example.com/thing/z> skos:broader <https://example.com/thing/x> .
+
+<https://example.com/thing/x> a skos:Concept ;
+    skos:closeMatch <https://example.com/thing/other>,
+        <https://example.com/thing/otherother> ;
+    skos:definition "Fake def for Thing X"@en ;
+    skos:narrower <https://example.com/thing/y>,
+        <https://example.com/thing/z> ;
+    skos:notation "XX",
+        "XXX" ;
+    skos:prefLabel "Fake def for Thing X"@en .""")
+    assert actual.isomorphic(expected)
 
 
 def test_concept_iri():
@@ -151,4 +170,3 @@ def test_concept_iri():
                 "http://example.com/working-iri/c/2",
             ],
         )
-    print(e)

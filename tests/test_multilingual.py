@@ -13,7 +13,7 @@ def test_countrycodes():
 
     # file eg-languages-valid.ttl should have been created
     g = Graph().parse(Path(__file__).parent / "030_eg-languages-valid.ttl")
-    assert len(g) == 4317
+    assert len(g) == 4342
 
     # clean up
     Path.unlink(Path(__file__).parent / "eg-languages-valid.ttl", missing_ok=True)

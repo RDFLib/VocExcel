@@ -133,50 +133,58 @@ class Concept(BaseModel):
     def each_child_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
+        return elem
 
     @validator("related_match")
     def each_rm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
+        return elem
 
     @validator("close_match")
     def each_cm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
+        return elem
 
     @validator("exact_match")
     def each_em_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
+        return elem
 
     @validator("narrow_match")
     def each_nm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
+        return elem
 
     @validator("broad_match")
     def each_bm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]
+        return elem
 
     def to_graph(self):
         g = Graph()
         c = URIRef(self.uri)
         g.add((c, RDF.type, SKOS.Concept))
-        if self.pl_language_code is None:
-            self.pl_language_code = ["en"]
-        for lang_code in self.pl_language_code:
-            g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang=lang_code)))
+        if not self.pl_language_code:
+            g.add((c, SKOS.prefLabel, Literal(self.definition, lang="en")))
+        else:
+            for lang_code in self.pl_language_code:
+                g.add((c, SKOS.prefLabel, Literal(self.definition, lang=lang_code)))
         if self.alt_labels is not None:
             for alt_label in self.alt_labels:
                 g.add((c, SKOS.altLabel, Literal(alt_label, lang="en")))
-        if self.def_language_code is None:
-            self.def_language_code = ["en"]
-        g.add((c, SKOS.definition, Literal(self.definition)))
-        if self.children is not None:
-            for child in self.children:
-                g.add((c, SKOS.narrower, URIRef(child)))
-                g.add((URIRef(child), SKOS.broader, c))
+        if not self.def_language_code:
+            g.add((c, SKOS.definition, Literal(self.definition, lang="en")))
+        else:
+            for lang_code in self.def_language_code:
+                g.add((c, SKOS.definition, Literal(self.definition, lang=lang_code)))
+        for child in self.children:
+            g.add((c, SKOS.narrower, URIRef(child)))
+            g.add((URIRef(child), SKOS.broader, c))
         if self.other_ids is not None:
             for other_id in self.other_ids:
                 g.add((c, SKOS.notation, Literal(other_id)))
@@ -187,7 +195,7 @@ class Concept(BaseModel):
         if self.related_match is not None:
             for related_match in self.related_match:
                 g.add((c, SKOS.relatedMatch, URIRef(related_match)))
-        if self.close_match is not None:
+        if self.close_match:
             for close_match in self.close_match:
                 g.add((c, SKOS.closeMatch, URIRef(close_match)))
         if self.exact_match is not None:
