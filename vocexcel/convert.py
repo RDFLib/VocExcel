@@ -23,6 +23,7 @@ from vocexcel.utils import (
     KNOWN_FILE_ENDINGS,
     RDF_FILE_ENDINGS,
     KNOWN_TEMPLATE_VERSIONS,
+    EXCEL_FILE_ENDINGS,
 )
 
 try:
@@ -112,7 +113,6 @@ def excel_to_rdf(
 
     # Build the total vocab
     v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
-
     # Write out the file
     if output_type == "graph":
         return v.to_graph()

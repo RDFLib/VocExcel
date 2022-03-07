@@ -91,10 +91,14 @@ def test_concept():
         definition="Fake def for Thing X",
         children=["https://example.com/thing/y", "https://example.com/thing/z"],
         other_ids=["XX", "XXX"],
-        close_match=["https://example.com/thing/other", "https://example.com/thing/otherother"],
+        close_match=[
+            "https://example.com/thing/other",
+            "https://example.com/thing/otherother",
+        ],
     )
     actual = c.to_graph()
-    expected = Graph().parse(data="""@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+    expected = Graph().parse(
+        data="""@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 <https://example.com/thing/y> skos:broader <https://example.com/thing/x> .
 
@@ -108,7 +112,8 @@ def test_concept():
         <https://example.com/thing/z> ;
     skos:notation "XX",
         "XXX" ;
-    skos:prefLabel "Fake def for Thing X"@en .""")
+    skos:prefLabel "Fake def for Thing X"@en ."""
+    )
     assert actual.isomorphic(expected)
 
 
