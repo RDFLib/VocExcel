@@ -40,7 +40,7 @@ def extract_concepts_and_collections(
                         close_match=split_and_tidy(r[f"C{row}"].value),
                         exact_match=split_and_tidy(r[f"D{row}"].value),
                         narrow_match=split_and_tidy(r[f"E{row}"].value),
-                        broader_match=split_and_tidy(r[f"F{row}"].value),
+                        broad_match=split_and_tidy(r[f"F{row}"].value),
                     )
                     concepts.append(c)
                 except ValidationError as e:
