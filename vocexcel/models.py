@@ -5,7 +5,14 @@ from openpyxl import Workbook
 from pydantic import BaseModel, validator
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
-from .utils import all_strings_in_list_are_iris
+
+try:
+    from utils import all_strings_in_list_are_iris
+except:
+    import sys
+
+    sys.path.append("..")
+    from vocexcel.utils import all_strings_in_list_are_iris
 
 ORGANISATIONS = {
     "CGI": URIRef("https://linked.data.gov.au/org/cgi"),
