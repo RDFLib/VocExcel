@@ -7,28 +7,27 @@ import pyshacl
 from colorama import Fore, Style
 from pydantic.error_wrappers import ValidationError
 
-from vocexcel.convert_021 import (
-    extract_concepts_and_collections as extract_concepts_and_collections_021,
-)
-from vocexcel.convert_030 import (
-    extract_concepts_and_collections as extract_concepts_and_collections_030,
-)
-from vocexcel.convert_040 import (
-    extract_concepts_and_collections as extract_concepts_and_collections_040,
-)
-from vocexcel.utils import (
-    ConversionError,
-    load_workbook,
-    get_template_version,
-    KNOWN_FILE_ENDINGS,
-    RDF_FILE_ENDINGS,
-    KNOWN_TEMPLATE_VERSIONS,
-    EXCEL_FILE_ENDINGS,
-)
-
 try:
     import models
     import profiles
+    from convert_021 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_021,
+    )
+    from convert_030 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_030,
+    )
+    from convert_040 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_040,
+    )
+    from utils import (
+        ConversionError,
+        load_workbook,
+        get_template_version,
+        KNOWN_FILE_ENDINGS,
+        RDF_FILE_ENDINGS,
+        KNOWN_TEMPLATE_VERSIONS,
+        EXCEL_FILE_ENDINGS,
+    )
 except:
     import sys
 
@@ -36,6 +35,24 @@ except:
     from vocexcel import models
     from vocexcel import profiles
 
+    from vocexcel.convert_021 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_021,
+    )
+    from vocexcel.convert_030 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_030,
+    )
+    from vocexcel.convert_040 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_040,
+    )
+    from vocexcel.utils import (
+        ConversionError,
+        load_workbook,
+        get_template_version,
+        KNOWN_FILE_ENDINGS,
+        RDF_FILE_ENDINGS,
+        KNOWN_TEMPLATE_VERSIONS,
+        EXCEL_FILE_ENDINGS,
+    )
 
 TEMPLATE_VERSION = None
 
