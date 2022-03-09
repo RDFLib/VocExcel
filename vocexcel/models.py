@@ -7,12 +7,12 @@ from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
 
 try:
-    from utils import all_strings_in_list_are_iris
+    from utils import all_strings_in_list_are_iris, string_is_http_iri
 except:
     import sys
 
     sys.path.append("..")
-    from vocexcel.utils import all_strings_in_list_are_iris
+    from vocexcel.utils import all_strings_in_list_are_iris, string_is_http_iri
 
 ORGANISATIONS = {
     "CGI": URIRef("https://linked.data.gov.au/org/cgi"),
@@ -89,7 +89,11 @@ class ConceptScheme(BaseModel):
         if self.custodian is not None:
             g.add((v, DCAT.contactPoint, Literal(self.custodian)))
         if self.pid is not None:
-            g.add((v, RDFS.seeAlso, URIRef(self.pid)))
+            # adding to the graph depending on if the pid is a URI or a literal
+            if string_is_http_iri(self.pid)[0]:
+                g.add((v, RDFS.seeAlso, URIRef(self.pid)))
+            else:
+                g.add((v, RDFS.seeAlso, Literal(self.pid)))
 
         # bind non-core prefixes
         g.bind("cs", v)
