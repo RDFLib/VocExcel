@@ -25,7 +25,7 @@ def test_exhaustive():
     g4 = g2 - g1
     print(g4.serialize())
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
-    Path(Path(__file__).parent / "040_exhaustive_example.ttl").unlink()
+    # Path(Path(__file__).parent / "040_exhaustive_example.ttl").unlink()
 
 
 def test_minimal():
