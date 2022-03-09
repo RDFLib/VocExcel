@@ -2,7 +2,7 @@ import pytest
 
 from pathlib import Path
 import sys
-from rdflib import Graph, URIRef, Literal
+from rdflib import Graph, URIRef, Literal, compare
 from rdflib.namespace import SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
@@ -56,18 +56,17 @@ def test_empty_template():
     assert "7 validation errors for ConceptScheme" in str(e)
 
 
-# this includes code for testing invlaid template
-# def test_invalid_template():
-#     convert.excel_to_rdf(
-#         Path(__file__).parent / "040_complexexample_invalid.xlsx", output_type="file"
-#     )
-#     g = Graph().parse("040_complexexample_invalid.ttl")
-#     assert (
-#                URIRef(
-#                    "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
-#                ),
-#                SKOS.prefLabel,
-#                Literal("Particle Type", lang="en"),
-#            ) in g, "PrefLabel for vocab is not correct"
-#     # tidy up
-#     Path("040_complex_valid.ttl").unlink()
+def test_exhaustive_template_is_isomorphic():
+    g1 = Graph().parse("040_exhaustive_example_perfect_output.ttl")
+    g2 = convert.excel_to_rdf(
+        Path(__file__).parent / "040_exhaustive_example.xlsx", output_type="graph"
+    )
+    assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
+
+
+def test_minimal_template_is_isomorphic():
+    g1 = Graph().parse("040_minimal_example_perfect_output.ttl")
+    g2 = convert.excel_to_rdf(
+        Path(__file__).parent / "040_minimal_example.xlsx", output_type="graph"
+    )
+    assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
