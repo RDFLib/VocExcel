@@ -1,7 +1,7 @@
-import pytest
-
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import pytest
 from rdflib import Graph, URIRef, Literal, compare
 from rdflib.namespace import SKOS
 
