@@ -56,6 +56,7 @@ def test_empty_template():
     assert "7 validation errors for ConceptScheme" in str(e)
 
 
+# isomorphic tests
 def test_exhaustive_template_is_isomorphic():
     g1 = Graph().parse("040_exhaustive_example_perfect_output.ttl")
     g2 = convert.excel_to_rdf(
