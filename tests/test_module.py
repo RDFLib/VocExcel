@@ -15,7 +15,7 @@ def test_exhaustive():
     #     Path(__file__).parent / "040_exhaustive_example.xlsx", output_type="file"
     # )
     # g0 = Graph().parse("040_exhaustive_example.ttl")
-    g1 = Graph().parse("040_exhaustive_example_perfect_file.ttl")
+    g1 = Graph().parse("040_exhaustive_example_perfect_output.ttl")
     g2 = convert.excel_to_rdf(
         Path(__file__).parent / "040_exhaustive_example.xlsx", output_type="graph"
     )
