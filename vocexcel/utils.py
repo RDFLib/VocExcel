@@ -14,7 +14,7 @@ RDF_FILE_ENDINGS = {
     ".n3": "n3",
 }
 KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
-KNOWN_TEMPLATE_VERSIONS = ["0.2.1", "0.3.0", "0.4.0", "0.4.1"]
+KNOWN_TEMPLATE_VERSIONS = ["0.2.1", "0.3.0", "0.4.0", "0.4.1", "0.4.2"]
 
 
 class ConversionError(Exception):
