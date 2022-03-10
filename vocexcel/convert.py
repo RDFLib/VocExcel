@@ -19,6 +19,9 @@ try:
     from convert_040 import (
         extract_concepts_and_collections as extract_concepts_and_collections_040,
     )
+    from convert_041 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_041,
+    )
     from utils import (
         ConversionError,
         load_workbook,
@@ -43,6 +46,9 @@ except:
     )
     from vocexcel.convert_040 import (
         extract_concepts_and_collections as extract_concepts_and_collections_040,
+    )
+    from vocexcel.convert_041 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_041,
     )
     from vocexcel.utils import (
         ConversionError,
@@ -102,16 +108,20 @@ def excel_to_rdf(
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
-    elif template_version == "0.4.0":
+    elif template_version == "0.4.0" or template_version == "0.4.1":
         try:
             sheet = wb["Concept Scheme"]
             concept_sheet = wb["Concepts"]
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
-            concepts, collections = extract_concepts_and_collections_040(
-                concept_sheet, additional_concept_sheet, collection_sheet
-            )
-
+            if template_version == "0.4.0":
+                concepts, collections = extract_concepts_and_collections_040(
+                    concept_sheet, additional_concept_sheet, collection_sheet
+                )
+            elif template_version == "0.4.1":
+                concepts, collections = extract_concepts_and_collections_041(
+                    concept_sheet, additional_concept_sheet, collection_sheet
+                )
             cs = models.ConceptScheme(
                 uri=sheet["B2"].value,
                 title=sheet["B3"].value,
