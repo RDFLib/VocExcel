@@ -1,7 +1,7 @@
 # Tests and Example Excel and RDF files
 
 ## What to Expect
-This folder contains quite a few examples of simple and complex vocabularies. The most recent vocpub template model is 0.4.0 so for current use, it's recommnded to look at the simple valid and complex valid 040 examples. These contain excel sheets with complete vocabularies for reference. Additionally, for usage on multiple languages, refer to the 030 languages valid examples where it showcases how to have multiple inputs with other languages.
+This folder contains quite a few examples of simple and complex vocabularies. The most recent vocpub template model is 0.4.1 so for current use, it's recommnded to look at the simple valid and complex valid 040 examples. These contain excel sheets with complete vocabularies for reference. Additionally, for usage on multiple languages, refer to the 030 languages valid examples where it showcases how to have multiple inputs with other languages.
 
 The valid Excel and RDF files here should convert without errors. The invalid ones should give the following errors:
 

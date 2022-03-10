@@ -7,11 +7,11 @@ How to use
 
 Creating vocabularies
 ---------------------
-The file *VocExcel-template_040.xlsx* in this repository's *templates/* folder is the Excel template to be used to create vocabularies. The template contains all the basics needed to understand what to do including: a *Read Me* sheet which has notes on use, examples of various vocabularies, and lookup lists of values (e.g. organisations). Vocab authors only need this file to create vocabulary content by filling it out.
+The file *VocExcel-template_041.xlsx* in this repository's *templates/* folder is the Excel template to be used to create vocabularies. The template contains all the basics needed to understand what to do including: a *Read Me* sheet which has notes on use, examples of various vocabularies, and lookup lists of values (e.g. organisations). Vocab authors only need this file to create vocabulary content by filling it out.
 
-*Note: the example sheets for version 0.4.0 are in the tests folder. There includes both complex and simple valid vocabularies*
+*Note: the example sheets for version 0.4.1 are in the tests folder. There includes both complex and simple valid vocabularies*
 
-There are other versions of template in the *templates/* folder. You are free to use any of them however the latest is usually the greatest! Currently the validation tool supports versions 0.3.0 and 0.2.1.
+There are other versions of template in the *templates/* folder. You are free to use any of them however the latest is usually the greatest! Currently the validation tool supports versions 0.4.0, 0.3.0 and 0.2.1.
 
 Use one Excel workbook per vocabulary. The recommendation in completing a vocabulary is to go through the read me sheet in version 0.4.0, reference your work with the example sheets,
 

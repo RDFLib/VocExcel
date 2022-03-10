@@ -37,3 +37,11 @@ def test_simple():
     ) in g, "PrefLabel for vocab is not correct"
     # tidy up
     Path(Path(__file__).parent / "041_simple_valid.ttl").unlink()
+
+
+def test_exhaustive_template_is_isomorphic():
+    g1 = Graph().parse("041_exhaustive_example_perfect_output.ttl")
+    g2 = convert.excel_to_rdf(
+        Path(__file__).parent / "041_exhaustive_example.xlsx", output_type="graph"
+    )
+    assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
