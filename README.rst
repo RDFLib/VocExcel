@@ -78,7 +78,7 @@ The converter program has two methods that can be called from other Python progr
     from vocexcel import convert
     from pathlib import Path
 
-    convert.rdf_to_excel(Path(".") / "path" / "to" /"vocab-file.xlsx")
+    convert.rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
 
 Or similar code for the reverse conversion, RDF to Excel using `convert.excel_to_rdf()`.
 
