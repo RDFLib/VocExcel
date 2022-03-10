@@ -108,7 +108,11 @@ def excel_to_rdf(
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
-    elif template_version == "0.4.0" or template_version == "0.4.1":
+    elif (
+        template_version == "0.4.0"
+        or template_version == "0.4.1"
+        or template_version == "0.4.2"
+    ):
         try:
             sheet = wb["Concept Scheme"]
             concept_sheet = wb["Concepts"]
@@ -118,7 +122,7 @@ def excel_to_rdf(
                 concepts, collections = extract_concepts_and_collections_040(
                     concept_sheet, additional_concept_sheet, collection_sheet
                 )
-            elif template_version == "0.4.1":
+            elif template_version == "0.4.1" or "0.4.2":
                 concepts, collections = extract_concepts_and_collections_041(
                     concept_sheet, additional_concept_sheet, collection_sheet
                 )
