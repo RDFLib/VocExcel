@@ -1,19 +1,19 @@
 VocExcel
 ********
-Another Excel to RDF converter for SKOS vocabs, but one that include profile-based validation of results.
+Another Excel to RDF converter for SKOS vocabs, but one that uses fixed template to achieve particular SKOS profile outcomes!
 
 How to use
 ==========
 
 Creating vocabularies
 ---------------------
-The file *VocExcel-template_041.xlsx* in this repository's *templates/* folder is the Excel template to be used to create vocabularies. The template contains all the basics needed to understand what to do including: a *Read Me* sheet which has notes on use, examples of various vocabularies, and lookup lists of values (e.g. organisations). Vocab authors only need this file to create vocabulary content by filling it out.
+The template files in this repository's *templates/* folder are to be used to create vocabularies. The templates contains all the basics needed to understand what to do including notes, examples and so on. Vocab authors only need this template file to create vocabulary content.
 
-*Note: the example sheets for version 0.4.1 are in the tests folder. There includes both complex and simple valid vocabularies*
+*Note: example sheets for various template versions are in the tests folder. Just ensure you're looking at examples prefixed with the template version you are after. Both simple and complex vocabularies are exemplified.*
 
-There are other versions of template in the *templates/* folder. You are free to use any of them however the latest is usually the greatest! Currently the validation tool supports versions 0.4.0, 0.3.0 and 0.2.1.
+There are multiple versions of template in the *templates/* folder. You are free to use any of them however the latest is usually the greatest!
 
-Use one Excel workbook per vocabulary. The recommendation in completing a vocabulary is to go through the read me sheet in version 0.4.0, reference your work with the example sheets,
+Use one Excel workbook per vocabulary.
 
 Installation
 ------------
@@ -78,7 +78,7 @@ The converter program has two methods that can be called from other Python progr
     from vocexcel import convert
     from pathlib import Path
 
-    convert.rdf_to_excel(Path(".") / "path" / "to" /"vocab-file.xlsx")
+    convert.rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
 
 Or similar code for the reverse conversion, RDF to Excel using `convert.excel_to_rdf()`.
 
