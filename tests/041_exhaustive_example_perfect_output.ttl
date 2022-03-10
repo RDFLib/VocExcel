@@ -1,0 +1,52 @@
+@prefix cs: <http://example.org/exhaustive_concept_scheme_vocabulary_iri> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/example_collection_uri> a skos:Collection ;
+    dcterms:isPartOf cs: ;
+    dcterms:provenance "Example Collection Provenance"@en ;
+    skos:definition "Example Collection Definition"@en ;
+    skos:member <http://example.org/example_collection_member_1>,
+        <http://example.org/example_collection_member_2>,
+        <http://example.org/example_collection_member_3> ;
+    skos:prefLabel "Example Collection Preferred Label"@en .
+
+<http://example.org/exhaustive_children_example_1> skos:broader <http://example.org/exhaustive_concept_iri> .
+
+<http://example.org/exhaustive_children_example_2> skos:broader <http://example.org/exhaustive_concept_iri> .
+
+<http://example.org/exhaustive_children_example_3> skos:broader <http://example.org/exhaustive_concept_iri> .
+
+cs: a skos:ConceptScheme ;
+    dcterms:created "2022-03-07"^^xsd:date ;
+    dcterms:creator <https://linked.data.gov.au/org/cgi> ;
+    dcterms:hasPart <http://example.org/example_collection_uri> ;
+    dcterms:modified "2022-03-07"^^xsd:date ;
+    dcterms:provenance "Example Provenance"@en ;
+    dcterms:publisher <https://linked.data.gov.au/org/cgi> ;
+    rdfs:seeAlso "1.2.3.4" ;
+    owl:versionInfo "0.1" ;
+    skos:definition "Exhaustive Vocabulary Description"@en ;
+    skos:hasTopConcept <http://example.org/exhaustive_concept_iri> ;
+    skos:prefLabel "Exhaustive Vocabulary Title"@en ;
+    dcat:contactPoint "Example Custodian" .
+
+<http://example.org/exhaustive_concept_iri> a skos:Concept ;
+    rdfs:isDefinedBy <http://example.org/exhaustive_concept_source_vocabulary_iri> ;
+    skos:altLabel "example exhaustive concept alternate label"@en ;
+    skos:broadMatch <http://example.org/example_broad_match> ;
+    skos:closeMatch <http://example.org/example_close_match> ;
+    skos:definition "example exhaustive concept definition"@en ;
+    skos:exactMatch <http://example.org/example_exact_match> ;
+    skos:inScheme cs: ;
+    skos:narrowMatch <http://example.org/example_narrow_match> ;
+    skos:narrower <http://example.org/exhaustive_children_example_1>,
+        <http://example.org/exhaustive_children_example_2>,
+        <http://example.org/exhaustive_children_example_3> ;
+    skos:prefLabel "example exhaustive concept definition"@en ;
+    skos:relatedMatch <http://example.org/example_related_match> ;
+    skos:topConceptOf cs: .
