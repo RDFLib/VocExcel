@@ -1,9 +1,9 @@
 # Tests and Example Excel and RDF files
 
 ## What to Expect
-This folder contains quite a few examples of simple and complex vocabularies and different versions of template. 
+This folder contains quite a few examples of simple and complex vocabularies and different versions of template.
 
-The most recent vocpub template model is 0.4.1 so for current use, it's recommnded to look at the simple valid and complex valid 041 examples. These contain excel sheets with complete vocabularies for reference. 
+The most recent vocpub template model is 0.4.2 so for current use, it's recommnded to look at the simple valid and complex valid 042 examples. These contain excel sheets with complete vocabularies for reference.
 
 For multiple languages, refer to the 030 languages valid examples which shows how to have multiple inputs with other languages.
 
