@@ -118,14 +118,14 @@ def excel_to_rdf(
             concept_sheet = wb["Concepts"]
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
-            if template_version == "0.4.0":
+            if template_version == "0.4.0" or "0.4.1" or "0.4.2":
                 concepts, collections = extract_concepts_and_collections_040(
                     concept_sheet, additional_concept_sheet, collection_sheet
                 )
-            elif template_version == "0.4.1" or "0.4.2":
-                concepts, collections = extract_concepts_and_collections_041(
-                    concept_sheet, additional_concept_sheet, collection_sheet
-                )
+            # elif template_version == "0.4.1" or "0.4.2":
+            #     concepts, collections = extract_concepts_and_collections_041(
+            #         concept_sheet, additional_concept_sheet, collection_sheet
+            #     )
             cs = models.ConceptScheme(
                 uri=sheet["B2"].value,
                 title=sheet["B3"].value,
