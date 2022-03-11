@@ -39,6 +39,12 @@ def test_simple():
     Path(Path(__file__).parent / "042_simple_example.ttl").unlink()
 
 
+def test_output():
+    convert.excel_to_rdf(
+        Path(__file__).parent / "042_simple_example.xlsx", output_type="file"
+    )
+
+
 #
 #
 # def test_exhaustive_template_is_isomorphic():
