@@ -21,6 +21,9 @@ ORGANISATIONS = {
     "GSQ": URIRef("https://linked.data.gov.au/org/gsq"),
     "ICSM": URIRef("https://linked.data.gov.au/org/icsm"),
     "DES": URIRef("https://linked.data.gov.au/org/des"),
+    "BITRE": URIRef("https://linked.data.gov.au/org/bitre"),
+    "CASA": URIRef("https://linked.data.gov.au/org/casa"),
+    "ATSB": URIRef("https://linked.data.gov.au/org/atsb"),
 }
 
 ORGANISATIONS_INVERSE = {
@@ -30,6 +33,9 @@ ORGANISATIONS_INVERSE = {
     URIRef("https://linked.data.gov.au/org/gsq"): "GSQ",
     URIRef("https://linked.data.gov.au/org/icsm"): "ICSM",
     URIRef("https://linked.data.gov.au/org/des"): "DES",
+    URIRef("https://linked.data.gov.au/org/bitre"): "BITRE",
+    URIRef("https://linked.data.gov.au/org/casa"): "CASA",
+    URIRef("https://linked.data.gov.au/org/atsb"): "ATSB",
 }
 
 
