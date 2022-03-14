@@ -43,6 +43,7 @@ def test_output():
     convert.excel_to_rdf(
         Path(__file__).parent / "042_simple_example.xlsx", output_type="file"
     )
+    Path(Path(__file__).parent / "042_simple_example.ttl").unlink()
 
 
 #
