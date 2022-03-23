@@ -16,7 +16,7 @@ def test_countrycodes():
     assert len(g) == 4342
 
     # clean up
-    Path.unlink(Path(__file__).parent / "eg-languages-valid.ttl", missing_ok=True)
+    Path.unlink(Path(__file__).parent / "030_eg-languages-valid.ttl", missing_ok=True)
 
 
 if __name__ == "__main__":
