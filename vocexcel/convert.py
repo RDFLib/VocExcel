@@ -15,9 +15,11 @@ try:
     )
     from convert_030 import (
         extract_concepts_and_collections as extract_concepts_and_collections_030,
+        extract_concept_scheme as extract_concept_scheme_030,
     )
     from convert_040 import (
         extract_concepts_and_collections as extract_concepts_and_collections_040,
+        extract_concept_scheme as extract_concept_scheme_040,
     )
     from convert_041 import (
         extract_concepts_and_collections as extract_concepts_and_collections_041,
@@ -43,9 +45,11 @@ except:
     )
     from vocexcel.convert_030 import (
         extract_concepts_and_collections as extract_concepts_and_collections_030,
+        extract_concept_scheme as extract_concept_scheme_030,
     )
     from vocexcel.convert_040 import (
         extract_concepts_and_collections as extract_concepts_and_collections_040,
+        extract_concept_scheme as extract_concept_scheme_040,
     )
     from vocexcel.convert_041 import (
         extract_concepts_and_collections as extract_concepts_and_collections_041,
@@ -92,19 +96,7 @@ def excel_to_rdf(
             concepts, collections = extract_concepts_and_collections_030(sheet)
 
         try:
-            cs = models.ConceptScheme(
-                uri=sheet["B1"].value,
-                title=sheet["B2"].value,
-                description=sheet["B3"].value,
-                created=sheet["B4"].value,
-                modified=sheet["B5"].value,
-                creator=sheet["B6"].value,
-                publisher=sheet["B7"].value,
-                version=sheet["B8"].value,
-                provenance=sheet["B9"].value,
-                custodian=sheet["B10"].value,
-                pid=sheet["B11"].value,
-            )
+            cs = extract_concept_scheme_030(sheet)
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
@@ -126,23 +118,8 @@ def excel_to_rdf(
                 concepts, collections = extract_concepts_and_collections_040(
                     concept_sheet, additional_concept_sheet, collection_sheet
                 )
-            # elif template_version == "0.4.1" or "0.4.2":
-            #     concepts, collections = extract_concepts_and_collections_041(
-            #         concept_sheet, additional_concept_sheet, collection_sheet
-            #     )
-            cs = models.ConceptScheme(
-                uri=sheet["B2"].value,
-                title=sheet["B3"].value,
-                description=sheet["B4"].value,
-                created=sheet["B5"].value,
-                modified=sheet["B6"].value,
-                creator=sheet["B7"].value,
-                publisher=sheet["B8"].value,
-                version=sheet["B9"].value,
-                provenance=sheet["B10"].value,
-                custodian=sheet["B11"].value,
-                pid=sheet["B12"].value,
-            )
+
+            cs = extract_concept_scheme_040(sheet)
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 

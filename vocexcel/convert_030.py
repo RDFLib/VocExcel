@@ -15,7 +15,7 @@ except:
 
 
 def extract_concepts_and_collections(
-    s: Worksheet,
+        s: Worksheet,
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
@@ -78,3 +78,20 @@ def extract_concepts_and_collections(
                 pass
 
     return concepts, collections
+
+
+def extract_concept_scheme(sheet: Worksheet):
+    cs = models.ConceptScheme(
+        uri=sheet["B1"].value,
+        title=sheet["B2"].value,
+        description=sheet["B3"].value,
+        created=sheet["B4"].value,
+        modified=sheet["B5"].value,
+        creator=sheet["B6"].value,
+        publisher=sheet["B7"].value,
+        version=sheet["B8"].value,
+        provenance=sheet["B9"].value,
+        custodian=sheet["B10"].value,
+        pid=sheet["B11"].value,
+    )
+    return cs
