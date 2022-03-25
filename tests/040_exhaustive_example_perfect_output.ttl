@@ -47,6 +47,7 @@ cs: a skos:ConceptScheme ;
     skos:narrower <http://example.org/exhaustive_children_example_1>,
         <http://example.org/exhaustive_children_example_2>,
         <http://example.org/exhaustive_children_example_3> ;
-    skos:prefLabel "example exhaustive concept definition"@en ;
+    skos:prefLabel "example exhaustive preferred label"@en ;
     skos:relatedMatch <http://example.org/example_related_match> ;
     skos:topConceptOf cs: .
+

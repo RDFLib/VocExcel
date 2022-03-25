@@ -71,3 +71,5 @@ def test_minimal_template_is_isomorphic():
         Path(__file__).parent / "040_minimal_example.xlsx", output_type="graph"
     )
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
+
+

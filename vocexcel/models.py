@@ -187,10 +187,10 @@ class Concept(BaseModel):
         c = URIRef(self.uri)
         g.add((c, RDF.type, SKOS.Concept))
         if not self.pl_language_code:
-            g.add((c, SKOS.prefLabel, Literal(self.definition, lang="en")))
+            g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang="en")))
         else:
             for lang_code in self.pl_language_code:
-                g.add((c, SKOS.prefLabel, Literal(self.definition, lang=lang_code)))
+                g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang=lang_code)))
         if self.alt_labels is not None:
             for alt_label in self.alt_labels:
                 g.add((c, SKOS.altLabel, Literal(alt_label, lang="en")))

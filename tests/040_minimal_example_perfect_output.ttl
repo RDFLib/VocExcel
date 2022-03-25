@@ -6,7 +6,7 @@
 <http://example/org/example1> a skos:Concept ;
     skos:definition "example concept definition"@en ;
     skos:inScheme cs: ;
-    skos:prefLabel "example concept definition"@en ;
+    skos:prefLabel "example preferred concept label"@en ;
     skos:topConceptOf cs: .
 
 cs: a skos:ConceptScheme ;
@@ -18,3 +18,4 @@ cs: a skos:ConceptScheme ;
     skos:definition "Example Description"@en ;
     skos:hasTopConcept <http://example/org/example1> ;
     skos:prefLabel "Example Title"@en .
+
