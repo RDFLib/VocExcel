@@ -55,48 +55,50 @@ def create_prefix_dict(s: Worksheet):
 # prefix and namespace use without list output
 def using_prefix_and_namespace_non_list_output(cell_value, prefix, s: Worksheet, row):
     c = cell_value
-    if c.startswith('http://') or c.startswith('https://'):
-        pass
-    elif only_one_colon_in_str(c):
-        split_c_prefix = c.split(":")[0]
-        split_c_added_component = c.split(":")[1]
+    if c is not None:
+        if c.startswith('http://') or c.startswith('https://'):
+            pass
+        elif only_one_colon_in_str(c):
+            split_c_prefix = c.split(":")[0]
+            split_c_added_component = c.split(":")[1]
 
-        if split_c_prefix in prefix:
-            c = prefix[split_c_prefix] + split_c_added_component
+            if split_c_prefix in prefix:
+                c = prefix[split_c_prefix] + split_c_added_component
+            else:
+                print(
+                    f"the prefix used: '{split_c_prefix}' in sheet {s} and row {row} "
+                    f"isn't included in the prefix sheet")
+                raise Exception
         else:
             print(
-                f"the prefix used: '{split_c_prefix}' in sheet {s} and row {row} "
-                f"isn't included in the prefix sheet")
+                f"Something doesn't look right on row {row} and sheet {s}. "
+                f"Likely this isn't in http form or more colons are used than normal")
             raise Exception
-    else:
-        print(
-            f"Something doesn't look right on row {row} and sheet {s}. "
-            f"Likely this isn't in http form or more colons are used than normal")
-        raise Exception
     return c
 
 
 # specifically just for concept scheme
 def using_prefix_and_namespace_cs(cell_value, prefix):
     c = cell_value
-    if c.startswith('http://') or c.startswith('https://'):
-        pass
-    elif only_one_colon_in_str(c):
-        split_c_prefix = c.split(":")[0]
-        split_c_added_component = c.split(":")[1]
+    if c is not None:
+        if c.startswith('http://') or c.startswith('https://'):
+            pass
+        elif only_one_colon_in_str(c):
+            split_c_prefix = c.split(":")[0]
+            split_c_added_component = c.split(":")[1]
 
-        if split_c_prefix in prefix:
-            c = prefix[split_c_prefix] + split_c_added_component
+            if split_c_prefix in prefix:
+                c = prefix[split_c_prefix] + split_c_added_component
+            else:
+                print(
+                    f"the prefix used: '{split_c_prefix}' in the concept scheme page"
+                    f"isn't included in the prefix sheet")
+                raise Exception
         else:
             print(
-                f"the prefix used: '{split_c_prefix}' in the concept scheme page"
-                f"isn't included in the prefix sheet")
+                f"Something doesn't look right in the concept scheme page. "
+                f"Likely the cells using prefixes aren't in http form or more colons are used than normal")
             raise Exception
-    else:
-        print(
-            f"Something doesn't look right in the concept scheme page. "
-            f"Likely the cells using prefixes aren't in http form or more colons are used than normal")
-        raise Exception
     return c
 
 
@@ -104,29 +106,30 @@ def using_prefix_and_namespace_cs(cell_value, prefix):
 def using_prefix_and_namespace(cell_value, prefix, s: Worksheet, row):
     variables = []
     for i in cell_value:
-        try:
-            c = cell_value
-            if c.startswith('http://') or c.startswith('https://'):
-                pass
-            elif only_one_colon_in_str(c):
-                split_c_prefix = c.split(":")[0]
-                split_c_added_component = c.split(":")[1]
+        if cell_value is not None:
+            try:
+                c = i
+                if c.startswith('http://') or c.startswith('https://'):
+                    pass
+                elif only_one_colon_in_str(c):
+                    split_c_prefix = c.split(":")[0]
+                    split_c_added_component = c.split(":")[1]
 
-                if split_c_prefix in prefix:
-                    c = prefix[split_c_prefix] + split_c_added_component
+                    if split_c_prefix in prefix:
+                        c = prefix[split_c_prefix] + split_c_added_component
+                    else:
+                        print(
+                            f"the prefix used: '{split_c_prefix}' in sheet {s} and row {row} "
+                            f"isn't included in the prefix sheet")
+                        raise Exception
                 else:
                     print(
-                        f"the prefix used: '{split_c_prefix}' in sheet {s} and row {row} "
-                        f"isn't included in the prefix sheet")
+                        f"Something doesn't look right on row {row} and sheet {s}. "
+                        f"Likely this isn't in http form or more colons are used than normal")
                     raise Exception
-            else:
-                print(
-                    f"Something doesn't look right on row {row} and sheet {s}. "
-                    f"Likely this isn't in http form or more colons are used than normal")
-                raise Exception
-            variables.append(c)
-        except Exception as e:
-            print(e)
+                variables.append(c)
+            except Exception as e:
+                print(e)
     return variables
 
 
@@ -156,7 +159,7 @@ def extract_concepts_and_collections(
                         def_language_code=split_and_tidy(q[f"E{row}"].value),
                         alt_labels=split_and_tidy(q[f"F{row}"].value),
                         children=using_prefix_and_namespace(split_and_tidy(q[f"G{row}"].value), prefix, q, row),
-                        provenance=using_prefix_and_namespace_non_list_output(q[f"H{row}"].value, prefix, q, row),
+                        provenance=q[f"H{row}"].value,
                         # Note in the new template, home_vocab_uri is synonymous with source vocab uri
                         home_vocab_uri=using_prefix_and_namespace_non_list_output(q[f"I{row}"].value, prefix, q, row),
                         # additional concept features sheets
@@ -185,7 +188,7 @@ def extract_concepts_and_collections(
             else:
                 try:
                     c = models.Collection(
-                        uri=using_prefix_and_namespace_non_list_output(s[f"A{row}"].value, prefix, s, row),
+                        uri=using_prefix_and_namespace_cs(s[f"A{row}"].value, prefix),
                         pref_label=s[f"B{row}"].value,
                         definition=s[f"C{row}"].value,
                         members=using_prefix_and_namespace(split_and_tidy(s[f"D{row}"].value), prefix, s, row),
