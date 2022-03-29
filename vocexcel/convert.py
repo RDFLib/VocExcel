@@ -15,12 +15,15 @@ try:
     )
     from convert_030 import (
         extract_concepts_and_collections as extract_concepts_and_collections_030,
+        extract_concept_scheme as extract_concept_scheme_030,
     )
     from convert_040 import (
         extract_concepts_and_collections as extract_concepts_and_collections_040,
+        extract_concept_scheme as extract_concept_scheme_040,
     )
-    from convert_041 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_041,
+    from convert_043 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_043,
+        create_prefix_dict, extract_concept_scheme as extract_concept_scheme_043,
     )
     from utils import (
         ConversionError,
@@ -43,12 +46,15 @@ except:
     )
     from vocexcel.convert_030 import (
         extract_concepts_and_collections as extract_concepts_and_collections_030,
+        extract_concept_scheme as extract_concept_scheme_030,
     )
     from vocexcel.convert_040 import (
         extract_concepts_and_collections as extract_concepts_and_collections_040,
+        extract_concept_scheme as extract_concept_scheme_040,
     )
-    from vocexcel.convert_041 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_041,
+    from vocexcel.convert_043 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_043,
+        create_prefix_dict, extract_concept_scheme as extract_concept_scheme_043,
     )
     from vocexcel.utils import (
         ConversionError,
@@ -92,19 +98,7 @@ def excel_to_rdf(
             concepts, collections = extract_concepts_and_collections_030(sheet)
 
         try:
-            cs = models.ConceptScheme(
-                uri=sheet["B1"].value,
-                title=sheet["B2"].value,
-                description=sheet["B3"].value,
-                created=sheet["B4"].value,
-                modified=sheet["B5"].value,
-                creator=sheet["B6"].value,
-                publisher=sheet["B7"].value,
-                version=sheet["B8"].value,
-                provenance=sheet["B9"].value,
-                custodian=sheet["B10"].value,
-                pid=sheet["B11"].value,
-            )
+            cs = extract_concept_scheme_030(sheet)
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 
@@ -118,31 +112,27 @@ def excel_to_rdf(
             concept_sheet = wb["Concepts"]
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
-            if (
-                template_version == "0.4.0"
-                or template_version == "0.4.1"
-                or template_version == "0.4.2"
-            ):
-                concepts, collections = extract_concepts_and_collections_040(
-                    concept_sheet, additional_concept_sheet, collection_sheet
-                )
-            # elif template_version == "0.4.1" or "0.4.2":
-            #     concepts, collections = extract_concepts_and_collections_041(
-            #         concept_sheet, additional_concept_sheet, collection_sheet
-            #     )
-            cs = models.ConceptScheme(
-                uri=sheet["B2"].value,
-                title=sheet["B3"].value,
-                description=sheet["B4"].value,
-                created=sheet["B5"].value,
-                modified=sheet["B6"].value,
-                creator=sheet["B7"].value,
-                publisher=sheet["B8"].value,
-                version=sheet["B9"].value,
-                provenance=sheet["B10"].value,
-                custodian=sheet["B11"].value,
-                pid=sheet["B12"].value,
-            )
+
+            concepts, collections = extract_concepts_and_collections_040(
+                concept_sheet, additional_concept_sheet, collection_sheet)
+            cs = extract_concept_scheme_040(sheet)
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
+    elif template_version == "0.4.3":
+        try:
+            sheet = wb["Concept Scheme"]
+            concept_sheet = wb["Concepts"]
+            additional_concept_sheet = wb["Additional Concept Features"]
+            collection_sheet = wb["Collections"]
+            prefix_sheet = wb["Prefix Sheet"]
+
+            prefix = create_prefix_dict(prefix_sheet)
+
+            concepts, collections = extract_concepts_and_collections_043(concept_sheet,
+                                                                         additional_concept_sheet,
+                                                                         collection_sheet,
+                                                                         prefix)
+            cs = extract_concept_scheme_043(sheet, prefix)
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 

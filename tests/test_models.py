@@ -112,7 +112,7 @@ def test_concept():
         <https://example.com/thing/z> ;
     skos:notation "XX",
         "XXX" ;
-    skos:prefLabel "Fake def for Thing X"@en ."""
+    skos:prefLabel "Thing X"@en ."""
     )
     assert actual.isomorphic(expected)
 

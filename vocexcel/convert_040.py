@@ -16,7 +16,7 @@ except:
 
 # this is a new function to iterate over the collection sheet in template version 0.4.0
 def extract_concepts_and_collections(
-    q: Worksheet, r: Worksheet, s: Worksheet
+        q: Worksheet, r: Worksheet, s: Worksheet
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
@@ -25,9 +25,9 @@ def extract_concepts_and_collections(
         for cell in col:
             row = cell.row
             if (
-                cell.value is None
-                or cell.value == "Concepts"
-                or cell.value == "Concept IRI*"
+                    cell.value is None
+                    or cell.value == "Concepts"
+                    or cell.value == "Concept IRI*"
             ):
                 pass
             else:
@@ -52,7 +52,7 @@ def extract_concepts_and_collections(
                     concepts.append(c)
                 except ValidationError as e:
                     raise ConversionError(
-                        f"Concept processing error, row {row}, error: {e}"
+                        f"Concept processing error, likely at sheet {q}, column {col}, row {row}, and with error: {e}"
                     )
 
     # iterating over the collections page
@@ -60,9 +60,9 @@ def extract_concepts_and_collections(
         for cell in col:
             row = cell.row
             if (
-                cell.value is None
-                or cell.value == "Collections"
-                or cell.value == "Collection URI"
+                    cell.value is None
+                    or cell.value == "Collections"
+                    or cell.value == "Collection URI"
             ):
                 pass
             else:
@@ -77,6 +77,23 @@ def extract_concepts_and_collections(
                     collections.append(c)
                 except ValidationError as e:
                     raise ConversionError(
-                        f"Collection processing error, row {row}, error: {e}"
+                        f"Collection processing error, likely at sheet {s}, column {col}, row {row}, error: {e}"
                     )
     return concepts, collections
+
+
+def extract_concept_scheme(sheet: Worksheet):
+    cs = models.ConceptScheme(
+        uri=sheet["B2"].value,
+        title=sheet["B3"].value,
+        description=sheet["B4"].value,
+        created=sheet["B5"].value,
+        modified=sheet["B6"].value,
+        creator=sheet["B7"].value,
+        publisher=sheet["B8"].value,
+        version=sheet["B9"].value,
+        provenance=sheet["B10"].value,
+        custodian=sheet["B11"].value,
+        pid=sheet["B12"].value,
+    )
+    return cs

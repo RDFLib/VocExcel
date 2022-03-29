@@ -15,7 +15,7 @@ except:
 
 
 def extract_concepts_and_collections(
-    s: Worksheet,
+        s: Worksheet,
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
@@ -55,7 +55,7 @@ def extract_concepts_and_collections(
                         concepts.append(c)
                     except ValidationError as e:
                         raise ConversionError(
-                            f"Concept processing error, row {row}, error: {e}"
+                            f"Concept processing error likely at column {col}, row {row}, and has error: {e}"
                         )
             elif process_collection:
                 if cell.value is None:
@@ -72,9 +72,26 @@ def extract_concepts_and_collections(
                         collections.append(c)
                     except ValidationError as e:
                         raise ConversionError(
-                            f"Collection processing error, row {row}, error: {e}"
+                            f"Collection processing error, likely at column {col}, row {row}, error: {e}"
                         )
             elif cell.value is None:
                 pass
 
     return concepts, collections
+
+
+def extract_concept_scheme(sheet: Worksheet):
+    cs = models.ConceptScheme(
+        uri=sheet["B1"].value,
+        title=sheet["B2"].value,
+        description=sheet["B3"].value,
+        created=sheet["B4"].value,
+        modified=sheet["B5"].value,
+        creator=sheet["B6"].value,
+        publisher=sheet["B7"].value,
+        version=sheet["B8"].value,
+        provenance=sheet["B9"].value,
+        custodian=sheet["B10"].value,
+        pid=sheet["B11"].value,
+    )
+    return cs
