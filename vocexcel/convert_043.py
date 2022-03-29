@@ -2,7 +2,6 @@ from typing import Tuple, List
 
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ValidationError
-from pathlib import Path
 
 try:
     import models
@@ -172,7 +171,7 @@ def extract_concepts_and_collections(
                     concepts.append(c)
                 except ValidationError as e:
                     raise ConversionError(
-                        f"Concept processing error, row {row}, error: {e}"
+                        f"Concept processing error likely at sheet {q}, column {col}, row {row}, and has error: {e}"
                     )
 
     # iterating over the collections page
@@ -197,7 +196,7 @@ def extract_concepts_and_collections(
                     collections.append(c)
                 except ValidationError as e:
                     raise ConversionError(
-                        f"Collection processing error, row {row}, error: {e}"
+                        f"Collection processing error, likely at sheet {s}, column {col}, row {row}, and has error: {e}"
                     )
     return concepts, collections
 
