@@ -40,7 +40,9 @@ def test_simple():
 
 
 def test_exhaustive_template_is_isomorphic():
-    g1 = Graph().parse("043_exhaustive_example_perfect_output.ttl")
+    g1 = Graph().parse(
+        Path(__file__).parent / "040_exhaustive_example_perfect_output.ttl"
+    )
     g2 = convert.excel_to_rdf(
         Path(__file__).parent / "043_exhaustive_example.xlsx", output_type="graph"
     )
