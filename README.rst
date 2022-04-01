@@ -1,3 +1,6 @@
+.. image:: https://surroundaustralia.com/themes/custom/surround_australia/surround-logo-dark.svg
+
+
 VocExcel
 ********
 Another Excel to RDF converter for SKOS vocabs, but one that uses fixed template to achieve particular SKOS profile outcomes!
