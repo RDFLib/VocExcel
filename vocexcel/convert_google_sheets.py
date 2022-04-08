@@ -20,6 +20,7 @@ scope = [
     "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/drive",
 ]
+#TODO: I have deleted the creds file as I accidently made it public - I need to recreate one and figure out safe server side implementation
 creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
 client = gspread.authorize(creds)
 
