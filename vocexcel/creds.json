@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "vocexcel",
+  "private_key_id": "e61d0f828ab0c9022a0144216012d73f36b86aee",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDDtCuJ+wlNytGZ\nILH9fC2NJWq4LTm7gdFOcAGyfjwjdFLE4NIu9Qy3d4YewFpAknNAqCbvq5HIpp1+\nHypz10Crt2F4fZR+jbLNzjztXO/nEccX3XnnxUI/Hq8AKOX2/UGsYMMRkyWkInOi\nEmfvc15R2SLVj51pC9LDWSKngXR21H5gimIosDBGCII+pJfjauu6fXjigk06pzo4\nfz5jUoNPKJEFikx6lOMebWpbvr18e0ERT2LhyeCg9sx28oMgfkDwDjhjMpUa9H3F\nRYG8mf5VOyPxsoSYsL564PAOkHRbfj99GvPlGqD2Tdcpca+lHBi03VrjN3Qn+ro9\nATMIvr83AgMBAAECggEALt+rgfv3qYNHmoajOxSQEHuCySRD7K5WRJQ9Q9RKcS9+\nV5uFnCujZRoirKDjvQ2Wv0jHMqaEX2vQ0xGB6IcI/VgJ54Mkmv8zcWnRXATjjRPL\n/OJWPXYYvOeLgN1K31KfdTsj3cTBwkNiMNJ5xHd8gtwgJMimKi/jxlhGHZq7G260\nHcaMtBwwxTPvprL+1cMn9EKktX/KqHNKoVUPVu8BKBod39c6mOI2uL+HDbuOaPYd\nLUP5gDF6UViUgJAq2Zc0Qqn00yLz4AcdLM4ictlBNayrcotvLq6XxoyZEnEkl2Wx\nCKnaeVH+jJCO8i3nCpTFUgOhiixg1V7XACV88umyMQKBgQD4RWj4iO7Lu+USk2Ix\nLzPg41KEHPvuwwMweqsxGwLe+v06mPOECnzgrsZsUBC1XDDmouCV6rMRaavWadBr\ntcS6f54AyMwK3Z9PENWWC6VYkgTOmJkNEG/uFpjzRa/JugQDYcFdxv6J8NZcgt8W\nLQAOoHWo1aQDyjyk0dRu23cI6QKBgQDJy9N2/I304f+9D3d6T6eggADplNW1gPQ2\nBrOJkoLAm0mn+BfcQFQIUwKJg8B9tFmVXYjM/r0BLEDeUdCrxCEB2bVb1wIDFqX5\nIa9j/E6wDflWGEHmqKmbc20QShbPtVIbpXzcNdCuEJZsytzAkeWaH3rEkReCBDZW\nzRGkpTRzHwKBgQCxg5eBlQ8A1xD8Dit4NWLnmkImuj6cQg1mvV7oFoMgAd/L5Q7A\ny2rsj6rKSRkZQ5inX7ArIQv2GFNIVJI0YVwPaS4FK41Q+5NrygKdbShFQupy+YL9\nZ1JQrxGfZ6VAHGPAM0Y6Eg1vfacXsG9oALb4vlxCYrcKCrD/vBQjS4I5+QKBgFve\nW2s0FzyBFvhvbilU0i+TltbAV3rGNmfSLTJYbQZaq/G4VMSE1LzlbaZFQQD5dj81\n0e3hmxJJn06XWLSaGZzKDHK/M79MNEtzNnICj6A+/GBhsr7b0jtfFSvxTulI1xSX\nBn0KUvKrwo/M2ysgQLMl2bJbi6Q5XrOtsHaQb4xpAoGBAPfhbF3ZAAzQbJCgzILs\nsN8ncpchczAyknA2KH1Dtfup+li1ej+9npeZjstNxFaOjzbduZBePHAyJ8ZFHg1s\nJJVp3WLg7eiQpcYvV05wRNB+/aYQ65Vrkg390mNOiqKXWSNEbWaLnXi4xXkVKVPc\n+RthAsjYVja9VSJhOIwm1yIN\n-----END PRIVATE KEY-----\n",
+  "client_email": "vocexcel-editor@vocexcel.iam.gserviceaccount.com",
+  "client_id": "112354821519375992978",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/vocexcel-editor%40vocexcel.iam.gserviceaccount.com"
+}
