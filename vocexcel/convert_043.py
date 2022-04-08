@@ -46,7 +46,7 @@ def create_prefix_dict(s: Worksheet):
                     prefix_dict[s[f"A{row}"].value] = s[f"B{row}"].value
                 except Exception as e:
                     raise ConversionError(
-                        f"Collection processing error, sheet {s}, row {row}, error: {e}"
+                        f"Prefix processing error, sheet {s}, row {row}, error: {e}"
                     )
     return prefix_dict
 
