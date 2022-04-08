@@ -23,7 +23,8 @@ try:
     )
     from convert_043 import (
         extract_concepts_and_collections as extract_concepts_and_collections_043,
-        create_prefix_dict, extract_concept_scheme as extract_concept_scheme_043,
+        create_prefix_dict,
+        extract_concept_scheme as extract_concept_scheme_043,
     )
     from utils import (
         ConversionError,
@@ -54,7 +55,8 @@ except:
     )
     from vocexcel.convert_043 import (
         extract_concepts_and_collections as extract_concepts_and_collections_043,
-        create_prefix_dict, extract_concept_scheme as extract_concept_scheme_043,
+        create_prefix_dict,
+        extract_concept_scheme as extract_concept_scheme_043,
     )
     from vocexcel.utils import (
         ConversionError,
@@ -114,7 +116,8 @@ def excel_to_rdf(
             collection_sheet = wb["Collections"]
 
             concepts, collections = extract_concepts_and_collections_040(
-                concept_sheet, additional_concept_sheet, collection_sheet)
+                concept_sheet, additional_concept_sheet, collection_sheet
+            )
             cs = extract_concept_scheme_040(sheet)
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
@@ -128,10 +131,9 @@ def excel_to_rdf(
 
             prefix = create_prefix_dict(prefix_sheet)
 
-            concepts, collections = extract_concepts_and_collections_043(concept_sheet,
-                                                                         additional_concept_sheet,
-                                                                         collection_sheet,
-                                                                         prefix)
+            concepts, collections = extract_concepts_and_collections_043(
+                concept_sheet, additional_concept_sheet, collection_sheet, prefix
+            )
             cs = extract_concept_scheme_043(sheet, prefix)
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
