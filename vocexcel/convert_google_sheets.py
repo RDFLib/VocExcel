@@ -3,6 +3,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ValidationError
+from typing import Literal
+from pathlib import Path
 
 try:
     import models
@@ -20,25 +22,9 @@ scope = [
     "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/drive",
 ]
-#TODO: I have deleted the creds file as I accidently made it public - I need to recreate one and figure out safe server side implementation
+# key = AIzaSyDOykBJa9BF8s5za0rRuVhaXmA9E44PixU
 creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
 client = gspread.authorize(creds)
-
-concept_sheet = client.open("Google Sheets test VocExcel-template_043").worksheet(
-    "Concepts*"
-)
-concept_scheme_sheet = client.open(
-    "Google Sheets test VocExcel-template_043"
-).worksheet("Concept Scheme*")
-additional_concept_sheet = client.open(
-    "Google Sheets test VocExcel-template_043"
-).worksheet("Additional Concept " "Features")
-collections_sheet = client.open("Google Sheets test VocExcel-template_043").worksheet(
-    "Collections"
-)
-prefix_sheet = client.open("Google Sheets test VocExcel-template_043").worksheet(
-    "Prefix Sheet"
-)
 
 
 def split_and_tidy_gsheets(cell_value: str):
@@ -81,7 +67,7 @@ def only_one_colon_in_str(string):
 
 
 def using_prefix_non_list_output(
-    cell_value, prefix: dict, s: gspread.Worksheet, row: int
+        cell_value, prefix: dict, s: gspread.Worksheet, row: int
 ):
     c = cell_value
     if c is not None:
@@ -158,7 +144,7 @@ def extract_concept_scheme(sheet: Worksheet, prefix: dict):
 
 
 def extract_concept(
-    csheet: gspread.Worksheet, acsheet: gspread.Worksheet, prefix: dict
+        csheet: gspread.Worksheet, acsheet: gspread.Worksheet, prefix: dict
 ):
     all_concept_sheet_values = csheet.get_values()
     ac_val = acsheet.get_values()
@@ -233,8 +219,66 @@ def extract_collection(col_sheet: gspread.Worksheet, prefix: dict):
     return collections
 
 
+def excel_to_rdf_gsheets(
+        # URI of the google sheet,
+        file_to_convert_path: Path,
+        output_type: Literal["file", "string", "graph"] = "file",
+        output_file_path=None,
+        output_format: Literal["turtle", "xml", "json-ld"] = "turtle"):
+    # Do template version check and validation
+
+    # if template version 0.4.3
+    try:
+        concept_sheet = client.open("Google Sheets test VocExcel-template_043").worksheet(
+            "Concepts*"
+        )
+        concept_scheme_sheet = client.open(
+            "Google Sheets test VocExcel-template_043"
+        ).worksheet("Concept Scheme*")
+        additional_concept_sheet = client.open(
+            "Google Sheets test VocExcel-template_043"
+        ).worksheet("Additional Concept " "Features")
+        collections_sheet = client.open("Google Sheets test VocExcel-template_043").worksheet(
+            "Collections"
+        )
+        prefix_sheet = client.open("Google Sheets test VocExcel-template_043").worksheet(
+            "Prefix Sheet"
+        )
+
+        prefix = create_prefix_dict_gsheets(prefix_sheet)
+        collection = extract_collection(collections_sheet, prefix)
+        concept = extract_concept(concept_sheet, additional_concept_sheet, prefix)
+        concept_scheme = extract_concept_scheme(concept_scheme_sheet, prefix)
+    except Exception as e:
+        print(e)
+
+    # Build the total vocab
+    v = models.Vocabulary(concept_scheme=concept_scheme, concepts=concept, collections=collection)
+
+    # Write out the file
+    if output_type == "graph":
+        return v.to_graph()
+    elif output_type == "string":
+        return v.to_graph().serialize(format=output_format)
+    else:  # output_format == "file":
+        if output_file_path is not None:
+            dest = output_file_path
+        else:
+            if output_format == "xml":
+                suffix = ".rdf"
+            elif output_format == "json-ld":
+                suffix = ".json-ld"
+            else:
+                suffix = ".ttl"
+            dest = file_to_convert_path.with_suffix(suffix)
+        v.to_graph().serialize(destination=str(dest), format=output_format)
+        return dest
+
+
 if __name__ == "__main__":
-    prefix = create_prefix_dict_gsheets(prefix_sheet)
-    print(extract_collection(collections_sheet, prefix))
-    print(extract_concept(concept_sheet, additional_concept_sheet, prefix))
-    print(extract_concept_scheme(concept_scheme_sheet, prefix))
+    print(excel_to_rdf_gsheets(Path(__file__), output_type="string"))
+
+
+
+    INPUT FILE
+    google drive location (IRI) , file name googlepath
