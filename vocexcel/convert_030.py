@@ -55,7 +55,7 @@ def extract_concepts_and_collections(
                         concepts.append(c)
                     except ValidationError as e:
                         raise ConversionError(
-                            f"Concept processing error likely at column {col}, row {row}, and has error: {e}"
+                            f"Concept processing error likely at row {row}, and has error: {e}"
                         )
             elif process_collection:
                 if cell.value is None:
