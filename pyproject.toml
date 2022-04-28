@@ -1,7 +1,8 @@
 [tool.poetry]
 name = "vocexcel"
-version = "0.1.0"
-description = ""
+version = "0.4.0"
+description = """Another Excel to RDF converter for SKOS vocabs, \
+  but one that include profile-based validation of results."""
 authors = ["peterphilips <peter.philips@surroundaustralia.com>"]
 
 [tool.poetry.dependencies]
@@ -21,3 +22,5 @@ black = "^22.1.0"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.poetry.scripts]
+vocexcel = "vocexcel.convert:main"
