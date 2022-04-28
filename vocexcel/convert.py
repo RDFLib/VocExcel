@@ -38,8 +38,6 @@ try:
         EXCEL_FILE_ENDINGS,
     )
 except:
-    import sys
-
     sys.path.append("..")
     from vocexcel import models
     from vocexcel import profiles
@@ -439,7 +437,7 @@ def log_msg(result: Dict, log_file: str) -> str:
 
 def main(args=None):
     parser = argparse.ArgumentParser(
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
@@ -460,7 +458,7 @@ def main(args=None):
 
     parser.add_argument(
         "file_to_convert",
-        nargs='?',  # allow 0 or 1 file name as argument
+        nargs="?",  # allow 0 or 1 file name as argument
         type=Path,
         help="The Excel file to convert to a SKOS vocabulary in RDF or an RDF file to convert to an Excel file",
     )
@@ -534,7 +532,7 @@ def main(args=None):
 
     args = parser.parse_args()
 
-    if len(sys.argv)==1:
+    if len(sys.argv) == 1:
         # show help if no args are given
         parser.print_help()
         parser.exit()
@@ -555,13 +553,11 @@ def main(args=None):
                     "', '".join(RDF_FILE_ENDINGS.keys())
                 )
             )
-            sys.exit()
+            parser.exit()
 
         print(f"Processing file {args.file_to_convert}")
 
-        if args.file_to_convert.suffix.lower().endswith(
-                tuple(EXCEL_FILE_ENDINGS)
-                ):
+        if args.file_to_convert.suffix.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
             try:
                 o = excel_to_rdf(
                     args.file_to_convert,
