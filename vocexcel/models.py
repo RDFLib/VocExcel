@@ -26,17 +26,7 @@ ORGANISATIONS = {
     "ATSB": URIRef("https://linked.data.gov.au/org/atsb"),
 }
 
-ORGANISATIONS_INVERSE = {
-    URIRef("https://linked.data.gov.au/org/cgi"): "CGI",
-    URIRef("https://linked.data.gov.au/org/ga"): "GA",
-    URIRef("https://linked.data.gov.au/org/ggic"): "GGIC",
-    URIRef("https://linked.data.gov.au/org/gsq"): "GSQ",
-    URIRef("https://linked.data.gov.au/org/icsm"): "ICSM",
-    URIRef("https://linked.data.gov.au/org/des"): "DES",
-    URIRef("https://linked.data.gov.au/org/bitre"): "BITRE",
-    URIRef("https://linked.data.gov.au/org/casa"): "CASA",
-    URIRef("https://linked.data.gov.au/org/atsb"): "ATSB",
-}
+ORGANISATIONS_INVERSE = {uref: name for name, uref in ORGANISATIONS.items()}
 
 
 class ConceptScheme(BaseModel):
@@ -248,7 +238,7 @@ class Collection(BaseModel):
 
     @validator("members")
     def members_must_by_iris(cls, v):
-        if not v[0].startswith("http"):
+        if any([not i.startswith("http") for i in v]):
             raise ValueError("The members of a Collection must be a list of IRIs")
         return v
 
