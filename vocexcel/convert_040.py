@@ -52,7 +52,7 @@ def extract_concepts_and_collections(
                     concepts.append(c)
                 except ValidationError as e:
                     raise ConversionError(
-                        f"Concept processing error, likely at sheet {q}, column {col}, row {row}, and with error: {e}"
+                        f"Concept processing error, likely at sheet {q}, row {row}, and with error: {e}"
                     )
 
     # iterating over the collections page
