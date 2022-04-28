@@ -534,6 +534,11 @@ def main(args=None):
 
     args = parser.parse_args()
 
+    if len(sys.argv)==1:
+        # show help if no args are given
+        parser.print_help()
+        parser.exit()
+
     if args.listprofiles:
         s = "Profiles\nToken\tIRI\n-----\t-----\n"
         for k, v in profiles.PROFILES.items():
