@@ -1,5 +1,7 @@
 import argparse
 import logging
+import sys
+
 from pathlib import Path
 from typing import Dict, Literal
 
@@ -128,7 +130,6 @@ def excel_to_rdf(
             additional_concept_sheet = wb["Additional Concept Features"]
             collection_sheet = wb["Collections"]
             prefix_sheet = wb["Prefix Sheet"]
-
             prefix = create_prefix_dict(prefix_sheet)
 
             concepts, collections = extract_concepts_and_collections_043(
@@ -438,13 +439,13 @@ def log_msg(result: Dict, log_file: str) -> str:
 
 def main(args=None):
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
         "-v",
         "--version",
-        help="The version of this copy of VocExel. Must still set an file_to_convert value to call this (can be fake)",
+        help="The version of this copy of VocExcel.",
         action="store_true",
     )
 
@@ -459,6 +460,7 @@ def main(args=None):
 
     parser.add_argument(
         "file_to_convert",
+        nargs='?',  # allow 0 or 1 file name as argument
         type=Path,
         help="The Excel file to convert to a SKOS vocabulary in RDF or an RDF file to convert to an Excel file",
     )
@@ -538,11 +540,9 @@ def main(args=None):
             s += f"{k}\t{v.uri}\n"
 
         print(s.rstrip())
-        exit()
     elif args.version:
         # not sure what to do here, just removing the errors
         print(TEMPLATE_VERSION)
-        exit()
     elif args.file_to_convert:
         if not args.file_to_convert.name.endswith(tuple(KNOWN_FILE_ENDINGS)):
             print(
@@ -550,11 +550,13 @@ def main(args=None):
                     "', '".join(RDF_FILE_ENDINGS.keys())
                 )
             )
-            exit()
+            sys.exit()
 
         print(f"Processing file {args.file_to_convert}")
 
-        if args.file_to_convert.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
+        if args.file_to_convert.suffix.lower().endswith(
+                tuple(EXCEL_FILE_ENDINGS)
+                ):
             try:
                 o = excel_to_rdf(
                     args.file_to_convert,
@@ -568,8 +570,7 @@ def main(args=None):
                 else:
                     print(f"Output is file {o}")
             except Exception as e:
-                print(e)
-                exit()
+                logging.exception(e)
         else:  # RDF file ending
             try:
                 o = rdf_to_excel(
@@ -585,11 +586,8 @@ def main(args=None):
                 else:
                     print(f"Output is file {o}")
             except Exception as e:
-                print(e)
-                exit()
+                logging.exception(e)
 
 
 if __name__ == "__main__":
-    import sys
-
     main(sys.argv[1:])
