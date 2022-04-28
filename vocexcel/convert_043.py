@@ -18,7 +18,7 @@ except:
 def only_one_colon_in_str(string):
     counter = 0
     for character in string:
-        if character == ':':
+        if character == ":":
             counter += 1
     if counter != 1:
         return False
@@ -35,9 +35,9 @@ def create_prefix_dict(s: Worksheet):
         for cell in col:
             row = cell.row
             if (
-                    cell.value is None
-                    or cell.value == "Prefix"
-                    or cell.value == "Prefix Sheet"
+                cell.value is None
+                or cell.value == "Prefix"
+                or cell.value == "Prefix Sheet"
             ):
                 pass
             else:
@@ -46,7 +46,7 @@ def create_prefix_dict(s: Worksheet):
                     prefix_dict[s[f"A{row}"].value] = s[f"B{row}"].value
                 except Exception as e:
                     raise ConversionError(
-                        f"Collection processing error, sheet {s}, row {row}, error: {e}"
+                        f"Prefix processing error, sheet {s}, row {row}, error: {e}"
                     )
     return prefix_dict
 
@@ -55,7 +55,7 @@ def create_prefix_dict(s: Worksheet):
 def using_prefix_and_namespace_non_list_output(cell_value, prefix, s: Worksheet, row):
     c = cell_value
     if c is not None:
-        if c.startswith('http://') or c.startswith('https://'):
+        if c.startswith("http://") or c.startswith("https://"):
             pass
         elif only_one_colon_in_str(c):
             split_c_prefix = c.split(":")[0]
@@ -66,12 +66,14 @@ def using_prefix_and_namespace_non_list_output(cell_value, prefix, s: Worksheet,
             else:
                 print(
                     f"the prefix used: '{split_c_prefix}' in sheet {s} and row {row} "
-                    f"isn't included in the prefix sheet")
+                    f"isn't included in the prefix sheet"
+                )
                 raise Exception
         else:
             print(
                 f"Something doesn't look right on row {row} and sheet {s}. "
-                f"Likely this isn't in http form or more colons are used than normal")
+                f"Likely this isn't in http form or more colons are used than normal"
+            )
             raise Exception
     return c
 
@@ -80,7 +82,7 @@ def using_prefix_and_namespace_non_list_output(cell_value, prefix, s: Worksheet,
 def using_prefix_and_namespace_cs(cell_value, prefix):
     c = cell_value
     if c is not None:
-        if c.startswith('http://') or c.startswith('https://'):
+        if c.startswith("http://") or c.startswith("https://"):
             pass
         elif only_one_colon_in_str(c):
             split_c_prefix = c.split(":")[0]
@@ -91,12 +93,14 @@ def using_prefix_and_namespace_cs(cell_value, prefix):
             else:
                 print(
                     f"the prefix used: '{split_c_prefix}' in the concept scheme page"
-                    f"isn't included in the prefix sheet")
+                    f"isn't included in the prefix sheet"
+                )
                 raise Exception
         else:
             print(
                 f"Something doesn't look right in the concept scheme page. "
-                f"Likely the cells using prefixes aren't in http form or more colons are used than normal")
+                f"Likely the cells using prefixes aren't in http form or more colons are used than normal"
+            )
             raise Exception
     return c
 
@@ -108,7 +112,7 @@ def using_prefix_and_namespace(cell_value, prefix, s: Worksheet, row):
         if cell_value is not None:
             try:
                 c = i
-                if c.startswith('http://') or c.startswith('https://'):
+                if c.startswith("http://") or c.startswith("https://"):
                     pass
                 elif only_one_colon_in_str(c):
                     split_c_prefix = c.split(":")[0]
@@ -119,12 +123,14 @@ def using_prefix_and_namespace(cell_value, prefix, s: Worksheet, row):
                     else:
                         print(
                             f"the prefix used: '{split_c_prefix}' in sheet {s} and row {row} "
-                            f"isn't included in the prefix sheet")
+                            f"isn't included in the prefix sheet"
+                        )
                         raise Exception
                 else:
                     print(
                         f"Something doesn't look right on row {row} and sheet {s}. "
-                        f"Likely this isn't in http form or more colons are used than normal")
+                        f"Likely this isn't in http form or more colons are used than normal"
+                    )
                     raise Exception
                 variables.append(c)
             except Exception as e:
@@ -134,7 +140,7 @@ def using_prefix_and_namespace(cell_value, prefix, s: Worksheet, row):
 
 # template version 0.4.3 using prefixes
 def extract_concepts_and_collections(
-        q: Worksheet, r: Worksheet, s: Worksheet, prefix
+    q: Worksheet, r: Worksheet, s: Worksheet, prefix
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
@@ -143,30 +149,46 @@ def extract_concepts_and_collections(
         for cell in col:
             row = cell.row
             if (
-                    cell.value is None
-                    or cell.value == "Concepts"
-                    or cell.value == "Concept IRI*"
+                cell.value is None
+                or cell.value == "Concepts"
+                or cell.value == "Concept IRI*"
             ):
                 pass
             else:
                 try:
                     c = models.Concept(
-                        uri=using_prefix_and_namespace_non_list_output(q[f"A{row}"].value, prefix, q, row),
+                        uri=using_prefix_and_namespace_non_list_output(
+                            q[f"A{row}"].value, prefix, q, row
+                        ),
                         pref_label=q[f"B{row}"].value,
                         pl_language_code=split_and_tidy(q[f"C{row}"].value),
                         definition=q[f"D{row}"].value,
                         def_language_code=split_and_tidy(q[f"E{row}"].value),
                         alt_labels=split_and_tidy(q[f"F{row}"].value),
-                        children=using_prefix_and_namespace(split_and_tidy(q[f"G{row}"].value), prefix, q, row),
+                        children=using_prefix_and_namespace(
+                            split_and_tidy(q[f"G{row}"].value), prefix, q, row
+                        ),
                         provenance=q[f"H{row}"].value,
                         # Note in the new template, home_vocab_uri is synonymous with source vocab uri
-                        home_vocab_uri=using_prefix_and_namespace_non_list_output(q[f"I{row}"].value, prefix, q, row),
+                        home_vocab_uri=using_prefix_and_namespace_non_list_output(
+                            q[f"I{row}"].value, prefix, q, row
+                        ),
                         # additional concept features sheets
-                        related_match=using_prefix_and_namespace(split_and_tidy(r[f"B{row}"].value), prefix, r, row),
-                        close_match=using_prefix_and_namespace(split_and_tidy(r[f"C{row}"].value), prefix, r, row),
-                        exact_match=using_prefix_and_namespace(split_and_tidy(r[f"D{row}"].value), prefix, r, row),
-                        narrow_match=using_prefix_and_namespace(split_and_tidy(r[f"E{row}"].value), prefix, r, row),
-                        broad_match=using_prefix_and_namespace(split_and_tidy(r[f"F{row}"].value), prefix, r, row),
+                        related_match=using_prefix_and_namespace(
+                            split_and_tidy(r[f"B{row}"].value), prefix, r, row
+                        ),
+                        close_match=using_prefix_and_namespace(
+                            split_and_tidy(r[f"C{row}"].value), prefix, r, row
+                        ),
+                        exact_match=using_prefix_and_namespace(
+                            split_and_tidy(r[f"D{row}"].value), prefix, r, row
+                        ),
+                        narrow_match=using_prefix_and_namespace(
+                            split_and_tidy(r[f"E{row}"].value), prefix, r, row
+                        ),
+                        broad_match=using_prefix_and_namespace(
+                            split_and_tidy(r[f"F{row}"].value), prefix, r, row
+                        ),
                     )
                     concepts.append(c)
                 except ValidationError as e:
@@ -179,9 +201,9 @@ def extract_concepts_and_collections(
         for cell in col:
             row = cell.row
             if (
-                    cell.value is None
-                    or cell.value == "Collections"
-                    or cell.value == "Collection URI"
+                cell.value is None
+                or cell.value == "Collections"
+                or cell.value == "Collection URI"
             ):
                 pass
             else:
@@ -190,7 +212,9 @@ def extract_concepts_and_collections(
                         uri=using_prefix_and_namespace_cs(s[f"A{row}"].value, prefix),
                         pref_label=s[f"B{row}"].value,
                         definition=s[f"C{row}"].value,
-                        members=using_prefix_and_namespace(split_and_tidy(s[f"D{row}"].value), prefix, s, row),
+                        members=using_prefix_and_namespace(
+                            split_and_tidy(s[f"D{row}"].value), prefix, s, row
+                        ),
                         provenance=s[f"E{row}"].value,
                     )
                     collections.append(c)

@@ -16,7 +16,7 @@ except:
 
 # this is a new function to iterate over the collection sheet in template version 0.4.0
 def extract_concepts_and_collections(
-        q: Worksheet, r: Worksheet, s: Worksheet
+    q: Worksheet, r: Worksheet, s: Worksheet
 ) -> Tuple[List[models.Concept], List[models.Collection]]:
     concepts = []
     collections = []
@@ -25,9 +25,9 @@ def extract_concepts_and_collections(
         for cell in col:
             row = cell.row
             if (
-                    cell.value is None
-                    or cell.value == "Concepts"
-                    or cell.value == "Concept IRI*"
+                cell.value is None
+                or cell.value == "Concepts"
+                or cell.value == "Concept IRI*"
             ):
                 pass
             else:
@@ -60,9 +60,9 @@ def extract_concepts_and_collections(
         for cell in col:
             row = cell.row
             if (
-                    cell.value is None
-                    or cell.value == "Collections"
-                    or cell.value == "Collection URI"
+                cell.value is None
+                or cell.value == "Collections"
+                or cell.value == "Collection URI"
             ):
                 pass
             else:
