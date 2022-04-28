@@ -272,10 +272,6 @@ def excel_to_rdf_gsheets(
         v.to_graph().serialize(destination=str(dest), format=output_format)
         return dest
 
+
 if __name__ == '__main__':
     pass
-
-
-
-
-
