@@ -6,7 +6,7 @@ description = """Another Excel to RDF converter for SKOS vocabs, \
 authors = ["peterphilips <peter.philips@surroundaustralia.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 openpyxl = "^3.0.9"
 rdflib = "^6.1.1"
 pydantic = "^1.9.0"

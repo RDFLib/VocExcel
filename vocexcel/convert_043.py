@@ -1,3 +1,5 @@
+import logging
+
 from typing import Tuple, List
 
 from openpyxl.worksheet.worksheet import Worksheet
@@ -134,7 +136,7 @@ def using_prefix_and_namespace(cell_value, prefix, s: Worksheet, row):
                     raise Exception
                 variables.append(c)
             except Exception as e:
-                print(e)
+                logging.exception(e)
     return variables
 
 
