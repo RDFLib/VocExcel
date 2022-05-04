@@ -185,9 +185,9 @@ def rdf_to_excel(
     allow_warnings = True if error_level > 1 else False
 
     # validate the RDF file
-    r = pyshacl.validate(
+    conforms, results_graph, results_text = pyshacl.validate(
         str(file_to_convert_path),
-        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
+        # shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
         allow_warnings=allow_warnings,
     )
 
@@ -209,7 +209,6 @@ def rdf_to_excel(
     warning_list = []
     violation_list = []
 
-    results_graph = r[1]
     from rdflib.namespace import RDF, SH
 
     for report in results_graph.subjects(RDF.type, SH.ValidationReport):
@@ -262,10 +261,7 @@ def rdf_to_excel(
         str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix]
     )
 
-    wb = load_workbook(file_path=(Path(__file__).parent / "blank_030.xlsx"))
-
-    # openpyxl's default active sheet seems to be the last visited one in Excel
-    wb.active = wb["vocabulary"]
+    wb = load_workbook(file_path=(Path(__file__).parent / "blank_043.xlsx"))
 
     holder = {"hasTopConcept": [], "provenance": None}
     for s in g.subjects(RDF.type, SKOS.ConceptScheme):
@@ -326,10 +322,14 @@ def rdf_to_excel(
     for s, o in g.subject_objects(SKOS.broader):
         g.add((o, SKOS.narrower, s))
 
-    row_no = 16
+    row_no, row_no_concepts = 3, 3
     for s in g.subjects(RDF.type, SKOS.Concept):
         holder = {
             "uri": str(s),
+            "pref_label": [],
+            "pl_language_code": [],
+            "definition": [],
+            "def_language_code": [],
             "children": [],
             "other_ids": [],
             "home_vocab_uri": None,
@@ -337,9 +337,11 @@ def rdf_to_excel(
         }
         for p, o in g.predicate_objects(s):
             if p == SKOS.prefLabel:
-                holder["pref_label"] = o.toPython()
+                holder["pref_label"].append(o.toPython())  # why not str(o)?
+                holder["pl_language_code"].append(o.language)
             elif p == SKOS.definition:
-                holder["definition"] = str(o)
+                holder["definition"].append(str(o))
+                holder["def_language_code"].append(o.language)
             elif p == SKOS.narrower:
                 holder["children"].append(str(o))
             elif p == SKOS.notation:
@@ -353,20 +355,21 @@ def rdf_to_excel(
             elif p == PROV.wasDerivedFrom:
                 holder["provenance"] = str(o)
 
-        models.Concept(
+        print(holder["uri"], row_no, row_no_concepts)
+        row_no_concepts = models.Concept(
             uri=holder["uri"],
             pref_label=holder["pref_label"],
+            pl_language_code=holder["pl_language_code"],
             definition=holder["definition"],
+            def_language_code=holder["def_language_code"],
             children=holder["children"],
             other_ids=holder["other_ids"],
             home_vocab_uri=holder["home_vocab_uri"],
-            provenance=holder["provenance"]
-            if holder.get("provenance") is not None
-            else None,
-        ).to_excel(wb, row_no)
+            provenance=holder["provenance"],
+        ).to_excel(wb, row_no, row_no_concepts)
         row_no += 1
 
-    row_no += 2
+    row_no = 3
 
     for s in g.subjects(RDF.type, SKOS.Collection):
         holder = {"uri": str(s), "members": []}
@@ -443,7 +446,7 @@ def main(args=None):
     parser.add_argument(
         "-v",
         "--version",
-        help="The version of this copy of VocExcel.",
+        help="The version of this copy of VocExel. Must still set an file_to_convert value to call this (can be fake)",
         action="store_true",
     )
 
