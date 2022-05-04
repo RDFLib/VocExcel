@@ -355,7 +355,6 @@ def rdf_to_excel(
             elif p == PROV.wasDerivedFrom:
                 holder["provenance"] = str(o)
 
-        print(holder["uri"], row_no, row_no_concepts)
         row_no_concepts = models.Concept(
             uri=holder["uri"],
             pref_label=holder["pref_label"],
