@@ -445,7 +445,7 @@ def main(args=None):
     parser.add_argument(
         "-v",
         "--version",
-        help="The version of this copy of VocExel. Must still set an file_to_convert value to call this (can be fake)",
+        help="The version of this copy of VocExcel.",
         action="store_true",
     )
 
