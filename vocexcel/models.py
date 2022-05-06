@@ -255,6 +255,7 @@ class Concept(BaseModel):
             ws[f"C{row_no_concepts}"] = lang
             ws[f"D{row_no_concepts}"] = definitions.get(lang, "")
             ws[f"E{row_no_concepts}"] = lang
+            ws[f"H{row_no_concepts}"] = self.provenance
             if first_row_exported:
                 row_no_concepts += 1
                 continue
@@ -262,7 +263,6 @@ class Concept(BaseModel):
                 first_row_exported = True
             ws[f"F{row_no_concepts}"] = ",\n".join(self.alt_labels)
             ws[f"G{row_no_concepts}"] = ",\n".join(self.children)
-            ws[f"H{row_no_concepts}"] = self.provenance
             ws[f"I{row_no_concepts}"] = self.home_vocab_uri
 
         ws = wb["Additional Concept Features"]
