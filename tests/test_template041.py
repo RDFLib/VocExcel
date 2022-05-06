@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 from rdflib import Graph, URIRef, Literal, compare
-from rdflib.namespace import SKOS
+from rdflib.namespace import SKOS, DCTERMS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel import convert
@@ -23,11 +23,10 @@ def test_empty_template():
 
 
 def test_simple():
-    convert.excel_to_rdf(
-        Path(__file__).parent / "041_simple_valid.xlsx", output_type="file"
+    g = convert.excel_to_rdf(
+        Path(__file__).parent / "041_simple_valid.xlsx", output_type="graph"
     )
-    g = Graph().parse(Path(__file__).parent / "041_simple_valid.ttl")
-    assert len(g) == 131
+    assert len(g) == 135
     assert (
         URIRef(
             "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
@@ -35,8 +34,13 @@ def test_simple():
         SKOS.prefLabel,
         Literal("Particle Type", lang="en"),
     ) in g, "PrefLabel for vocab is not correct"
+    assert (
+        URIRef("http://resource.geosciml.org/classifier/cgi/particletype/bioclast"),
+        DCTERMS.provenance,
+        Literal("NADM SLTTs 2004", lang="en")
+    ) in g, "Provenance for vocab is not correct"
     # tidy up
-    Path(Path(__file__).parent / "041_simple_valid.ttl").unlink()
+    # Path(Path(__file__).parent / "041_simple_valid.ttl").unlink()
 
 
 def test_exhaustive_template_is_isomorphic():

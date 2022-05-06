@@ -36,6 +36,7 @@ cs: a skos:ConceptScheme ;
     dcat:contactPoint "Example Custodian" .
 
 <http://example.org/exhaustive_concept_iri> a skos:Concept ;
+    dcterms:provenance "Example Exhaustive Provenance"@en ;
     rdfs:isDefinedBy <http://example.org/exhaustive_concept_source_vocabulary_iri> ;
     skos:altLabel "example exhaustive concept alternate label"@en ;
     skos:broadMatch <http://example.org/example_broad_match> ;

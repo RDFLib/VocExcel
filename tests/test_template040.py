@@ -15,7 +15,7 @@ def test_simple():
         Path(__file__).parent / "040_simple_valid.xlsx", output_type="file"
     )
     g = Graph().parse(Path(__file__).parent / "040_simple_valid.ttl")
-    assert len(g) == 131
+    assert len(g) == 135
     assert (
         URIRef(
             "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
@@ -32,7 +32,7 @@ def test_complex():
         Path(__file__).parent / "040_complex_valid.xlsx", output_type="file"
     )
     g = Graph().parse(Path(__file__).parent / "040_complex_valid.ttl")
-    assert len(g) == 131
+    assert len(g) == 135
     assert (
         URIRef(
             "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
