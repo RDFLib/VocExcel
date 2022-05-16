@@ -322,7 +322,7 @@ def rdf_to_excel(
     for s, o in g.subject_objects(SKOS.broader):
         g.add((o, SKOS.narrower, s))
 
-    row_no, row_no_concepts = 3, 3
+    row_no_features, row_no_concepts = 3, 3
     for s in g.subjects(RDF.type, SKOS.Concept):
         holder = {
             "uri": str(s),
@@ -365,8 +365,8 @@ def rdf_to_excel(
             other_ids=holder["other_ids"],
             home_vocab_uri=holder["home_vocab_uri"],
             provenance=holder["provenance"],
-        ).to_excel(wb, row_no, row_no_concepts)
-        row_no += 1
+        ).to_excel(wb, row_no_features, row_no_concepts)
+        row_no_features += 1
 
     row_no = 3
 
