@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Union
 from itertools import chain
 
 from openpyxl import Workbook
@@ -122,10 +122,10 @@ class ConceptScheme(BaseModel):
 
 class Concept(BaseModel):
     uri: str
-    pref_label: List[str] = []
+    pref_label: Union[str, List[str]]
     alt_labels: List[str] = []
     pl_language_code: List[str] = []
-    definition: List[str]
+    definition: Union[str, List[str]]
     def_language_code: List[str] = []
     children: List[str] = []
     other_ids: List[str] = []
@@ -258,8 +258,8 @@ class Concept(BaseModel):
             ws[f"D{row_no_concepts}"] = definitions.get(lang, "")
             ws[f"E{row_no_concepts}"] = lang
             ws[f"H{row_no_concepts}"] = self.provenance
+            row_no_concepts += 1
             if first_row_exported:
-                row_no_concepts += 1
                 continue
             else:
                 first_row_exported = True
