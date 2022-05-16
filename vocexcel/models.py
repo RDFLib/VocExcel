@@ -218,7 +218,7 @@ class Concept(BaseModel):
 
         return g
 
-    def to_excel(self, wb: Workbook, row_no: int, row_no_concepts: int):
+    def to_excel(self, wb: Workbook, row_no_features: int, row_no_concepts: int):
         """ "
         Export Concept to Excel using on row per language
 
@@ -227,8 +227,7 @@ class Concept(BaseModel):
         """
         # Note: "self.other_ids" is no longer supported in template 0.4.3
 
-        wb.active = wb["Concepts"]
-        ws = wb.active
+        ws = wb["Concepts"]
 
         # determine the languages with full and patial translation
         pref_labels = {
@@ -267,15 +266,14 @@ class Concept(BaseModel):
             ws[f"G{row_no_concepts}"] = ",\n".join(self.children)
             ws[f"I{row_no_concepts}"] = self.home_vocab_uri
 
-        wb.active = wb["Additional Concept Features"]
-        ws = wb.active
+        ws = wb["Additional Concept Features"]
 
-        ws[f"A{row_no}"] = self.uri
-        ws[f"B{row_no}"] = ",\n".join(self.related_match)
-        ws[f"C{row_no}"] = ",\n".join(self.close_match)
-        ws[f"D{row_no}"] = ",\n".join(self.exact_match)
-        ws[f"E{row_no}"] = ",\n".join(self.narrow_match)
-        ws[f"F{row_no}"] = ",\n".join(self.broad_match)
+        ws[f"A{row_no_features}"] = self.uri
+        ws[f"B{row_no_features}"] = ",\n".join(self.related_match)
+        ws[f"C{row_no_features}"] = ",\n".join(self.close_match)
+        ws[f"D{row_no_features}"] = ",\n".join(self.exact_match)
+        ws[f"E{row_no_features}"] = ",\n".join(self.narrow_match)
+        ws[f"F{row_no_features}"] = ",\n".join(self.broad_match)
 
         return row_no_concepts
 
