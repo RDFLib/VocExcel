@@ -413,7 +413,7 @@ def log_msg(result: Dict, log_file: str) -> str:
 \tSeverity: sh:{result['resultSeverity'].split(str(SH))[1]}
 \tSource Shape: <{result['sourceShape']}>
 \tFocus Node: <{result['focusNode']}>
-\tValue Node: <{result['value']}>
+\tValue Node: <{result.get('value', '')}>
 \tMessage: {result['resultMessage']}
 """
     if result["resultSeverity"] == str(SH.Info):
