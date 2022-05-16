@@ -227,7 +227,8 @@ class Concept(BaseModel):
         """
         # Note: "self.other_ids" is no longer supported in template 0.4.3
 
-        ws = wb["Concepts"]
+        wb.active = wb["Concepts"]
+        ws = wb.active
 
         # determine the languages with full and patial translation
         pref_labels = {
@@ -248,6 +249,7 @@ class Concept(BaseModel):
             fully_translated.remove("en")
             fully_translated.insert(0, "en")
 
+#        import ipdb; ipdb.set_trace()
         first_row_exported = False
         for lang in chain(fully_translated, partially_translated):
             ws[f"A{row_no_concepts}"] = self.uri
@@ -265,7 +267,8 @@ class Concept(BaseModel):
             ws[f"G{row_no_concepts}"] = ",\n".join(self.children)
             ws[f"I{row_no_concepts}"] = self.home_vocab_uri
 
-        ws = wb["Additional Concept Features"]
+        wb.active = wb["Additional Concept Features"]
+        ws = wb.active
 
         ws[f"A{row_no}"] = self.uri
         ws[f"B{row_no}"] = ",\n".join(self.related_match)
