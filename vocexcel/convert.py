@@ -436,7 +436,14 @@ def log_msg(result: Dict, log_file: str) -> str:
 
 
 def main(args=None):
+
+    if args is None:  # vocexcel run via entrypoint
+        args = sys.argv[1:]
+
+    has_args = True if args else False
+
     parser = argparse.ArgumentParser(
+        prog="vocexcel",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
@@ -530,9 +537,9 @@ def main(args=None):
         "-l", "--logfile", help="The file to write logging output to", required=False
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
-    if len(sys.argv) == 1:
+    if not has_args:
         # show help if no args are given
         parser.print_help()
         parser.exit()
