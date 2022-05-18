@@ -187,7 +187,7 @@ def rdf_to_excel(
     # validate the RDF file
     conforms, results_graph, results_text = pyshacl.validate(
         str(file_to_convert_path),
-        # shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
+        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
         allow_warnings=allow_warnings,
     )
 
@@ -255,7 +255,7 @@ def rdf_to_excel(
 
     # the RDF is valid so extract data and create Excel
     from rdflib import Graph
-    from rdflib.namespace import DCTERMS, PROV, RDF, RDFS, SKOS, OWL
+    from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SKOS, OWL
 
     g = Graph().parse(
         str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix]
@@ -297,6 +297,10 @@ def rdf_to_excel(
                 holder["provenance"] = str(o)
             elif p == SKOS.hasTopConcept:
                 holder["hasTopConcept"].append(str(o))
+            elif p == DCAT.contactPoint:
+                holder["custodian"] = str(o)
+            elif p == RDFS.seeAlso:
+                holder["pid"] = str(o)
 
     # from models import ConceptScheme, Concept, Collection
     cs = models.ConceptScheme(
@@ -307,14 +311,10 @@ def rdf_to_excel(
         modified=holder["modified"],
         creator=holder["creator"],
         publisher=holder["publisher"],
-        version=holder["versionInfo"]
-        if holder.get("versionInfo") is not None
-        else None,
-        provenance=holder["provenance"]
-        if holder.get("provenance") is not None
-        else None,
-        custodian=None,
-        pid=None,
+        version=holder.get("versionInfo", None),
+        provenance=holder.get("provenance", None),
+        custodian=holder.get("custodian", None),
+        pid=holder.get("pid", None),
     )
     cs.to_excel(wb)
 
@@ -331,21 +331,21 @@ def rdf_to_excel(
             "definition": [],
             "def_language_code": [],
             "children": [],
-            "other_ids": [],
+            "alt_labels": [],
             "home_vocab_uri": None,
             "provenance": None,
         }
         for p, o in g.predicate_objects(s):
             if p == SKOS.prefLabel:
-                holder["pref_label"].append(o.toPython())  # why not str(o)?
+                holder["pref_label"].append(o.toPython()) 
                 holder["pl_language_code"].append(o.language)
             elif p == SKOS.definition:
                 holder["definition"].append(str(o))
                 holder["def_language_code"].append(o.language)
             elif p == SKOS.narrower:
                 holder["children"].append(str(o))
-            elif p == SKOS.notation:
-                holder["other_ids"].append(str(o))
+            elif p == SKOS.altLabel:
+                holder["alt_labels"].append(str(o))
             elif p == RDFS.isDefinedBy:
                 holder["home_vocab_uri"] = str(o)
             elif p == DCTERMS.source:
@@ -362,7 +362,7 @@ def rdf_to_excel(
             definition=holder["definition"],
             def_language_code=holder["def_language_code"],
             children=holder["children"],
-            other_ids=holder["other_ids"],
+            alt_labels=holder["alt_labels"],
             home_vocab_uri=holder["home_vocab_uri"],
             provenance=holder["provenance"],
         ).to_excel(wb, row_no_features, row_no_concepts)
