@@ -1,5 +1,6 @@
 import datetime
-from typing import List
+from typing import List, Union
+from itertools import chain
 
 from openpyxl import Workbook
 from pydantic import BaseModel, validator
@@ -105,26 +106,26 @@ class ConceptScheme(BaseModel):
         return g
 
     def to_excel(self, wb: Workbook):
-        ws = wb.active
-        ws["B1"] = self.uri
-        ws["B2"] = self.title
-        ws["B3"] = self.description
-        ws["B4"] = self.created.isoformat()
-        ws["B5"] = self.modified.isoformat()
-        ws["B6"] = self.creator
-        ws["B7"] = self.publisher
-        ws["B8"] = self.version
-        ws["B9"] = self.provenance
-        # ws["B10"] = ""
-        # ws["B11"] = ""
+        ws = wb["Concept Scheme"]
+        ws["B2"] = self.uri
+        ws["B3"] = self.title
+        ws["B4"] = self.description
+        ws["B5"] = self.created.isoformat()
+        ws["B6"] = self.modified.isoformat()
+        ws["B7"] = self.creator
+        ws["B8"] = self.publisher
+        ws["B9"] = self.version
+        ws["B10"] = self.provenance
+        ws["B11"] = self.custodian
+        ws["B12"] = self.pid
 
 
 class Concept(BaseModel):
     uri: str
-    pref_label: str
+    pref_label: Union[str, List[str]]
     alt_labels: List[str] = []
     pl_language_code: List[str] = []
-    definition: str
+    definition: Union[str, List[str]]
     def_language_code: List[str] = []
     children: List[str] = []
     other_ids: List[str] = []
@@ -217,16 +218,65 @@ class Concept(BaseModel):
 
         return g
 
-    def to_excel(self, wb: Workbook, row_no: int):
-        ws = wb.active
-        ws[f"A{row_no}"] = self.uri
-        ws[f"B{row_no}"] = self.pref_label
-        ws[f"C{row_no}"] = self.alt_labels
-        ws[f"D{row_no}"] = self.definition
-        ws[f"E{row_no}"] = ",\n".join(self.children)
-        ws[f"F{row_no}"] = ",\n".join(self.other_ids)
-        ws[f"G{row_no}"] = self.home_vocab_uri
-        ws[f"H{row_no}"] = self.provenance
+    def to_excel(self, wb: Workbook, row_no_features: int, row_no_concepts: int):
+        """ "
+        Export Concept to Excel using on row per language
+
+        Non-labels like Children, Provenance are reported only for the first
+        language. If "en" is among the used languages, it is reported first.
+        """
+        # Note: "self.other_ids" is no longer supported in template 0.4.3
+
+        ws = wb["Concepts"]
+
+        # determine the languages with full and patial translation
+        pref_labels = {
+            lang: pl for pl, lang in zip(self.pref_label, self.pl_language_code)
+        }
+        definitions = {
+            lang: d for d, lang in zip(self.definition, self.def_language_code)
+        }
+        fully_translated = [l for l in pref_labels.keys() if l in definitions.keys()]
+        partially_translated = [
+            l
+            for l in chain(pref_labels.keys(), definitions.keys())
+            if l not in fully_translated
+        ]
+
+        # put "en" first if available
+        if "en" in fully_translated:
+            fully_translated.remove("en")
+            fully_translated.insert(0, "en")
+
+        first_row_exported = False
+        for lang in chain(fully_translated, partially_translated):
+            ws[f"A{row_no_concepts}"] = self.uri
+            ws[f"B{row_no_concepts}"] = pref_labels.get(lang, "")
+            ws[f"C{row_no_concepts}"] = lang
+            ws[f"D{row_no_concepts}"] = definitions.get(lang, "")
+            ws[f"E{row_no_concepts}"] = lang
+            ws[f"H{row_no_concepts}"] = self.provenance
+
+            if first_row_exported:
+                row_no_concepts += 1
+                continue
+            else:
+                first_row_exported = True
+            ws[f"F{row_no_concepts}"] = ",\n".join(self.alt_labels)
+            ws[f"G{row_no_concepts}"] = ",\n".join(self.children)
+            ws[f"I{row_no_concepts}"] = self.home_vocab_uri
+            row_no_concepts += 1
+
+        ws = wb["Additional Concept Features"]
+
+        ws[f"A{row_no_features}"] = self.uri
+        ws[f"B{row_no_features}"] = ",\n".join(self.related_match)
+        ws[f"C{row_no_features}"] = ",\n".join(self.close_match)
+        ws[f"D{row_no_features}"] = ",\n".join(self.exact_match)
+        ws[f"E{row_no_features}"] = ",\n".join(self.narrow_match)
+        ws[f"F{row_no_features}"] = ",\n".join(self.broad_match)
+
+        return row_no_concepts
 
 
 class Collection(BaseModel):
@@ -256,7 +306,7 @@ class Collection(BaseModel):
         return g
 
     def to_excel(self, wb: Workbook, row_no: int):
-        ws = wb.active
+        ws = wb["Collections"]
         ws[f"A{row_no}"] = self.uri
         ws[f"B{row_no}"] = self.pref_label
         ws[f"C{row_no}"] = self.definition

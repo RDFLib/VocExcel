@@ -185,7 +185,7 @@ def rdf_to_excel(
     allow_warnings = True if error_level > 1 else False
 
     # validate the RDF file
-    r = pyshacl.validate(
+    conforms, results_graph, results_text = pyshacl.validate(
         str(file_to_convert_path),
         shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
         allow_warnings=allow_warnings,
@@ -209,7 +209,6 @@ def rdf_to_excel(
     warning_list = []
     violation_list = []
 
-    results_graph = r[1]
     from rdflib.namespace import RDF, SH
 
     for report in results_graph.subjects(RDF.type, SH.ValidationReport):
@@ -256,16 +255,13 @@ def rdf_to_excel(
 
     # the RDF is valid so extract data and create Excel
     from rdflib import Graph
-    from rdflib.namespace import DCTERMS, PROV, RDF, RDFS, SKOS, OWL
+    from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SKOS, OWL
 
     g = Graph().parse(
         str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix]
     )
 
-    wb = load_workbook(file_path=(Path(__file__).parent / "blank_030.xlsx"))
-
-    # openpyxl's default active sheet seems to be the last visited one in Excel
-    wb.active = wb["vocabulary"]
+    wb = load_workbook(file_path=(Path(__file__).parent / "blank_043.xlsx"))
 
     holder = {"hasTopConcept": [], "provenance": None}
     for s in g.subjects(RDF.type, SKOS.ConceptScheme):
@@ -301,6 +297,10 @@ def rdf_to_excel(
                 holder["provenance"] = str(o)
             elif p == SKOS.hasTopConcept:
                 holder["hasTopConcept"].append(str(o))
+            elif p == DCAT.contactPoint:
+                holder["custodian"] = str(o)
+            elif p == RDFS.seeAlso:
+                holder["pid"] = str(o)
 
     # from models import ConceptScheme, Concept, Collection
     cs = models.ConceptScheme(
@@ -311,14 +311,10 @@ def rdf_to_excel(
         modified=holder["modified"],
         creator=holder["creator"],
         publisher=holder["publisher"],
-        version=holder["versionInfo"]
-        if holder.get("versionInfo") is not None
-        else None,
-        provenance=holder["provenance"]
-        if holder.get("provenance") is not None
-        else None,
-        custodian=None,
-        pid=None,
+        version=holder.get("versionInfo", None),
+        provenance=holder.get("provenance", None),
+        custodian=holder.get("custodian", None),
+        pid=holder.get("pid", None),
     )
     cs.to_excel(wb)
 
@@ -326,24 +322,30 @@ def rdf_to_excel(
     for s, o in g.subject_objects(SKOS.broader):
         g.add((o, SKOS.narrower, s))
 
-    row_no = 16
+    row_no_features, row_no_concepts = 3, 3
     for s in g.subjects(RDF.type, SKOS.Concept):
         holder = {
             "uri": str(s),
+            "pref_label": [],
+            "pl_language_code": [],
+            "definition": [],
+            "def_language_code": [],
             "children": [],
-            "other_ids": [],
+            "alt_labels": [],
             "home_vocab_uri": None,
             "provenance": None,
         }
         for p, o in g.predicate_objects(s):
             if p == SKOS.prefLabel:
-                holder["pref_label"] = o.toPython()
+                holder["pref_label"].append(o.toPython()) 
+                holder["pl_language_code"].append(o.language)
             elif p == SKOS.definition:
-                holder["definition"] = str(o)
+                holder["definition"].append(str(o))
+                holder["def_language_code"].append(o.language)
             elif p == SKOS.narrower:
                 holder["children"].append(str(o))
-            elif p == SKOS.notation:
-                holder["other_ids"].append(str(o))
+            elif p == SKOS.altLabel:
+                holder["alt_labels"].append(str(o))
             elif p == RDFS.isDefinedBy:
                 holder["home_vocab_uri"] = str(o)
             elif p == DCTERMS.source:
@@ -353,20 +355,20 @@ def rdf_to_excel(
             elif p == PROV.wasDerivedFrom:
                 holder["provenance"] = str(o)
 
-        models.Concept(
+        row_no_concepts = models.Concept(
             uri=holder["uri"],
             pref_label=holder["pref_label"],
+            pl_language_code=holder["pl_language_code"],
             definition=holder["definition"],
+            def_language_code=holder["def_language_code"],
             children=holder["children"],
-            other_ids=holder["other_ids"],
+            alt_labels=holder["alt_labels"],
             home_vocab_uri=holder["home_vocab_uri"],
-            provenance=holder["provenance"]
-            if holder.get("provenance") is not None
-            else None,
-        ).to_excel(wb, row_no)
-        row_no += 1
+            provenance=holder["provenance"],
+        ).to_excel(wb, row_no_features, row_no_concepts)
+        row_no_features += 1
 
-    row_no += 2
+    row_no = 3
 
     for s in g.subjects(RDF.type, SKOS.Collection):
         holder = {"uri": str(s), "members": []}
@@ -411,7 +413,7 @@ def log_msg(result: Dict, log_file: str) -> str:
 \tSeverity: sh:{result['resultSeverity'].split(str(SH))[1]}
 \tSource Shape: <{result['sourceShape']}>
 \tFocus Node: <{result['focusNode']}>
-\tValue Node: <{result['value']}>
+\tValue Node: <{result.get('value', '')}>
 \tMessage: {result['resultMessage']}
 """
     if result["resultSeverity"] == str(SH.Info):
