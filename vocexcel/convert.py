@@ -61,6 +61,7 @@ except:
     from vocexcel.utils import (
         ConversionError,
         load_workbook,
+        load_template,
         get_template_version,
         KNOWN_FILE_ENDINGS,
         RDF_FILE_ENDINGS,
@@ -163,6 +164,7 @@ def rdf_to_excel(
     file_to_convert_path: Path,
     profile="vocpub",
     output_file_path=None,
+    template_file_path=None,
     error_level=1,
     message_level=1,
     log_file=None,
@@ -261,7 +263,10 @@ def rdf_to_excel(
         str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix]
     )
 
-    wb = load_workbook(file_path=(Path(__file__).parent / "blank_043.xlsx"))
+    if template_file_path is None:
+        wb = load_template(file_path=(Path(__file__).parent / "blank_043.xlsx"))
+    else:
+        wb = load_template(file_path=template_file_path)
 
     holder = {"hasTopConcept": [], "provenance": None}
     for s in g.subjects(RDF.type, SKOS.ConceptScheme):
@@ -337,7 +342,7 @@ def rdf_to_excel(
         }
         for p, o in g.predicate_objects(s):
             if p == SKOS.prefLabel:
-                holder["pref_label"].append(o.toPython()) 
+                holder["pref_label"].append(o.toPython())
                 holder["pl_language_code"].append(o.language)
             elif p == SKOS.definition:
                 holder["definition"].append(str(o))
@@ -445,8 +450,7 @@ def main(args=None):
     has_args = True if args else False
 
     parser = argparse.ArgumentParser(
-        prog="vocexcel",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        prog="vocexcel", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
@@ -515,6 +519,14 @@ def main(args=None):
         "--sheet",
         help="The sheet within the target Excel Workbook to process",
         default="vocabulary",
+    )
+
+    parser.add_argument(
+        "-t",
+        "--templatefile",
+        help="An optionally-provided Excel-template file to be used in SKOS-> Excel converion.",
+        type=Path,
+        required=False,
     )
 
     # 1 - info, 2 - warning, 3 - violation
@@ -587,6 +599,7 @@ def main(args=None):
                     args.file_to_convert,
                     profile=args.profile,
                     output_file_path=args.outputfile,
+                    template_file_path=args.templatefile,
                     error_level=int(args.errorlevel),
                     message_level=int(args.messagelevel),
                     log_file=args.logfile,

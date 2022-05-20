@@ -15,6 +15,7 @@ RDF_FILE_ENDINGS = {
 }
 KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
 KNOWN_TEMPLATE_VERSIONS = ["0.2.1", "0.3.0", "0.4.0", "0.4.1", "0.4.2", "0.4.3"]
+LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
 
 class ConversionError(Exception):
@@ -22,8 +23,20 @@ class ConversionError(Exception):
 
 
 def load_workbook(file_path: Path) -> Workbook:
-    if not file_path.name.endswith(tuple(EXCEL_FILE_ENDINGS)):
+    if not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
         raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
+    return _load_workbook(filename=str(file_path), data_only=True)
+
+
+def load_template(file_path: Path) -> Workbook:
+    if not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
+        raise ValueError(
+            "Template files for RDF-to-Excel conversion must be Excel files ending .xlsx"
+        )
+    if get_template_version(load_workbook(file_path)) != LATEST_TEMPLATE:
+        raise ValueError(
+            f"Template files for RDF-to-Excel conversion must be of latest version ({LATEST_TEMPLATE})"
+        )
     return _load_workbook(filename=str(file_path), data_only=True)
 
 
