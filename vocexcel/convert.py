@@ -37,7 +37,7 @@ try:
         KNOWN_TEMPLATE_VERSIONS,
         EXCEL_FILE_ENDINGS,
     )
-except:
+except ImportError:
     sys.path.append("..")
     from vocexcel import models
     from vocexcel import profiles
@@ -548,7 +548,11 @@ def main(args=None):
 
     # log to file
     parser.add_argument(
-        "-l", "--logfile", help="The file to write logging output to", required=False
+        "-l",
+        "--logfile",
+        help="The file to write logging output to",
+        type=Path,
+        required=False,
     )
 
     args = parser.parse_args(args)
@@ -591,8 +595,10 @@ def main(args=None):
                     print(o)
                 else:
                     print(f"Output is file {o}")
-            except Exception as e:
-                logging.exception(e)
+            except ConversionError as err:
+                logging.error("{0}".format(err))
+                return 1
+
         else:  # RDF file ending
             try:
                 o = rdf_to_excel(
@@ -608,9 +614,12 @@ def main(args=None):
                     print(o)
                 else:
                     print(f"Output is file {o}")
-            except Exception as e:
-                logging.exception(e)
+            except ConversionError as err:
+                logging.error("{0}".format(err))
+                return 1
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    retval = main(sys.argv[1:])
+    if retval is not None:
+        sys.exit(retval)
