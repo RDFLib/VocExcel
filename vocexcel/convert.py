@@ -3,11 +3,12 @@ import logging
 import sys
 
 from pathlib import Path
-from typing import Dict, Literal
+from typing import Dict, Literal, Union
 
 import pyshacl
 from colorama import Fore, Style
 from pydantic.error_wrappers import ValidationError
+from pyshacl.pytypes import GraphLike
 
 try:
     import models
@@ -72,123 +73,24 @@ except:
 TEMPLATE_VERSION = None
 
 
-def excel_to_rdf(
-    file_to_convert_path: Path,
-    sheet_name=None,
-    output_type: Literal["file", "string", "graph"] = "file",
-    output_file_path=None,
-    output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
-):
-    """Converts a sheet within an Excel workbook to an RDF file"""
-    wb = load_workbook(file_to_convert_path)
-    template_version = get_template_version(wb)
-
-    # test that we have a valid template variable.
-    if template_version not in KNOWN_TEMPLATE_VERSIONS:
-        raise ValueError(
-            f"Unknown Template Version. Known Template Versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)},"
-            f" you supplied {template_version}"
-        )
-
-    # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
-    elif template_version == "0.3.0" or template_version == "0.2.1":
-        sheet = wb["vocabulary" if sheet_name is None else sheet_name]
-        # read from the vocabulary sheet of the workbook unless given a specific sheet
-
-        if template_version == "0.2.1":
-            concepts, collections = extract_concepts_and_collections_021(sheet)
-        elif template_version == "0.3.0":
-            concepts, collections = extract_concepts_and_collections_030(sheet)
-
-        try:
-            cs = extract_concept_scheme_030(sheet)
-        except ValidationError as e:
-            raise ConversionError(f"ConceptScheme processing error: {e}")
-
-    elif (
-        template_version == "0.4.0"
-        or template_version == "0.4.1"
-        or template_version == "0.4.2"
-    ):
-        try:
-            sheet = wb["Concept Scheme"]
-            concept_sheet = wb["Concepts"]
-            additional_concept_sheet = wb["Additional Concept Features"]
-            collection_sheet = wb["Collections"]
-
-            concepts, collections = extract_concepts_and_collections_040(
-                concept_sheet, additional_concept_sheet, collection_sheet
-            )
-            cs = extract_concept_scheme_040(sheet)
-        except ValidationError as e:
-            raise ConversionError(f"ConceptScheme processing error: {e}")
-    elif template_version == "0.4.3":
-        try:
-            sheet = wb["Concept Scheme"]
-            concept_sheet = wb["Concepts"]
-            additional_concept_sheet = wb["Additional Concept Features"]
-            collection_sheet = wb["Collections"]
-            prefix_sheet = wb["Prefix Sheet"]
-            prefix = create_prefix_dict(prefix_sheet)
-
-            concepts, collections = extract_concepts_and_collections_043(
-                concept_sheet, additional_concept_sheet, collection_sheet, prefix
-            )
-            cs = extract_concept_scheme_043(sheet, prefix)
-        except ValidationError as e:
-            raise ConversionError(f"ConceptScheme processing error: {e}")
-
-    # Build the total vocab
-    v = models.Vocabulary(concept_scheme=cs, concepts=concepts, collections=collections)
-    # Write out the file
-    if output_type == "graph":
-        return v.to_graph()
-    elif output_type == "string":
-        return v.to_graph().serialize(format=output_format)
-    else:  # output_format == "file":
-        if output_file_path is not None:
-            dest = output_file_path
-        else:
-            if output_format == "xml":
-                suffix = ".rdf"
-            elif output_format == "json-ld":
-                suffix = ".json-ld"
-            else:
-                suffix = ".ttl"
-            dest = file_to_convert_path.with_suffix(suffix)
-        v.to_graph().serialize(destination=str(dest), format=output_format)
-        return dest
-
-
-def rdf_to_excel(
-    file_to_convert_path: Path,
+def validate_with_profile(
+    data_graph: Union[GraphLike, str, bytes],
     profile="vocpub",
-    output_file_path=None,
-    template_file_path=None,
     error_level=1,
     message_level=1,
     log_file=None,
 ):
-    if type(file_to_convert_path) is str:
-        file_to_convert_path = Path(file_to_convert_path)
-    if not file_to_convert_path.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
-        raise ValueError(
-            "Files for conversion to Excel must end with one of the RDF file formats: '{}'".format(
-                "', '".join(RDF_FILE_ENDINGS.keys())
-            )
-        )
     if profile not in profiles.PROFILES.keys():
         raise ValueError(
             "The profile chosen for conversion must be one of '{}'. 'vocpub' is default".format(
                 "', '".join(profiles.PROFILES.keys())
             )
         )
-
     allow_warnings = True if error_level > 1 else False
 
     # validate the RDF file
     conforms, results_graph, results_text = pyshacl.validate(
-        str(file_to_convert_path),
+        data_graph,
         shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
         allow_warnings=allow_warnings,
     )
@@ -255,6 +157,137 @@ def rdf_to_excel(
             f"The file you supplied is not valid according to the {profile} profile."
         )
 
+
+def excel_to_rdf(
+    file_to_convert_path: Path,
+    profile="vocpub",
+    sheet_name=None,
+    output_type: Literal["file", "string", "graph"] = "file",
+    output_file_path=None,
+    output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
+    error_level=1,
+    message_level=1,
+    log_file=None,
+    validate=False,
+):
+    """Converts a sheet within an Excel workbook to an RDF file"""
+    wb = load_workbook(file_to_convert_path)
+    template_version = get_template_version(wb)
+
+    # test that we have a valid template variable.
+    if template_version not in KNOWN_TEMPLATE_VERSIONS:
+        raise ValueError(
+            f"Unknown Template Version. Known Template Versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)},"
+            f" you supplied {template_version}"
+        )
+
+    # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
+    elif template_version == "0.3.0" or template_version == "0.2.1":
+        sheet = wb["vocabulary" if sheet_name is None else sheet_name]
+        # read from the vocabulary sheet of the workbook unless given a specific sheet
+
+        if template_version == "0.2.1":
+            concepts, collections = extract_concepts_and_collections_021(sheet)
+        elif template_version == "0.3.0":
+            concepts, collections = extract_concepts_and_collections_030(sheet)
+
+        try:
+            cs = extract_concept_scheme_030(sheet)
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
+
+    elif (
+        template_version == "0.4.0"
+        or template_version == "0.4.1"
+        or template_version == "0.4.2"
+    ):
+        try:
+            sheet = wb["Concept Scheme"]
+            concept_sheet = wb["Concepts"]
+            additional_concept_sheet = wb["Additional Concept Features"]
+            collection_sheet = wb["Collections"]
+
+            concepts, collections = extract_concepts_and_collections_040(
+                concept_sheet, additional_concept_sheet, collection_sheet
+            )
+            cs = extract_concept_scheme_040(sheet)
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
+    elif template_version == "0.4.3":
+        try:
+            sheet = wb["Concept Scheme"]
+            concept_sheet = wb["Concepts"]
+            additional_concept_sheet = wb["Additional Concept Features"]
+            collection_sheet = wb["Collections"]
+            prefix_sheet = wb["Prefix Sheet"]
+            prefix = create_prefix_dict(prefix_sheet)
+
+            concepts, collections = extract_concepts_and_collections_043(
+                concept_sheet, additional_concept_sheet, collection_sheet, prefix
+            )
+            cs = extract_concept_scheme_043(sheet, prefix)
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
+
+    # Build the total vocab
+    vocab_graph = models.Vocabulary(
+        concept_scheme=cs, concepts=concepts, collections=collections
+    ).to_graph()
+
+    if validate:
+        validate_with_profile(
+            vocab_graph,
+            profile=profile,
+            error_level=error_level,
+            message_level=message_level,
+            log_file=log_file,
+        )
+
+    # Write out the file
+    if output_type == "graph":
+        return vocab_graph
+    elif output_type == "string":
+        return vocab_graph.serialize(format=output_format)
+    else:  # output_format == "file":
+        if output_file_path is not None:
+            dest = output_file_path
+        else:
+            if output_format == "xml":
+                suffix = ".rdf"
+            elif output_format == "json-ld":
+                suffix = ".json-ld"
+            else:
+                suffix = ".ttl"
+            dest = file_to_convert_path.with_suffix(suffix)
+        vocab_graph.serialize(destination=str(dest), format=output_format)
+        return dest
+
+
+def rdf_to_excel(
+    file_to_convert_path: Path,
+    profile="vocpub",
+    output_file_path=None,
+    template_file_path=None,
+    error_level=1,
+    message_level=1,
+    log_file=None,
+):
+    if type(file_to_convert_path) is str:
+        file_to_convert_path = Path(file_to_convert_path)
+    if not file_to_convert_path.name.endswith(tuple(RDF_FILE_ENDINGS.keys())):
+        raise ValueError(
+            "Files for conversion to Excel must end with one of the RDF file formats: '{}'".format(
+                "', '".join(RDF_FILE_ENDINGS.keys())
+            )
+        )
+
+    validate_with_profile(
+        str(file_to_convert_path),
+        profile=profile,
+        error_level=error_level,
+        message_level=message_level,
+        log_file=log_file,
+    )
     # the RDF is valid so extract data and create Excel
     from rdflib import Graph
     from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SKOS, OWL
@@ -582,10 +615,15 @@ def main(args=None):
             try:
                 o = excel_to_rdf(
                     args.file_to_convert,
+                    profile=args.profile,
                     sheet_name=args.sheet,
                     output_type=args.outputtype,
                     output_file_path=args.outputfile,
                     output_format=args.outputformat,
+                    error_level=int(args.errorlevel),
+                    message_level=int(args.messagelevel),
+                    log_file=args.logfile,
+                    validate=True,
                 )
                 if args.outputtype == "string":
                     print(o)
