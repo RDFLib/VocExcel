@@ -1,7 +1,6 @@
 import argparse
 import logging
 import sys
-
 from pathlib import Path
 from typing import Dict, Literal, Union
 
@@ -40,8 +39,7 @@ try:
     )
 except ImportError:
     sys.path.append("..")
-    from vocexcel import models
-    from vocexcel import profiles
+    from vocexcel import models, profiles
 
     from vocexcel.convert_021 import (
         extract_concepts_and_collections as extract_concepts_and_collections_021,

@@ -68,9 +68,7 @@ def test_exhaustive_template_is_isomorphic():
 
 
 def test_minimal_template_is_isomorphic():
-    g1 = Graph().parse(
-        Path(__file__).parent / "040_minimal_example_perfect_output.ttl"
-    )
+    g1 = Graph().parse(Path(__file__).parent / "040_minimal_example_perfect_output.ttl")
     g2 = convert.excel_to_rdf(
         Path(__file__).parent / "040_minimal_example.xlsx", output_type="graph"
     )

@@ -37,7 +37,7 @@ def test_simple():
     assert (
         URIRef("http://resource.geosciml.org/classifier/cgi/particletype/bioclast"),
         DCTERMS.provenance,
-        Literal("NADM SLTTs 2004", lang="en")
+        Literal("NADM SLTTs 2004", lang="en"),
     ) in g, "Provenance for vocab is not correct"
     # tidy up
     # Path(Path(__file__).parent / "041_simple_valid.ttl").unlink()

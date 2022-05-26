@@ -1,20 +1,22 @@
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 from googleapiclient.discovery import build
 from pydantic import ValidationError
 
 try:
-    import models
+    import models, profiles
     from utils import split_and_tidy, ConversionError
+    from convert import validate_with_profile, log_msg
 except:
     import sys
 
     sys.path.append("..")
-    from vocexcel import models
+    from vocexcel import models, profiles
+    from vocexcel.convert import validate_with_profile, log_msg
     from vocexcel.utils import split_and_tidy, ConversionError
 
-ACCEPTED_TEMPLATE_VERSIONS = ['0.4.3']
+ACCEPTED_TEMPLATE_VERSIONS = ["0.4.3"]
 SPREADSHEET_ID = None
 RANGE = None
 KEY = None
@@ -24,8 +26,8 @@ sheet = None
 
 def get_spreadsheetid_from_URI(uri: str) -> str:
     try:
-        split = uri.split('/d/')
-        split2 = split[1].split('/edit')
+        split = uri.split("/d/")
+        split2 = split[1].split("/edit")
         spreadsheetid = split2[0]
     except Exception:
         raise Exception("There seems to be something wrong with the URI supplied")
@@ -57,12 +59,15 @@ def using_prefix_list_output(cell_value: list, prefix: dict):
                     if split_c_prefix in prefix:
                         c = prefix[split_c_prefix] + split_c_added_component
                     else:
-                        print(f"The prefix used: {split_c_prefix} isn't included in the prefix sheet")
+                        print(
+                            f"The prefix used: {split_c_prefix} isn't included in the prefix sheet"
+                        )
                         raise Exception
                 else:
                     print(
                         f"Something doesn't look right with this cell_value {cell_value}. "
-                        f"Likely this isn't in http form or more colons are used than normal")
+                        f"Likely this isn't in http form or more colons are used than normal"
+                    )
                     raise Exception
                 variables.append(c)
             except Exception as e:
@@ -83,12 +88,15 @@ def using_prefix_non_list_output(cell_value, prefix: dict):
             if split_c_prefix in prefix:
                 c = prefix[split_c_prefix] + split_c_added_component
             else:
-                print(f"The prefix used: '{split_c_prefix}' isn't included in the prefix sheet")
+                print(
+                    f"The prefix used: '{split_c_prefix}' isn't included in the prefix sheet"
+                )
                 raise Exception
         else:
             print(
                 f"Something doesn't look right with the cell value: {cell_value}. "
-                f"Likely this isn't in http form or more colons are used than normal")
+                f"Likely this isn't in http form or more colons are used than normal"
+            )
             raise Exception
     return c
 
@@ -96,17 +104,23 @@ def using_prefix_non_list_output(cell_value, prefix: dict):
 def get_template_version_gsheets(spreadsheet_id: str):
     # Load workbook
     try:
-        intro_sheet = sheet.values().get(spreadsheetId=spreadsheet_id, range='Introduction!J11').execute()
-        template_value = intro_sheet.get('values')[0][0]
+        intro_sheet = (
+            sheet.values()
+            .get(spreadsheetId=spreadsheet_id, range="Introduction!J11")
+            .execute()
+        )
+        template_value = intro_sheet.get("values")[0][0]
         return template_value
     except Exception:
-        raise Exception("The version of the Google Template you are using is not accepted/can't be determined")
+        raise Exception(
+            "The version of the Google Template you are using is not accepted/can't be determined"
+        )
 
 
 def read_cell(sheet_dict: dict, n: int, i: Optional[int] = 0):
     try:
-        if sheet_dict.get('values')[n]:
-            return sheet_dict.get('values')[n][i]
+        if sheet_dict.get("values")[n]:
+            return sheet_dict.get("values")[n][i]
         else:
             return None
     except IndexError:
@@ -114,7 +128,7 @@ def read_cell(sheet_dict: dict, n: int, i: Optional[int] = 0):
 
 
 def rows_filled_out(c_sheet: dict):
-    variable = len(c_sheet.get('values'))
+    variable = len(c_sheet.get("values"))
     return variable
 
 
@@ -145,31 +159,49 @@ def extract_concept_scheme(concept_scheme_sheet: dict, prefix: dict):
     return cs
 
 
-def extract_concepts(concepts_sheet: dict, additional_concepts_sheet: dict, prefix: dict):
+def extract_concepts(
+    concepts_sheet: dict, additional_concepts_sheet: dict, prefix: dict
+):
     concepts = []
     for index in range(2, rows_filled_out(concepts_sheet)):
         try:
             c = models.Concept(
-                uri=using_prefix_non_list_output(read_cell(concepts_sheet, index, 0), prefix),
+                uri=using_prefix_non_list_output(
+                    read_cell(concepts_sheet, index, 0), prefix
+                ),
                 pref_label=read_cell(concepts_sheet, index, 1),
                 pl_language_code=split_and_tidy(read_cell(concepts_sheet, index, 2)),
                 definition=read_cell(concepts_sheet, index, 3),
                 def_language_code=split_and_tidy(read_cell(concepts_sheet, index, 4)),
                 alt_labels=split_and_tidy(read_cell(concepts_sheet, index, 5)),
-                children=using_prefix_list_output(split_and_tidy(read_cell(concepts_sheet, index, 6)), prefix),
+                children=using_prefix_list_output(
+                    split_and_tidy(read_cell(concepts_sheet, index, 6)), prefix
+                ),
                 provenance=read_cell(concepts_sheet, index, 7),
-                home_vocab_uri=using_prefix_non_list_output(read_cell(concepts_sheet, index, 8), prefix),
+                home_vocab_uri=using_prefix_non_list_output(
+                    read_cell(concepts_sheet, index, 8), prefix
+                ),
                 # additional concepts sheet page
                 related_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 0)), prefix),
+                    split_and_tidy(read_cell(additional_concepts_sheet, index, 0)),
+                    prefix,
+                ),
                 close_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 1)), prefix),
+                    split_and_tidy(read_cell(additional_concepts_sheet, index, 1)),
+                    prefix,
+                ),
                 exact_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 2)), prefix),
+                    split_and_tidy(read_cell(additional_concepts_sheet, index, 2)),
+                    prefix,
+                ),
                 narrow_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 3)), prefix),
+                    split_and_tidy(read_cell(additional_concepts_sheet, index, 3)),
+                    prefix,
+                ),
                 broad_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 4)), prefix),
+                    split_and_tidy(read_cell(additional_concepts_sheet, index, 4)),
+                    prefix,
+                ),
             )
             concepts.append(c)
         except ValidationError as e:
@@ -186,10 +218,14 @@ def extract_collections(collection_sheet: dict, prefix: dict):
     for index in range(2, row):
         try:
             c = models.Collection(
-                uri=using_prefix_non_list_output(read_cell(collection_sheet, index, 0), prefix),
+                uri=using_prefix_non_list_output(
+                    read_cell(collection_sheet, index, 0), prefix
+                ),
                 pref_label=read_cell(collection_sheet, index, 1),
                 definition=read_cell(collection_sheet, index, 2),
-                members=using_prefix_list_output(split_and_tidy(read_cell(collection_sheet, index, 3)), prefix),
+                members=using_prefix_list_output(
+                    split_and_tidy(read_cell(collection_sheet, index, 3)), prefix
+                ),
                 provenance=read_cell(collection_sheet, index, 4),
             )
             collections.append(c)
@@ -201,12 +237,17 @@ def extract_collections(collection_sheet: dict, prefix: dict):
 
 
 def excel_to_rdf_gsheets(
-        uri: str,
-        key: str,
-        file_to_convert_path: Path,
-        output_type: Literal["file", "string", "graph"] = "file",
-        output_file_path=None,
-        output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
+    uri: str,
+    key: str,
+    file_to_convert_path: Path,
+    output_type: Literal["file", "string", "graph"] = "file",
+    output_file_path=None,
+    output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
+    profile="vocpub",
+    error_level=1,
+    message_level=1,
+    log_file=None,
+    validate=False,
 ):
     # get spreadsheet id from uri
     global SPREADSHEET_ID
@@ -216,7 +257,7 @@ def excel_to_rdf_gsheets(
     KEY = key
 
     global client
-    client = build('sheets', 'v4', developerKey=KEY)
+    client = build("sheets", "v4", developerKey=KEY)
 
     global sheet
     sheet = client.spreadsheets()
@@ -232,16 +273,34 @@ def excel_to_rdf_gsheets(
     # Template Version 0.4.3
     if template_version == "0.4.3":
         try:
-            concept_scheme_sheet = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                                      range='Concept Scheme*!B2:B12').execute()
-            concept_sheet = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                               range='Concepts*!A:I').execute()
-            additional_concept_sheet = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                                          range='Additional Concept Features!B:F').execute()
-            collection_sheet = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                                  range='Collections!A:E').execute()
-            prefix_sheet = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                              range='Prefix Sheet!A:B').execute()
+            concept_scheme_sheet = (
+                sheet.values()
+                .get(spreadsheetId=SPREADSHEET_ID, range="Concept Scheme*!B2:B12")
+                .execute()
+            )
+            concept_sheet = (
+                sheet.values()
+                .get(spreadsheetId=SPREADSHEET_ID, range="Concepts*!A:I")
+                .execute()
+            )
+            additional_concept_sheet = (
+                sheet.values()
+                .get(
+                    spreadsheetId=SPREADSHEET_ID,
+                    range="Additional Concept Features!B:F",
+                )
+                .execute()
+            )
+            collection_sheet = (
+                sheet.values()
+                .get(spreadsheetId=SPREADSHEET_ID, range="Collections!A:E")
+                .execute()
+            )
+            prefix_sheet = (
+                sheet.values()
+                .get(spreadsheetId=SPREADSHEET_ID, range="Prefix Sheet!A:B")
+                .execute()
+            )
 
             prefix = create_prefix_dict(prefix_sheet)
             concept_scheme = extract_concept_scheme(concept_scheme_sheet, prefix)
@@ -251,13 +310,25 @@ def excel_to_rdf_gsheets(
             print(e)
 
     # Build the total vocab
-    v = models.Vocabulary(concept_scheme=concept_scheme, concepts=concept, collections=collections)
+    vocab_graph = models.Vocabulary(
+        concept_scheme=concept_scheme, concepts=concept, collections=collections
+    ).to_graph()
+
+    # validate with vocpub
+    if validate:
+        validate_with_profile(
+            vocab_graph,
+            profile=profile,
+            error_level=error_level,
+            message_level=message_level,
+            log_file=log_file,
+        )
 
     # Write out the file
     if output_type == "graph":
-        return v.to_graph()
+        return vocab_graph
     elif output_type == "string":
-        return v.to_graph().serialize(format=output_format)
+        return vocab_graph.serialize(format=output_format)
     else:  # output_format == "file":
         if output_file_path is not None:
             dest = output_file_path
@@ -269,9 +340,9 @@ def excel_to_rdf_gsheets(
             else:
                 suffix = ".ttl"
             dest = file_to_convert_path.with_suffix(suffix)
-        v.to_graph().serialize(destination=str(dest), format=output_format)
+        vocab_graph.serialize(destination=str(dest), format=output_format)
         return dest
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
