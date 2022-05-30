@@ -51,3 +51,21 @@ def test_exhaustive_template_is_isomorphic():
         Path(__file__).parent / "043_exhaustive_example.xlsx", output_type="graph"
     )
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
+
+
+def test_rdf_to_excel():
+    g1 = Graph().parse(
+        Path(__file__).parent / "040_exhaustive_example_perfect_output.ttl"
+    )
+    convert.rdf_to_excel(
+        Path(__file__).parent / "040_exhaustive_example_perfect_output.ttl",
+    )
+    g2 = convert.excel_to_rdf(
+        Path(__file__).parent / "040_exhaustive_example_perfect_output.xlsx",
+        output_type="graph",
+    )
+    # clean up file
+    Path(Path(__file__).parent / "040_exhaustive_example_perfect_output.xlsx").unlink(
+        missing_ok=True
+    )
+    assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"

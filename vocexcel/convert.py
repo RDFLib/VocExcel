@@ -370,6 +370,11 @@ def rdf_to_excel(
             "alt_labels": [],
             "home_vocab_uri": None,
             "provenance": None,
+            "related_match": [],
+            "close_match": [],
+            "exact_match": [],
+            "narrow_match": [],
+            "broad_match": [],
         }
         for p, o in g.predicate_objects(s):
             if p == SKOS.prefLabel:
@@ -390,6 +395,16 @@ def rdf_to_excel(
                 holder["provenance"] = str(o)
             elif p == PROV.wasDerivedFrom:
                 holder["provenance"] = str(o)
+            elif p == SKOS.relatedMatch:
+                holder["related_match"].append(str(o))
+            elif p == SKOS.closeMatch:
+                holder["close_match"].append(str(o))
+            elif p == SKOS.exactMatch:
+                holder["exact_match"].append(str(o))
+            elif p == SKOS.narrowMatch:
+                holder["narrow_match"].append(str(o))
+            elif p == SKOS.broadMatch:
+                holder["broad_match"].append(str(o))
 
         row_no_concepts = models.Concept(
             uri=holder["uri"],
@@ -401,6 +416,11 @@ def rdf_to_excel(
             alt_labels=holder["alt_labels"],
             home_vocab_uri=holder["home_vocab_uri"],
             provenance=holder["provenance"],
+            related_match=holder["related_match"],
+            close_match=holder["close_match"],
+            exact_match=holder["exact_match"],
+            narrow_match=holder["narrow_match"],
+            broad_match=holder["broad_match"],
         ).to_excel(wb, row_no_features, row_no_concepts)
         row_no_features += 1
 
