@@ -97,21 +97,18 @@ def test_concept():
         ],
     )
     actual = c.to_graph()
+    print(actual)
     expected = Graph().parse(
         data="""@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-
+        @prefix dcterms: <http://purl.org/dc/terms/> .
 <https://example.com/thing/y> skos:broader <https://example.com/thing/x> .
-
 <https://example.com/thing/z> skos:broader <https://example.com/thing/x> .
-
 <https://example.com/thing/x> a skos:Concept ;
-    skos:closeMatch <https://example.com/thing/other>,
-        <https://example.com/thing/otherother> ;
+    skos:closeMatch <https://example.com/thing/other>, <https://example.com/thing/otherother> ;
     skos:definition "Fake def for Thing X"@en ;
-    skos:narrower <https://example.com/thing/y>,
-        <https://example.com/thing/z> ;
-    skos:notation "XX",
-        "XXX" ;
+    skos:narrower <https://example.com/thing/y>, <https://example.com/thing/z> ;
+    skos:notation "XX", "XXX" ;
+    dcterms:identifier "x" ;
     skos:prefLabel "Thing X"@en ."""
     )
     assert actual.isomorphic(expected)

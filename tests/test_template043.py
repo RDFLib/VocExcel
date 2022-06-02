@@ -26,7 +26,7 @@ def test_simple():
     g = convert.excel_to_rdf(
         Path(__file__).parent / "043_simple_valid.xlsx", output_type="graph"
     )
-    assert len(g) == 135
+    assert len(g) == 142
     assert (
         URIRef(
             "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"

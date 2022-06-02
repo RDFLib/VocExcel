@@ -4,12 +4,14 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <http://example/org/example1> a skos:Concept ;
+    dcterms:identifier "example1" ;
     skos:definition "example concept definition"@en ;
     skos:inScheme cs: ;
     skos:prefLabel "example preferred concept label"@en ;
     skos:topConceptOf cs: .
 
 cs: a skos:ConceptScheme ;
+    dcterms:identifier "vocabulary_iri" ;
     dcterms:created "2022-03-07"^^xsd:date ;
     dcterms:creator <https://linked.data.gov.au/org/cgi> ;
     dcterms:modified "2022-03-07"^^xsd:date ;

@@ -62,6 +62,13 @@ class ConceptScheme(BaseModel):
     def to_graph(self):
         g = Graph()
         v = URIRef(self.uri)
+        # For dcterms:identifier
+        if "#" in v:
+            identifier = v.split("#")[-1]
+        else:
+            identifier = v.split("/")[-1]
+        g.add((v, DCTERMS.identifier, Literal(identifier)))
+
         g.add((v, RDF.type, SKOS.ConceptScheme))
         g.add((v, SKOS.prefLabel, Literal(self.title, lang="en")))
         g.add((v, SKOS.definition, Literal(self.description, lang="en")))
@@ -176,7 +183,15 @@ class Concept(BaseModel):
     def to_graph(self):
         g = Graph()
         c = URIRef(self.uri)
+
         g.add((c, RDF.type, SKOS.Concept))
+        # For dcterms:identifier
+        if "#" in c:
+            identifier = c.split("#")[-1]
+        else:
+            identifier = c.split("/")[-1]
+        g.add((c, DCTERMS.identifier, Literal(identifier)))
+
         if not self.pl_language_code:
             g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang="en")))
         else:
@@ -296,6 +311,13 @@ class Collection(BaseModel):
         g = Graph()
         c = URIRef(self.uri)
         g.add((c, RDF.type, SKOS.Collection))
+        # for dcterms:identifier
+        if "#" in c:
+            identifier = c.split("#")[-1]
+        else:
+            identifier = c.split("/")[-1]
+        g.add((c, DCTERMS.identifier, Literal(identifier)))
+
         g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang="en")))
         g.add((c, SKOS.definition, Literal(self.definition, lang="en")))
         for member in self.members:
