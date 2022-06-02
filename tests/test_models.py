@@ -101,6 +101,7 @@ def test_concept():
     expected = Graph().parse(
         data="""@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
         @prefix dcterms: <http://purl.org/dc/terms/> .
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 <https://example.com/thing/y> skos:broader <https://example.com/thing/x> .
 <https://example.com/thing/z> skos:broader <https://example.com/thing/x> .
 <https://example.com/thing/x> a skos:Concept ;
@@ -108,7 +109,7 @@ def test_concept():
     skos:definition "Fake def for Thing X"@en ;
     skos:narrower <https://example.com/thing/y>, <https://example.com/thing/z> ;
     skos:notation "XX", "XXX" ;
-    dcterms:identifier "x" ;
+    dcterms:identifier "x"^^xsd:token ;
     skos:prefLabel "Thing X"@en ."""
     )
     assert actual.isomorphic(expected)

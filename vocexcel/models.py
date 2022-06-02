@@ -67,7 +67,7 @@ class ConceptScheme(BaseModel):
             identifier = v.split("#")[-1]
         else:
             identifier = v.split("/")[-1]
-        g.add((v, DCTERMS.identifier, Literal(identifier)))
+        g.add((v, DCTERMS.identifier, Literal(identifier, datatype=XSD.token)))
 
         g.add((v, RDF.type, SKOS.ConceptScheme))
         g.add((v, SKOS.prefLabel, Literal(self.title, lang="en")))
@@ -190,7 +190,7 @@ class Concept(BaseModel):
             identifier = c.split("#")[-1]
         else:
             identifier = c.split("/")[-1]
-        g.add((c, DCTERMS.identifier, Literal(identifier)))
+        g.add((c, DCTERMS.identifier, Literal(identifier, datatype=XSD.token)))
 
         if not self.pl_language_code:
             g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang="en")))
@@ -316,7 +316,7 @@ class Collection(BaseModel):
             identifier = c.split("#")[-1]
         else:
             identifier = c.split("/")[-1]
-        g.add((c, DCTERMS.identifier, Literal(identifier)))
+        g.add((c, DCTERMS.identifier, Literal(identifier, datatype=XSD.token)))
 
         g.add((c, SKOS.prefLabel, Literal(self.pref_label, lang="en")))
         g.add((c, SKOS.definition, Literal(self.definition, lang="en")))
