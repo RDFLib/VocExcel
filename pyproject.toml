@@ -16,6 +16,7 @@ colorama = "^0.4.4"
 Pillow = "^9.1.0"
 pytest = "^7.1.2"
 setuptools = "^62.3.2"
+google-api-python-client = "^2.51.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
