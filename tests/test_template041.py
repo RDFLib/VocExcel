@@ -9,6 +9,8 @@ sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel import convert
 from vocexcel.utils import ConversionError
 
+tests_dir_path = Path(__file__).parent
+
 
 def test_empty_template():
     assert Path(
@@ -17,15 +19,12 @@ def test_empty_template():
     with pytest.raises(ConversionError) as e:
         convert.excel_to_rdf(
             Path(__file__).parent.parent / "templates" / "VocExcel-template_041.xlsx",
-            output_type="file",
         )
     assert "7 validation errors for ConceptScheme" in str(e)
 
 
 def test_simple():
-    g = convert.excel_to_rdf(
-        Path(__file__).parent / "041_simple_valid.xlsx", output_type="graph"
-    )
+    g = convert.excel_to_rdf(tests_dir_path / "041_simple_valid.xlsx", output_format="graph")
     assert len(g) == 142
     assert (
         URIRef(
@@ -44,10 +43,7 @@ def test_simple():
 
 
 def test_exhaustive_template_is_isomorphic():
-    g1 = Graph().parse(
-        Path(__file__).parent / "040_exhaustive_example_perfect_output.ttl"
-    )
-    g2 = convert.excel_to_rdf(
-        Path(__file__).parent / "041_exhaustive_example.xlsx", output_type="graph"
-    )
+    g1 = Graph().parse(tests_dir_path / "041_exhaustive_comparison.ttl")
+    g1.serialize(destination=tests_dir_path / "x.ttl")
+    g2 = convert.excel_to_rdf(tests_dir_path / "041_exhaustive.xlsx", output_format="graph")
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"

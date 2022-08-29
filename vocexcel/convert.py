@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, Literal, Union
+from typing import Dict, Literal, Union, Optional
 
 import pyshacl
 from colorama import Fore, Style
@@ -159,14 +159,13 @@ def validate_with_profile(
 def excel_to_rdf(
     file_to_convert_path: Path,
     profile="vocpub",
-    sheet_name=None,
-    output_type: Literal["file", "string", "graph"] = "file",
-    output_file_path=None,
-    output_format: Literal["turtle", "xml", "json-ld"] = "turtle",
-    error_level=1,
-    message_level=1,
-    log_file=None,
-    validate=False,
+    sheet_name: Optional[str] = None,
+    output_file_path: Optional[Path] = None,
+    output_format: Literal["turtle", "xml", "json-ld", "graph"] = "turtle",
+    error_level=1,  # TODO: list Literal possible values
+    message_level=1,  # TODO: list Literal possible values
+    log_file: Optional[Path] = None,
+    validate: Optional[bool] = False,
 ):
     """Converts a sheet within an Excel workbook to an RDF file"""
     wb = load_workbook(file_to_convert_path)
@@ -241,31 +240,20 @@ def excel_to_rdf(
             log_file=log_file,
         )
 
-    # Write out the file
-    if output_type == "graph":
-        return vocab_graph
-    elif output_type == "string":
-        return vocab_graph.serialize(format=output_format)
-    else:  # output_format == "file":
-        if output_file_path is not None:
-            dest = output_file_path
+    if output_file_path is not None:
+        vocab_graph.serialize(destination=str(output_file_path), format=output_format)
+    else:  # print to std out
+        if output_format == "graph":
+            return vocab_graph
         else:
-            if output_format == "xml":
-                suffix = ".rdf"
-            elif output_format == "json-ld":
-                suffix = ".json-ld"
-            else:
-                suffix = ".ttl"
-            dest = file_to_convert_path.with_suffix(suffix)
-        vocab_graph.serialize(destination=str(dest), format=output_format)
-        return dest
+            return vocab_graph.serialize(format=output_format)
 
 
 def rdf_to_excel(
     file_to_convert_path: Path,
-    profile="vocpub",
-    output_file_path=None,
-    template_file_path=None,
+    profile: Optional[str] = "vocpub",
+    output_file_path: Optional[Path] = None,
+    template_file_path: Optional[Path] = None,
     error_level=1,
     message_level=1,
     log_file=None,
@@ -498,21 +486,19 @@ def main(args=None):
     if args is None:  # vocexcel run via entrypoint
         args = sys.argv[1:]
 
-    has_args = True if args else False
-
     parser = argparse.ArgumentParser(
         prog="vocexcel", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
-        "-v",
-        "--version",
-        help="The version of this copy of VocExcel.",
+        "-i",
+        "--info",
+        help="The version and other info of this instance of VocExcel.",
         action="store_true",
     )
 
     parser.add_argument(
-        "-lp",
+        "-l",
         "--listprofiles",
         help="This flag, if set, must be the only flag supplied. It will cause the program to list all the vocabulary"
         " profiles that this converter, indicating both their URI and their short token for use with the"
@@ -528,7 +514,7 @@ def main(args=None):
     )
 
     parser.add_argument(
-        "-val", "--validate", help="Validate output file", action="store_true"
+        "-v", "--validate", help="Validate output file", action="store_true"
     )
 
     parser.add_argument(
@@ -542,26 +528,19 @@ def main(args=None):
     )
 
     parser.add_argument(
-        "-ot",
-        "--outputtype",
-        help="The format of the vocabulary output.",
-        choices=["file", "string"],
-        default="file",
-    )
-
-    parser.add_argument(
         "-o",
         "--outputfile",
-        help="An optionally-provided output file path.",
+        help="An optionally-provided output file path. If not provided, output is to standard out.",
         required=False,
     )
 
     parser.add_argument(
-        "-of",
+        "-f",
         "--outputformat",
-        help="An optionally-provided output format for RDF files. Only relevant in Excel-to-RDf conversions.",
+        help="An optionally-provided output format for RDF outputs. 'graph' returns the in-memory graph object, "
+             "not serialized RDF.",
         required=False,
-        choices=["turtle", "xml", "json-ld"],
+        choices=["turtle", "xml", "json-ld", "graph"],
         default="turtle",
     )
 
@@ -599,7 +578,7 @@ def main(args=None):
 
     # log to file
     parser.add_argument(
-        "-l",
+        "-g",
         "--logfile",
         help="The file to write logging output to",
         type=Path,
@@ -608,7 +587,7 @@ def main(args=None):
 
     args = parser.parse_args(args)
 
-    if not has_args:
+    if not args:
         # show help if no args are given
         parser.print_help()
         parser.exit()
@@ -617,13 +596,15 @@ def main(args=None):
         s = "Profiles\nToken\tIRI\n-----\t-----\n"
         for k, v in profiles.PROFILES.items():
             s += f"{k}\t{v.uri}\n"
-
         print(s.rstrip())
-    elif args.version:
+    elif args.info:
         # not sure what to do here, just removing the errors
-        print(TEMPLATE_VERSION)
+        from vocexcel import __version__
+        print(f"VocExel version: {__version__}")
+        from vocexcel.utils import KNOWN_TEMPLATE_VERSIONS
+        print(f"Known template versions: {', '.join(sorted(KNOWN_TEMPLATE_VERSIONS, reverse=True))}")
     elif args.file_to_convert:
-        if not args.file_to_convert.name.endswith(tuple(KNOWN_FILE_ENDINGS)):
+        if not args.file_to_convert.suffix.lower().endswith(tuple(KNOWN_FILE_ENDINGS)):
             print(
                 "Files for conversion must either end with .xlsx (Excel) or one of the known RDF file endings, '{}'".format(
                     "', '".join(RDF_FILE_ENDINGS.keys())
@@ -633,13 +614,13 @@ def main(args=None):
 
         print(f"Processing file {args.file_to_convert}")
 
+        # input file looks like an Excel file, so convert Excel -> RDF
         if args.file_to_convert.suffix.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
             try:
                 o = excel_to_rdf(
                     args.file_to_convert,
                     profile=args.profile,
                     sheet_name=args.sheet,
-                    output_type=args.outputtype,
                     output_file_path=args.outputfile,
                     output_format=args.outputformat,
                     error_level=int(args.errorlevel),
@@ -647,15 +628,14 @@ def main(args=None):
                     log_file=args.logfile,
                     validate=True,
                 )
-                if args.outputtype == "string":
+                if args.outputfile is None:
                     print(o)
-                else:
-                    print(f"Output is file {o}")
             except ConversionError as err:
                 logging.error("{0}".format(err))
                 return 1
 
-        else:  # RDF file ending
+        # RDF file ending, so convert RDF -> Excel
+        else:
             try:
                 o = rdf_to_excel(
                     args.file_to_convert,
@@ -666,12 +646,10 @@ def main(args=None):
                     message_level=int(args.messagelevel),
                     log_file=args.logfile,
                 )
-                if args.outputtype == "string":
+                if args.outputfile is None:
                     print(o)
-                else:
-                    print(f"Output is file {o}")
             except ConversionError as err:
-                logging.error("{0}".format(err))
+                logging.error(f"{err}")
                 return 1
 
 

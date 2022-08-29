@@ -17,14 +17,13 @@ def test_empty_template():
     with pytest.raises(ConversionError) as e:
         convert.excel_to_rdf(
             Path(__file__).parent.parent / "templates" / "VocExcel-template_042.xlsx",
-            output_type="file",
         )
     assert "7 validation errors for ConceptScheme" in str(e)
 
 
 def test_simple():
     g = convert.excel_to_rdf(
-        Path(__file__).parent / "042_simple_example.xlsx", output_type="graph"
+        Path(__file__).parent / "042_simple.xlsx", output_format="graph"
     )
     assert len(g) == 142
     assert (

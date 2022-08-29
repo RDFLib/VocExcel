@@ -11,7 +11,7 @@ def test_example_complex():
     g = convert.excel_to_rdf(
         Path(__file__).parent.parent / "templates" / "VocExcel-template_030.xlsx",
         sheet_name="example - complex",
-        output_type="graph",
+        output_format="graph",
     )
 
     top_concepts = 0

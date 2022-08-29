@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 from rdflib import Graph, URIRef, Literal, compare
-from rdflib.namespace import SKOS, DCTERMS
+from rdflib.namespace import DCTERMS, SKOS, RDF
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel import convert
@@ -11,22 +11,18 @@ from vocexcel.utils import ConversionError
 
 
 def test_empty_template():
-    assert Path(
-        Path(__file__).parent.parent / "templates" / "VocExcel-template_043.xlsx"
-    ).is_file()
     with pytest.raises(ConversionError) as e:
-        convert.excel_to_rdf(
-            Path(__file__).parent.parent / "templates" / "VocExcel-template_043.xlsx",
-            output_type="file",
-        )
+        convert.excel_to_rdf(Path(__file__).parent.parent / "templates" / "VocExcel-template_043.xlsx")
     assert "7 validation errors for ConceptScheme" in str(e)
 
 
 def test_simple():
+    tests_dir_path = Path(__file__).parent
     g = convert.excel_to_rdf(
-        Path(__file__).parent / "043_simple_valid.xlsx", output_type="graph"
+        tests_dir_path / "043_simple_valid.xlsx",
+        # output_file_path=tests_dir_path /"043_simple_valid_nc.ttl"
+        output_format="graph"
     )
-    assert len(g) == 142
     assert (
         URIRef(
             "http://resource.geosciml.org/classifierscheme/cgi/2016.01/particletype"
@@ -39,33 +35,27 @@ def test_simple():
         DCTERMS.provenance,
         Literal("NADM SLTTs 2004", lang="en"),
     ) in g, "Provenance for vocab is not correct"
-    # tidy up
-    # Path(Path(__file__).parent / "043_simple_valid.ttl").unlink(missing_ok=True)
 
 
 def test_exhaustive_template_is_isomorphic():
-    g1 = Graph().parse(
-        Path(__file__).parent / "040_exhaustive_example_perfect_output.ttl"
-    )
-    g2 = convert.excel_to_rdf(
-        Path(__file__).parent / "043_exhaustive_example.xlsx", output_type="graph"
-    )
+    tests_dir_path = Path(__file__).parent
+    g1 = Graph().parse(tests_dir_path / "043_exhaustive.ttl")
+    g2 = convert.excel_to_rdf(Path(__file__).parent / "043_exhaustive.xlsx", output_format="graph")
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
 
 
 def test_rdf_to_excel():
-    g1 = Graph().parse(
-        Path(__file__).parent / "040_exhaustive_example_perfect_output.ttl"
-    )
+    tests_dir_path = Path(__file__).parent
+    g1 = Graph().parse(tests_dir_path / "043_exhaustive.ttl")
     convert.rdf_to_excel(
-        Path(__file__).parent / "040_exhaustive_example_perfect_output.ttl",
+        tests_dir_path / "043_exhaustive.ttl",
+        output_file_path=tests_dir_path / "043_exhaustive_roundtrip.xlsx",
     )
     g2 = convert.excel_to_rdf(
-        Path(__file__).parent / "040_exhaustive_example_perfect_output.xlsx",
-        output_type="graph",
+        tests_dir_path / "043_exhaustive.xlsx",
+        output_format="graph"
     )
-    # clean up file
-    Path(Path(__file__).parent / "040_exhaustive_example_perfect_output.xlsx").unlink(
-        missing_ok=True
-    )
+
+    # clean up files
+    Path(tests_dir_path / "043_exhaustive_roundtrip.xlsx").unlink(missing_ok=True)
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"

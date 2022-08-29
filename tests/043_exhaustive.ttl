@@ -7,6 +7,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <http://example.org/example_collection_uri> a skos:Collection ;
+    dcterms:identifier "example_collection_uri"^^xsd:token ;
     dcterms:isPartOf cs: ;
     dcterms:provenance "Example Collection Provenance"@en ;
     skos:definition "Example Collection Definition"@en ;
@@ -22,6 +23,7 @@
 <http://example.org/exhaustive_children_example_3> skos:broader <http://example.org/exhaustive_concept_iri> .
 
 cs: a skos:ConceptScheme ;
+    dcterms:identifier "exhaustive_concept_scheme_vocabulary_iri"^^xsd:token ;
     dcterms:created "2022-03-07"^^xsd:date ;
     dcterms:creator <https://linked.data.gov.au/org/cgi> ;
     dcterms:hasPart <http://example.org/example_collection_uri> ;
@@ -36,6 +38,8 @@ cs: a skos:ConceptScheme ;
     dcat:contactPoint "Example Custodian" .
 
 <http://example.org/exhaustive_concept_iri> a skos:Concept ;
+    dcterms:identifier "exhaustive_concept_iri"^^xsd:token ;
+    dcterms:provenance "Example Exhaustive Provenance"@en ;
     rdfs:isDefinedBy <http://example.org/exhaustive_concept_source_vocabulary_iri> ;
     skos:altLabel "example exhaustive concept alternate label"@en ;
     skos:broadMatch <http://example.org/example_broad_match> ;
@@ -50,3 +54,4 @@ cs: a skos:ConceptScheme ;
     skos:prefLabel "example exhaustive preferred label"@en ;
     skos:relatedMatch <http://example.org/example_related_match> ;
     skos:topConceptOf cs: .
+

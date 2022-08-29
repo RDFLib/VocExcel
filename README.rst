@@ -110,34 +110,34 @@ It will print something like this with any updates actually available in the too
 
 ::
 
-    usage: convert.py [-h] [-v] [-lp] [-val] [-p PROFILE] [-of {file,string}] [-s SHEET] excel_file
+usage: vocexcel [-h] [-i] [-l] [-v] [-p PROFILE] [-o OUTPUTFILE] [-f {turtle,xml,json-ld}] [-s SHEET] [-t TEMPLATEFILE] [-e ERRORLEVEL] [-m MESSAGELEVEL] [-g LOGFILE] [file_to_convert]
 
-    positional arguments:
-      excel_file            The Excel file to convert to a SKOS vocabulary in RDF
+positional arguments:
+  file_to_convert       The Excel file to convert to a SKOS vocabulary in RDF or an RDF file to convert to an Excel file (default: None)
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      -v, --version         The version of this copy of VocExel. (default: False)
-      -lp, --listprofiles   This flag, if set, must be the only flag supplied. It will cause the program to list all the vocabulary profiles that this converter, indicating
-                            both their URI and their short token for use with the -p (--profile) flag when converting Excel files (default: False)
-      -val, --validate      Validate output file (default: False)
-      -p PROFILE, --profile PROFILE
-                            A profile - a specified information model - for a vocabulary. This tool understands several profiles andyou can choose which one you want to convert
-                            the Excel file according to. The list of profiles - URIs and their corresponding tokens - supported by VocExcel, can be found by running the program
-                            with the flag -lp or --listprofiles. (default: vocpub)
-      -of {file,string}, --outputformat {file,string}
-                            The format of the vocabulary output. (default: file)
-      -s SHEET, --sheet SHEET
-                            The sheet within the target Excel Workbook to process (default: vocabulary)
-
-Note that the ``excel_file`` parameter is always required except for the 'help' (``-h``) option, so if you want tpo print out the version of the program, you will need to put in a fake file location like this:
-
-::
-
-    > vocexcel.exe -v .
-
-    ~$ sh vocexcel.sh -v .
-
+optional arguments:
+  -h, --help            show this help message and exit
+  -i, --info            The version and other info of this instance of VocExcel. (default: False)
+  -l, --listprofiles    This flag, if set, must be the only flag supplied. It will cause the program to list all the vocabulary profiles that this converter, indicating both their URI and their short token for use with
+                        the -p (--profile) flag when converting Excel files (default: False)
+  -v, --validate        Validate output file (default: False)
+  -p PROFILE, --profile PROFILE
+                        A profile - a specified information model - for a vocabulary. This tool understands several profiles andyou can choose which one you want to convert the Excel file according to. The list of
+                        profiles - URIs and their corresponding tokens - supported by VocExcel, can be found by running the program with the flag -lp or --listprofiles. (default: vocpub)
+  -o OUTPUTFILE, --outputfile OUTPUTFILE
+                        An optionally-provided output file path. If not provided, output is to standard out. (default: None)
+  -f {turtle,xml,json-ld,graph}, --outputformat {turtle,xml,json-ld,graph}
+                        An optionally-provided output format for RDF outputs. 'graph' returns the in-memory graph object, not serialized RDF. (default: turtle)
+  -s SHEET, --sheet SHEET
+                        The sheet within the target Excel Workbook to process (default: vocabulary)
+  -t TEMPLATEFILE, --templatefile TEMPLATEFILE
+                        An optionally-provided Excel-template file to be used in SKOS-> Excel converion. (default: None)
+  -e ERRORLEVEL, --errorlevel ERRORLEVEL
+                        The minimum severity level which fails validation (default: 1)
+  -m MESSAGELEVEL, --messagelevel MESSAGELEVEL
+                        The minimum severity level printed to console (default: 1)
+  -g LOGFILE, --logfile LOGFILE
+                        The file to write logging output to (default: None)
 
 
 License

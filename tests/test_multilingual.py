@@ -7,17 +7,18 @@ from vocexcel import convert
 from pathlib import Path
 from rdflib import Graph
 
+tests_dir_path = Path(__file__).parent
+
 
 def test_countrycodes():
-    convert.excel_to_rdf(Path(__file__).parent / "030_eg-languages-valid.xlsx")
+    convert.excel_to_rdf(
+        tests_dir_path / "030_languages.xlsx",
+        output_file_path=tests_dir_path / "030_languages.ttl"
+    )
 
     # file eg-languages-valid.ttl should have been created
-    g = Graph().parse(Path(__file__).parent / "030_eg-languages-valid.ttl")
+    g = Graph().parse(tests_dir_path / "030_languages.ttl")
     assert len(g) == 4940
 
     # clean up
-    Path.unlink(Path(__file__).parent / "030_eg-languages-valid.ttl", missing_ok=True)
-
-
-if __name__ == "__main__":
-    print(test_countrycodes())
+    Path.unlink(tests_dir_path / "030_languages.ttl", missing_ok=True)
