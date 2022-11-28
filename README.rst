@@ -7,22 +7,15 @@ How to use
 
 Creating vocabularies
 ---------------------
-The template files in this repository's *templates/* folder are to be used to create vocabularies. The templates contains all the basics needed to understand what to do including notes, examples and so on. Vocab authors only need this template file to create vocabulary content.
+The template files in this repository's *templates/* folder are to be used to create vocabularies. The templates hopefully contain all the information needed to understand how to use them: notes, examples and so on. Vocab authors only need a template file filled out to create a vocabulary.
 
-*Note: example sheets for various template versions are in the tests folder. Just ensure you're looking at examples prefixed with the template version you are after. Both simple and complex vocabularies are exemplified.*
+Unless you have a good reason to do something different, please use the latest version of the template. Currently (November, 2022) the latest template is v0.5.0 (VocExcel-template_050.xlsx).
+
+*Note: example sheets for various template versions are given in the `tests/` folder. Just ensure you're looking at examples prefixed with the same template version you are after.*
 
 There are multiple versions of template in the *templates/* folder. You are free to use any of them however the latest is usually the greatest!
 
 Use one Excel workbook per vocabulary.
-
-Templates
----------
-All working Excel templates are in the `templates/` folder in this repository.
-
-Unless you have a good reason to do something different, please use the latest version of the template.
-
-Currently (November, 2022) the latest template is v0.5.0 (VocExcel-template_050.xlsx).
-
 
 Installation
 ------------
