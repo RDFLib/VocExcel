@@ -1,9 +1,6 @@
-.. image:: https://surroundaustralia.com/themes/custom/surround_australia/surround-logo-dark.svg
-
-
 VocExcel
 ********
-Another Excel to RDF converter for SKOS vocabs, but one that uses fixed template to achieve particular SKOS profile outcomes!
+Another Excel to RDF converter for SKOS vocabs, but one that uses fixed templates to achieve particular SKOS profile outcomes!
 
 How to use
 ==========
@@ -18,14 +15,24 @@ There are multiple versions of template in the *templates/* folder. You are free
 
 Use one Excel workbook per vocabulary.
 
+Templates
+---------
+All working Excel templates are in the `templates/` folder in this repository.
+
+Unless you have a good reason to do something different, please use the latest version of the template.
+
+Currently (November, 2022) the latest template is v0.5.0 (VocExcel-template_050.xlsx).
+
+
 Installation
 ------------
 Several forms of use of this tool do not require any installation - see the next section. However, to run the tool as a Python script or a module, you will need to:
 
-1. have Python (3.6+) installed on your computer
-2. create a poetry environment
+1. have Python (3.6+, ideally 3.11) installed on your computer
+2. create a `Python Poetry <https://python-poetry.org/docs/basic-usage/>`_ environment
 3. install the necessary packages in that environment
-    * when running a poetry environment, some IDE's like python will automatically install the pyproject.toml else, there would have to be a manual install with something like 'poetry install'
+    * when running a Poetry environment, some IDE's like python will automatically install the pyproject.toml, else there would have to be a manual install with something like 'poetry install'
+    * a `requirements.txt` file is also provided for basic Python PIP package installation
 4. run the script, `convert.py`, using the version of Python in your poetry environment
 
 Generating RDF from Excel
@@ -152,14 +159,8 @@ Contact
 | *Lead Developer*:
 | **Nicholas Car**
 | *Data System Architect*
-| `SURROUND Australia Pty Ltd <https://surroundaustralia.com>`_
-| nicholas.car@surroundaustralia.com
-|
-| *Supporting Developer*:
-| **Peter Philips**
-| *Analyst Programmer*
-| `SURROUND Australia Pty Ltd <https://surroundaustralia.com>`_
-| peter.philips@surroundaustralia.com
+| `KurrawongAI <https://kurrawong.net>`_
+| nick@kurrawong.net
 |
 | **Company support**:
-| info@surroundaustralia.com
+| info@kurrawong.net
