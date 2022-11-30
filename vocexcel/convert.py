@@ -28,6 +28,13 @@ try:
         create_prefix_dict,
         extract_concept_scheme as extract_concept_scheme_043,
     )
+
+    from convert_050 import extract_concept_scheme as extract_concept_scheme_050
+    from convert_050 import extract_concepts as extract_concepts_050
+    from convert_050 import extract_collections as extract_collections_050
+    from convert_050 import extract_additions_concept_properties as extract_additions_concept_properties_050
+    from convert_050 import extract_prefixes as extract_prefixes_050
+
     from utils import (
         ConversionError,
         load_workbook,
@@ -179,6 +186,32 @@ def excel_to_rdf(
         )
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
+    elif template_version == "0.5.0":
+        try:
+            cs = extract_concept_scheme_050(wb["Concept Scheme"])
+            cons = extract_concepts_050(wb["Concepts"])
+            cols = extract_collections_050(wb["Collections"])
+            extra = create_additions_concept_properties(wb["Additional Concept Features"])
+            prefixes = create_prefixes(wb["Prefix Sheet"])
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
+
+    elif template_version == "0.4.3":
+        try:
+            sheet = wb["Concept Scheme"]
+            concept_sheet = wb["Concepts"]
+            additional_concept_sheet = wb["Additional Concept Features"]
+            collection_sheet = wb["Collections"]
+            prefix_sheet = wb["Prefix Sheet"]
+            prefix = create_prefix_dict(prefix_sheet)
+
+            concepts, collections = extract_concepts_and_collections_043(
+                concept_sheet, additional_concept_sheet, collection_sheet, prefix
+            )
+            cs = extract_concept_scheme_043(sheet, prefix)
+        except ValidationError as e:
+            raise ConversionError(f"ConceptScheme processing error: {e}")
+
     elif template_version == "0.3.0" or template_version == "0.2.1":
         sheet = wb["vocabulary" if sheet_name is None else sheet_name]
         # read from the vocabulary sheet of the workbook unless given a specific sheet
@@ -208,21 +241,6 @@ def excel_to_rdf(
                 concept_sheet, additional_concept_sheet, collection_sheet
             )
             cs = extract_concept_scheme_040(sheet)
-        except ValidationError as e:
-            raise ConversionError(f"ConceptScheme processing error: {e}")
-    elif template_version == "0.4.3":
-        try:
-            sheet = wb["Concept Scheme"]
-            concept_sheet = wb["Concepts"]
-            additional_concept_sheet = wb["Additional Concept Features"]
-            collection_sheet = wb["Collections"]
-            prefix_sheet = wb["Prefix Sheet"]
-            prefix = create_prefix_dict(prefix_sheet)
-
-            concepts, collections = extract_concepts_and_collections_043(
-                concept_sheet, additional_concept_sheet, collection_sheet, prefix
-            )
-            cs = extract_concept_scheme_043(sheet, prefix)
         except ValidationError as e:
             raise ConversionError(f"ConceptScheme processing error: {e}")
 

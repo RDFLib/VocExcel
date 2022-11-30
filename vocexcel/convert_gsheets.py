@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 try:
     import models, profiles
-    from utils import split_and_tidy, ConversionError
+    from utils import split_and_tidy_to_strings, ConversionError
     from convert import validate_with_profile, log_msg
 except:
     import sys
@@ -14,7 +14,7 @@ except:
     sys.path.append("..")
     from vocexcel import models, profiles
     from vocexcel.convert import validate_with_profile, log_msg
-    from vocexcel.utils import split_and_tidy, ConversionError
+    from vocexcel.utils import split_and_tidy_to_strings, ConversionError
 
 ACCEPTED_TEMPLATE_VERSIONS = ["0.4.3"]
 SPREADSHEET_ID = None
@@ -170,12 +170,12 @@ def extract_concepts(
                     read_cell(concepts_sheet, index, 0), prefix
                 ),
                 pref_label=read_cell(concepts_sheet, index, 1),
-                pl_language_code=split_and_tidy(read_cell(concepts_sheet, index, 2)),
+                pl_language_code=split_and_tidy_to_strings(read_cell(concepts_sheet, index, 2)),
                 definition=read_cell(concepts_sheet, index, 3),
-                def_language_code=split_and_tidy(read_cell(concepts_sheet, index, 4)),
-                alt_labels=split_and_tidy(read_cell(concepts_sheet, index, 5)),
+                def_language_code=split_and_tidy_to_strings(read_cell(concepts_sheet, index, 4)),
+                alt_labels=split_and_tidy_to_strings(read_cell(concepts_sheet, index, 5)),
                 children=using_prefix_list_output(
-                    split_and_tidy(read_cell(concepts_sheet, index, 6)), prefix
+                    split_and_tidy_to_strings(read_cell(concepts_sheet, index, 6)), prefix
                 ),
                 provenance=read_cell(concepts_sheet, index, 7),
                 home_vocab_uri=using_prefix_non_list_output(
@@ -183,23 +183,23 @@ def extract_concepts(
                 ),
                 # additional concepts sheet page
                 related_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 0)),
+                    split_and_tidy_to_strings(read_cell(additional_concepts_sheet, index, 0)),
                     prefix,
                 ),
                 close_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 1)),
+                    split_and_tidy_to_strings(read_cell(additional_concepts_sheet, index, 1)),
                     prefix,
                 ),
                 exact_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 2)),
+                    split_and_tidy_to_strings(read_cell(additional_concepts_sheet, index, 2)),
                     prefix,
                 ),
                 narrow_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 3)),
+                    split_and_tidy_to_strings(read_cell(additional_concepts_sheet, index, 3)),
                     prefix,
                 ),
                 broad_match=using_prefix_list_output(
-                    split_and_tidy(read_cell(additional_concepts_sheet, index, 4)),
+                    split_and_tidy_to_strings(read_cell(additional_concepts_sheet, index, 4)),
                     prefix,
                 ),
             )
@@ -224,7 +224,7 @@ def extract_collections(collection_sheet: dict, prefix: dict):
                 pref_label=read_cell(collection_sheet, index, 1),
                 definition=read_cell(collection_sheet, index, 2),
                 members=using_prefix_list_output(
-                    split_and_tidy(read_cell(collection_sheet, index, 3)), prefix
+                    split_and_tidy_to_strings(read_cell(collection_sheet, index, 3)), prefix
                 ),
                 provenance=read_cell(collection_sheet, index, 4),
             )

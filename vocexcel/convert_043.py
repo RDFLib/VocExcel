@@ -7,13 +7,13 @@ from pydantic import ValidationError
 
 try:
     import models
-    from utils import split_and_tidy, ConversionError, load_workbook
+    from utils import split_and_tidy_to_strings, ConversionError, load_workbook
 except:
     import sys
 
     sys.path.append("..")
     from vocexcel import models
-    from vocexcel.utils import split_and_tidy, ConversionError, load_workbook
+    from vocexcel.utils import split_and_tidy_to_strings, ConversionError, load_workbook
 
 
 # Checking how many colon's in string
@@ -163,12 +163,12 @@ def extract_concepts_and_collections(
                             q[f"A{row}"].value, prefix, q, row
                         ),
                         pref_label=q[f"B{row}"].value,
-                        pl_language_code=split_and_tidy(q[f"C{row}"].value),
+                        pl_language_code=split_and_tidy_to_strings(q[f"C{row}"].value),
                         definition=q[f"D{row}"].value,
-                        def_language_code=split_and_tidy(q[f"E{row}"].value),
-                        alt_labels=split_and_tidy(q[f"F{row}"].value),
+                        def_language_code=split_and_tidy_to_strings(q[f"E{row}"].value),
+                        alt_labels=split_and_tidy_to_strings(q[f"F{row}"].value),
                         children=using_prefix_and_namespace(
-                            split_and_tidy(q[f"G{row}"].value), prefix, q, row
+                            split_and_tidy_to_strings(q[f"G{row}"].value), prefix, q, row
                         ),
                         provenance=q[f"H{row}"].value,
                         # Note in the new template, home_vocab_uri is synonymous with source vocab uri
@@ -177,19 +177,19 @@ def extract_concepts_and_collections(
                         ),
                         # additional concept features sheets
                         related_match=using_prefix_and_namespace(
-                            split_and_tidy(r[f"B{row}"].value), prefix, r, row
+                            split_and_tidy_to_strings(r[f"B{row}"].value), prefix, r, row
                         ),
                         close_match=using_prefix_and_namespace(
-                            split_and_tidy(r[f"C{row}"].value), prefix, r, row
+                            split_and_tidy_to_strings(r[f"C{row}"].value), prefix, r, row
                         ),
                         exact_match=using_prefix_and_namespace(
-                            split_and_tidy(r[f"D{row}"].value), prefix, r, row
+                            split_and_tidy_to_strings(r[f"D{row}"].value), prefix, r, row
                         ),
                         narrow_match=using_prefix_and_namespace(
-                            split_and_tidy(r[f"E{row}"].value), prefix, r, row
+                            split_and_tidy_to_strings(r[f"E{row}"].value), prefix, r, row
                         ),
                         broad_match=using_prefix_and_namespace(
-                            split_and_tidy(r[f"F{row}"].value), prefix, r, row
+                            split_and_tidy_to_strings(r[f"F{row}"].value), prefix, r, row
                         ),
                     )
                     concepts.append(c)
@@ -215,7 +215,7 @@ def extract_concepts_and_collections(
                         pref_label=s[f"B{row}"].value,
                         definition=s[f"C{row}"].value,
                         members=using_prefix_and_namespace(
-                            split_and_tidy(s[f"D{row}"].value), prefix, s, row
+                            split_and_tidy_to_strings(s[f"D{row}"].value), prefix, s, row
                         ),
                         provenance=s[f"E{row}"].value,
                     )

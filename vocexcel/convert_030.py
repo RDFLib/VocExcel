@@ -5,13 +5,13 @@ from pydantic import ValidationError
 
 try:
     import models
-    from utils import split_and_tidy, ConversionError
+    from utils import split_and_tidy_to_strings, ConversionError
 except:
     import sys
 
     sys.path.append("..")
     from vocexcel import models
-    from vocexcel.utils import split_and_tidy, ConversionError
+    from vocexcel.utils import split_and_tidy_to_strings, ConversionError
 
 
 def extract_concepts_and_collections(
@@ -37,16 +37,16 @@ def extract_concepts_and_collections(
                         c = models.Concept(
                             uri=s[f"A{row}"].value,
                             pref_label=s[f"B{row}"].value,
-                            pl_language_code=split_and_tidy(
+                            pl_language_code=split_and_tidy_to_strings(
                                 s[f"C{row}"].value
                             ),  # new in 0.3.0
-                            alt_labels=split_and_tidy(s[f"D{row}"].value),
+                            alt_labels=split_and_tidy_to_strings(s[f"D{row}"].value),
                             definition=s[f"E{row}"].value,
-                            def_language_code=split_and_tidy(
+                            def_language_code=split_and_tidy_to_strings(
                                 s[f"F{row}"].value
                             ),  # new in 0.3.0
-                            children=split_and_tidy(s[f"G{row}"].value),
-                            other_ids=split_and_tidy(s[f"H{row}"].value),
+                            children=split_and_tidy_to_strings(s[f"G{row}"].value),
+                            other_ids=split_and_tidy_to_strings(s[f"H{row}"].value),
                             home_vocab_uri=s[f"I{row}"].value,
                             provenance=s[f"J{row}"].value,
                             template_version="0.3.0",
@@ -66,7 +66,7 @@ def extract_concepts_and_collections(
                             uri=s[f"A{row}"].value,
                             pref_label=s[f"B{row}"].value,
                             definition=s[f"C{row}"].value,
-                            members=split_and_tidy(s[f"D{row}"].value),
+                            members=split_and_tidy_to_strings(s[f"D{row}"].value),
                             provenance=s[f"E{row}"].value,
                         )
                         collections.append(c)

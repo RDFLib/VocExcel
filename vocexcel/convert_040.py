@@ -5,13 +5,13 @@ from pydantic import ValidationError
 
 try:
     import models
-    from utils import split_and_tidy, ConversionError
+    from utils import split_and_tidy_to_strings, ConversionError
 except:
     import sys
 
     sys.path.append("..")
     from vocexcel import models
-    from vocexcel.utils import split_and_tidy, ConversionError
+    from vocexcel.utils import split_and_tidy_to_strings, ConversionError
 
 
 # this is a new function to iterate over the collection sheet in template version 0.4.0
@@ -35,19 +35,19 @@ def extract_concepts_and_collections(
                     c = models.Concept(
                         uri=q[f"A{row}"].value,
                         pref_label=q[f"B{row}"].value,
-                        pl_language_code=split_and_tidy(q[f"C{row}"].value),
+                        pl_language_code=split_and_tidy_to_strings(q[f"C{row}"].value),
                         definition=q[f"D{row}"].value,
-                        def_language_code=split_and_tidy(q[f"E{row}"].value),
-                        alt_labels=split_and_tidy(q[f"F{row}"].value),
-                        children=split_and_tidy(q[f"G{row}"].value),
+                        def_language_code=split_and_tidy_to_strings(q[f"E{row}"].value),
+                        alt_labels=split_and_tidy_to_strings(q[f"F{row}"].value),
+                        children=split_and_tidy_to_strings(q[f"G{row}"].value),
                         provenance=q[f"H{row}"].value,
                         home_vocab_uri=q[f"I{row}"].value,
                         # additional concept features sheets
-                        related_match=split_and_tidy(r[f"B{row}"].value),
-                        close_match=split_and_tidy(r[f"C{row}"].value),
-                        exact_match=split_and_tidy(r[f"D{row}"].value),
-                        narrow_match=split_and_tidy(r[f"E{row}"].value),
-                        broad_match=split_and_tidy(r[f"F{row}"].value),
+                        related_match=split_and_tidy_to_strings(r[f"B{row}"].value),
+                        close_match=split_and_tidy_to_strings(r[f"C{row}"].value),
+                        exact_match=split_and_tidy_to_strings(r[f"D{row}"].value),
+                        narrow_match=split_and_tidy_to_strings(r[f"E{row}"].value),
+                        broad_match=split_and_tidy_to_strings(r[f"F{row}"].value),
                     )
                     concepts.append(c)
                 except ValidationError as e:
@@ -71,7 +71,7 @@ def extract_concepts_and_collections(
                         uri=s[f"A{row}"].value,
                         pref_label=s[f"B{row}"].value,
                         definition=s[f"C{row}"].value,
-                        members=split_and_tidy(s[f"D{row}"].value),
+                        members=split_and_tidy_to_strings(s[f"D{row}"].value),
                         provenance=s[f"E{row}"].value,
                     )
                     collections.append(c)

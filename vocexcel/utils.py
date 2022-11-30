@@ -1,7 +1,11 @@
+import re
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Optional
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
+from rdflib import Graph, URIRef, Literal, Namespace, BNode
+from rdflib.namespace import RDF, RDFS, DCTERMS, PROV, XSD, DCAT, SKOS
+
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {
@@ -14,7 +18,7 @@ RDF_FILE_ENDINGS = {
     ".n3": "n3",
 }
 KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
-KNOWN_TEMPLATE_VERSIONS = ["0.2.1", "0.3.0", "0.4.0", "0.4.1", "0.4.2", "0.4.3"]
+KNOWN_TEMPLATE_VERSIONS = ["0.2.1", "0.3.0", "0.4.0", "0.4.1", "0.4.2", "0.4.3", "0.5.0"]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
 
@@ -41,9 +45,11 @@ def load_template(file_path: Path) -> Workbook:
 
 
 def get_template_version(wb: Workbook) -> str:
-    # try 0.4.0 location
+    # try 0.4.0 & 0.5.0 locations
     try:
         intro_sheet = wb["Introduction"]
+        if intro_sheet["E11"].value in KNOWN_TEMPLATE_VERSIONS:
+            return intro_sheet["E11"].value
         if intro_sheet["J11"].value in KNOWN_TEMPLATE_VERSIONS:
             return intro_sheet["J11"].value
     except Exception:
@@ -64,16 +70,17 @@ def get_template_version(wb: Workbook) -> str:
     )
 
 
-def split_and_tidy(cell_value: str):
+def split_and_tidy_to_strings(s: str):
     # note this may not work in list of things that contain commas. Need to consider revising
     # to allow comma-seperated values where it'll split in commas but not in things enclosed in quotes.
-    if cell_value == "" or cell_value is None:
+    if s == "" or s is None:
         return []
-    return (
-        [x.strip() for x in cell_value.strip().split(",")]
-        if cell_value is not None
-        else []
-    )
+    else:
+        return [x.strip() for x in re.split(r",\n", s.strip())]
+
+
+def split_and_tidy_to_iris(s: str, prefixes):
+    return [expand_namespaces(ss.strip(), prefixes) for ss in split_and_tidy_to_strings(s)]
 
 
 def string_is_http_iri(s: str) -> Tuple[bool, str]:
@@ -81,7 +88,11 @@ def string_is_http_iri(s: str) -> Tuple[bool, str]:
     # returns (False, message) otherwise
     messages = []
     if not s.startswith("http"):
-        messages.append("HTTP IRIs must start with 'http' or 'https'")
+        messages.append(f"HTTP IRIs must start with 'http' or 'https'. Your value was '{s}'")
+        if ":" in s:
+            messages.append(
+                f"It looks like your IRI might contain a prefix, {s.split(':')[0]+':'}, that could not be expanded. "
+                "Check it's present in the Prefixes sheet of your workbook")
 
     if " " in s:
         messages.append("IRIs cannot contain spaces")
@@ -104,3 +115,48 @@ def all_strings_in_list_are_iris(l_: []) -> Tuple[bool, str]:
         return False, " and ".join(messages)
     else:
         return True, ""
+
+
+def expand_namespaces(s: str, prefixes: dict[str, Namespace]) -> URIRef:
+    for pre in prefixes.keys():
+        if s.startswith(pre):
+            return URIRef(s.replace(pre, prefixes[pre]))
+    return URIRef(s)
+
+
+def bind_namespaces(g: Graph, prefixes: dict[str, Namespace]):
+    for pre, ns in prefixes.items():
+        g.bind(pre.rstrip(":"), ns)
+
+
+def string_from_iri(iri):
+    s = str(iri.split("/")[-1].split("#")[-1])
+    s = re.sub(r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", " ", s)
+    s = s.title()
+    s = s.replace("-", " ")
+
+    return s
+
+
+def id_from_iri(iri):
+    id = str(iri.split("/")[-1].split("#")[-1])
+    return Literal(id, datatype=XSD.token)
+
+
+def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
+    ag = Graph()
+    iri = expand_namespaces(agent_value, prefixes)
+    creator_iri_conv = string_is_http_iri(str(iri))
+    if not creator_iri_conv[0]:
+        iri = BNode()
+    ag.add((iri, RDF.type, PROV.Agent))
+    ag.add((iri, RDFS.label, Literal(string_from_iri(agent_value))))
+    if agent_role in [DCTERMS.creator, DCTERMS.publisher, DCTERMS.rightsHolder]:
+        ag.add((iri_of_subject, agent_role, iri))
+    else:
+        qa = BNode()
+        ag.add((iri_of_subject, PROV.qualifiedAttribution, qa))
+        ag.add((qa, PROV.agent, iri))
+        ag.add((qa, DCAT.hadRole, agent_role))
+
+    return ag
