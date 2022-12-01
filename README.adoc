@@ -22,13 +22,13 @@ The template files in this repository's *templates/* folder are to be used to cr
 
 Use one Excel workbook per vocabulary.
 
-==== Latest Template: 0.6.0
+=== Latest Template
 
 Unless you have a good reason to do something different, please use the latest version of the template. Currently, (December, 2022) the latest template is v0.6.0 (VocExcel-template_060.xlsx).
 
 Older templates still convert, so if you've used one and like it, keep using it.
 
-==== Examples
+=== Examples
 
 Example filled-in templates versions are given in the `tests/` folder. Just ensure you're looking at examples prefixed with the same template version you are after, e.g. 0.6.0 = 060_simple.xlsx*
 
@@ -41,9 +41,7 @@ To process an Excel template, you will need to either:
 
 The Python script can also run as a Python module, i.e. within a larger Python workflow.
 
-=== Python Script
-
-==== Installation
+=== Installation
 
 You will need to:
 
@@ -102,7 +100,7 @@ optional arguments:
                         The file to write logging output to (default: None)
 ----
 
-===== As a library
+==== As a library
 
 The _convert.py_ file as a function that you can call to do conversions: `excel_to_rdf()`, like this:
 
@@ -113,7 +111,7 @@ from pathlib import Path
 convert.rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
 ----
 
-===== Online
+==== Online
 
 *Coming soon! (Dec, 2022)*
 
