@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
 from rdflib import Graph, URIRef, Literal, Namespace, BNode
@@ -18,7 +18,7 @@ RDF_FILE_ENDINGS = {
     ".n3": "n3",
 }
 KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
-KNOWN_TEMPLATE_VERSIONS = ["0.2.1", "0.3.0", "0.4.0", "0.4.1", "0.4.2", "0.4.3", "0.5.0"]
+KNOWN_TEMPLATE_VERSIONS = ["0.2.1", "0.3.0", "0.4.0", "0.4.1", "0.4.2", "0.4.3", "0.5.0", "0.6.0"]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
 
@@ -37,20 +37,17 @@ def load_template(file_path: Path) -> Workbook:
         raise ValueError(
             "Template files for RDF-to-Excel conversion must be Excel files ending .xlsx"
         )
-    if get_template_version(load_workbook(file_path)) != LATEST_TEMPLATE:
-        raise ValueError(
-            f"Template files for RDF-to-Excel conversion must be of latest version ({LATEST_TEMPLATE})"
-        )
+
     return _load_workbook(filename=str(file_path), data_only=True)
 
 
 def get_template_version(wb: Workbook) -> str:
-    # try 0.4.0 & 0.5.0 locations
+    # try 0.4.0, 0.5.0 & 0.6.0 locations
     try:
         intro_sheet = wb["Introduction"]
-        if intro_sheet["E11"].value in KNOWN_TEMPLATE_VERSIONS:
+        if intro_sheet["E11"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.5.0, 0.6.0
             return intro_sheet["E11"].value
-        if intro_sheet["J11"].value in KNOWN_TEMPLATE_VERSIONS:
+        if intro_sheet["J11"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.4.0
             return intro_sheet["J11"].value
     except Exception:
         pass
@@ -76,7 +73,7 @@ def split_and_tidy_to_strings(s: str):
     if s == "" or s is None:
         return []
     else:
-        return [x.strip() for x in re.split(r",\n", s.strip())]
+        return [x.strip() for x in re.split("[,\n]\s?", s.strip()) if x != ""]
 
 
 def split_and_tidy_to_iris(s: str, prefixes):
@@ -117,11 +114,14 @@ def all_strings_in_list_are_iris(l_: []) -> Tuple[bool, str]:
         return True, ""
 
 
-def expand_namespaces(s: str, prefixes: dict[str, Namespace]) -> URIRef:
+def expand_namespaces(s: str, prefixes: dict[str, Namespace]) -> Union[URIRef, str]:
     for pre in prefixes.keys():
         if s.startswith(pre):
             return URIRef(s.replace(pre, prefixes[pre]))
-    return URIRef(s)
+    if s.startswith("http"):
+        return URIRef(s)
+    else:
+        return s
 
 
 def bind_namespaces(g: Graph, prefixes: dict[str, Namespace]):
@@ -160,3 +160,11 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
         ag.add((qa, DCAT.hadRole, agent_role))
 
     return ag
+
+
+def make_iri(s: str, prefixes: dict[str, Namespace]):
+    iri = expand_namespaces(s, prefixes)
+    iri_conv = string_is_http_iri(str(iri))
+    if not iri_conv[0]:
+        raise ConversionError(iri_conv[1])
+    return iri

@@ -29,11 +29,7 @@ try:
         extract_concept_scheme as extract_concept_scheme_043,
     )
 
-    from convert_050 import extract_concept_scheme as extract_concept_scheme_050
-    from convert_050 import extract_concepts as extract_concepts_050
-    from convert_050 import extract_collections as extract_collections_050
-    from convert_050 import extract_additions_concept_properties as extract_additions_concept_properties_050
-    from convert_050 import extract_prefixes as extract_prefixes_050
+    from convert_060 import excel_to_rdf as excel_to_rdf_060
 
     from utils import (
         ConversionError,
@@ -186,15 +182,8 @@ def excel_to_rdf(
         )
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
-    elif template_version == "0.5.0":
-        try:
-            cs = extract_concept_scheme_050(wb["Concept Scheme"])
-            cons = extract_concepts_050(wb["Concepts"])
-            cols = extract_collections_050(wb["Collections"])
-            extra = create_additions_concept_properties(wb["Additional Concept Features"])
-            prefixes = create_prefixes(wb["Prefix Sheet"])
-        except ValidationError as e:
-            raise ConversionError(f"ConceptScheme processing error: {e}")
+    elif template_version in ["0.5.0", "0.6.0"]:
+        return excel_to_rdf_060(wb, output_file_path, output_format)
 
     elif template_version == "0.4.3":
         try:
