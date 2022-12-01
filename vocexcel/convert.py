@@ -102,7 +102,7 @@ def excel_to_rdf(
         print(validate)
         return excel_to_rdf_060(wb, output_file_path, output_format, validate, profile, error_level, message_level, log_file)
 
-    elif template_version == "0.4.3":
+    elif template_version in ["0.4.3", "0.4.4"]:
         try:
             sheet = wb["Concept Scheme"]
             concept_sheet = wb["Concepts"]
