@@ -9,7 +9,7 @@ from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
 
 try:
     from utils import all_strings_in_list_are_iris, string_is_http_iri
-except:
+except ImportError:
     import sys
 
     sys.path.append("..")
@@ -43,15 +43,8 @@ class ConceptScheme(BaseModel):
     custodian: str = None
     pid: str = None
 
-    @validator("creator")
-    def creator_must_be_from_list(cls, v):
-        if v not in ORGANISATIONS.keys():
-            raise ValueError(
-                f"Organisations must selected from the Organisations list: {', '.join(ORGANISATIONS)}"
-            )
-        return v
-
-    @validator("publisher")
+    @validator("creator", allow_reuse=True)
+    @validator("publisher", allow_reuse=True)
     def publisher_must_be_from_list(cls, v):
         if v not in ORGANISATIONS.keys():
             raise ValueError(
@@ -144,37 +137,12 @@ class Concept(BaseModel):
     narrow_match: List[str] = []
     broad_match: List[str] = []
 
-    @validator("children")
-    def each_child_must_be_an_iri(cls, elem):
-        r = all_strings_in_list_are_iris(elem)
-        assert r[0], r[1]
-        return elem
-
-    @validator("related_match")
-    def each_rm_must_be_an_iri(cls, elem):
-        r = all_strings_in_list_are_iris(elem)
-        assert r[0], r[1]
-        return elem
-
-    @validator("close_match")
-    def each_cm_must_be_an_iri(cls, elem):
-        r = all_strings_in_list_are_iris(elem)
-        assert r[0], r[1]
-        return elem
-
-    @validator("exact_match")
-    def each_em_must_be_an_iri(cls, elem):
-        r = all_strings_in_list_are_iris(elem)
-        assert r[0], r[1]
-        return elem
-
-    @validator("narrow_match")
-    def each_nm_must_be_an_iri(cls, elem):
-        r = all_strings_in_list_are_iris(elem)
-        assert r[0], r[1]
-        return elem
-
-    @validator("broad_match")
+    @validator("children", allow_reuse=True)
+    @validator("related_match", allow_reuse=True)
+    @validator("close_match", allow_reuse=True)
+    @validator("exact_match", allow_reuse=True)
+    @validator("narrow_match", allow_reuse=True)
+    @validator("broad_match", allow_reuse=True)
     def each_bm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]

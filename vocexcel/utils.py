@@ -1,11 +1,17 @@
+import logging
 import re
 from pathlib import Path
-from typing import Tuple, Optional, Union
+from typing import Tuple, Union, Dict
+
+import pyshacl
+from colorama import Fore, Style
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
+from pyshacl.pytypes import GraphLike
 from rdflib import Graph, URIRef, Literal, Namespace, BNode
-from rdflib.namespace import RDF, RDFS, DCTERMS, PROV, XSD, DCAT, SKOS
+from rdflib.namespace import RDF, RDFS, DCTERMS, PROV, XSD, DCAT
 
+from vocexcel import profiles
 
 EXCEL_FILE_ENDINGS = ["xlsx"]
 RDF_FILE_ENDINGS = {
@@ -18,7 +24,16 @@ RDF_FILE_ENDINGS = {
     ".n3": "n3",
 }
 KNOWN_FILE_ENDINGS = [str(x) for x in RDF_FILE_ENDINGS.keys()] + EXCEL_FILE_ENDINGS
-KNOWN_TEMPLATE_VERSIONS = ["0.2.1", "0.3.0", "0.4.0", "0.4.1", "0.4.2", "0.4.3", "0.5.0", "0.6.0"]
+KNOWN_TEMPLATE_VERSIONS = [
+    "0.2.1",
+    "0.3.0",
+    "0.4.0",
+    "0.4.1",
+    "0.4.2",
+    "0.4.3",
+    "0.5.0",
+    "0.6.0",
+]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
 
@@ -77,7 +92,9 @@ def split_and_tidy_to_strings(s: str):
 
 
 def split_and_tidy_to_iris(s: str, prefixes):
-    return [expand_namespaces(ss.strip(), prefixes) for ss in split_and_tidy_to_strings(s)]
+    return [
+        expand_namespaces(ss.strip(), prefixes) for ss in split_and_tidy_to_strings(s)
+    ]
 
 
 def string_is_http_iri(s: str) -> Tuple[bool, str]:
@@ -85,11 +102,14 @@ def string_is_http_iri(s: str) -> Tuple[bool, str]:
     # returns (False, message) otherwise
     messages = []
     if not s.startswith("http"):
-        messages.append(f"HTTP IRIs must start with 'http' or 'https'. Your value was '{s}'")
+        messages.append(
+            f"HTTP IRIs must start with 'http' or 'https'. Your value was '{s}'"
+        )
         if ":" in s:
             messages.append(
                 f"It looks like your IRI might contain a prefix, {s.split(':')[0]+':'}, that could not be expanded. "
-                "Check it's present in the Prefixes sheet of your workbook")
+                "Check it's present in the Prefixes sheet of your workbook"
+            )
 
     if " " in s:
         messages.append("IRIs cannot contain spaces")
@@ -168,3 +188,118 @@ def make_iri(s: str, prefixes: dict[str, Namespace]):
     if not iri_conv[0]:
         raise ConversionError(iri_conv[1])
     return iri
+
+
+def validate_with_profile(
+    data_graph: Union[GraphLike, str, bytes],
+    profile="vocpub",
+    error_level=1,
+    message_level=1,
+    log_file=None,
+):
+    if profile not in profiles.PROFILES.keys():
+        raise ValueError(
+            "The profile chosen for conversion must be one of '{}'. 'vocpub' is default".format(
+                "', '".join(profiles.PROFILES.keys())
+            )
+        )
+    allow_warnings = True if error_level > 1 else False
+
+    # validate the RDF file
+    conforms, results_graph, results_text = pyshacl.validate(
+        data_graph,
+        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
+        allow_warnings=allow_warnings,
+    )
+
+    logging_level = logging.INFO
+
+    if message_level == 3:
+        logging_level = logging.ERROR
+    elif message_level == 2:
+        logging_level = logging.WARNING
+
+    if log_file:
+        logging.basicConfig(
+            level=logging_level, format="%(message)s", filename=log_file, force=True
+        )
+    else:
+        logging.basicConfig(level=logging_level, format="%(message)s")
+
+    info_list = []
+    warning_list = []
+    violation_list = []
+
+    from rdflib.namespace import RDF, SH
+
+    for report in results_graph.subjects(RDF.type, SH.ValidationReport):
+        for result in results_graph.objects(report, SH.result):
+            result_dict = {}
+            for p, o in results_graph.predicate_objects(result):
+                if p == SH.focusNode:
+                    result_dict["focusNode"] = str(o)
+                elif p == SH.resultMessage:
+                    result_dict["resultMessage"] = str(o)
+                elif p == SH.resultSeverity:
+                    result_dict["resultSeverity"] = str(o)
+                elif p == SH.sourceConstraintComponent:
+                    result_dict["sourceConstraintComponent"] = str(o)
+                elif p == SH.sourceShape:
+                    result_dict["sourceShape"] = str(o)
+                elif p == SH.value:
+                    result_dict["value"] = str(o)
+            result_message_formatted = log_msg(result_dict, log_file)
+            result_message = log_msg(result_dict, "placeholder")
+            if result_dict["resultSeverity"] == str(SH.Info):
+                logging.info(result_message_formatted)
+                info_list.append(result_message)
+            elif result_dict["resultSeverity"] == str(SH.Warning):
+                logging.warning(result_message_formatted)
+                warning_list.append(result_message)
+            elif result_dict["resultSeverity"] == str(SH.Violation):
+                logging.error(result_message_formatted)
+                violation_list.append(result_message)
+
+    if error_level == 3:
+        error_messages = violation_list
+    elif error_level == 2:
+        error_messages = warning_list + violation_list
+    else:  # error_level == 1
+        error_messages = info_list + warning_list + violation_list
+
+    if len(error_messages) > 0:
+        raise ConversionError(
+            f"The file you supplied is not valid according to the {profile} profile."
+        )
+
+
+def log_msg(result: Dict, log_file: str) -> str:
+    from rdflib.namespace import SH
+
+    formatted_msg = ""
+    message = f"""Validation Result in {result['sourceConstraintComponent'].split(str(SH))[1]} ({result['sourceConstraintComponent']}):
+\tSeverity: sh:{result['resultSeverity'].split(str(SH))[1]}
+\tSource Shape: <{result['sourceShape']}>
+\tFocus Node: <{result['focusNode']}>
+\tValue Node: <{result.get('value', '')}>
+\tMessage: {result['resultMessage']}
+"""
+    if result["resultSeverity"] == str(SH.Info):
+        formatted_msg = (
+            f"INFO: {message}"
+            if log_file
+            else Fore.BLUE + "INFO: " + Style.RESET_ALL + message
+        )
+    elif result["resultSeverity"] == str(SH.Warning):
+        formatted_msg = (
+            f"WARNING: {message}"
+            if log_file
+            else Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
+        )
+    elif result["resultSeverity"] == str(SH.Violation):
+        formatted_msg = (
+            f"VIOLATION: {message}"
+            if log_file
+            else Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
+        )
+    return formatted_msg

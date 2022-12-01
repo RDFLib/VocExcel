@@ -6,7 +6,7 @@ from pydantic import ValidationError
 try:
     import models
     from utils import split_and_tidy_to_strings, ConversionError
-except:
+except ImportError:
     import sys
 
     sys.path.append("..")

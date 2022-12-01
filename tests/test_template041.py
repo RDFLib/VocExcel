@@ -24,7 +24,9 @@ def test_empty_template():
 
 
 def test_simple():
-    g = convert.excel_to_rdf(tests_dir_path / "041_simple_valid.xlsx", output_format="graph")
+    g = convert.excel_to_rdf(
+        tests_dir_path / "041_simple_valid.xlsx", output_format="graph"
+    )
     assert len(g) == 142
     assert (
         URIRef(
@@ -44,5 +46,7 @@ def test_simple():
 
 def test_exhaustive_template_is_isomorphic():
     g1 = Graph().parse(tests_dir_path / "041_exhaustive_comparison.ttl")
-    g2 = convert.excel_to_rdf(tests_dir_path / "041_exhaustive.xlsx", output_format="graph")
+    g2 = convert.excel_to_rdf(
+        tests_dir_path / "041_exhaustive.xlsx", output_format="graph"
+    )
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"

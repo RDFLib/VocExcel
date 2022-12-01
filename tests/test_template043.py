@@ -12,7 +12,9 @@ from vocexcel.utils import ConversionError
 
 def test_empty_template():
     with pytest.raises(ConversionError) as e:
-        convert.excel_to_rdf(Path(__file__).parent.parent / "templates" / "VocExcel-template_043.xlsx")
+        convert.excel_to_rdf(
+            Path(__file__).parent.parent / "templates" / "VocExcel-template_043.xlsx"
+        )
     assert "7 validation errors for ConceptScheme" in str(e)
 
 
@@ -21,7 +23,7 @@ def test_simple():
     g = convert.excel_to_rdf(
         tests_dir_path / "043_simple_valid.xlsx",
         # output_file_path=tests_dir_path /"043_simple_valid_nc.ttl"
-        output_format="graph"
+        output_format="graph",
     )
     assert (
         URIRef(
@@ -40,7 +42,9 @@ def test_simple():
 def test_exhaustive_template_is_isomorphic():
     tests_dir_path = Path(__file__).parent
     g1 = Graph().parse(tests_dir_path / "043_exhaustive.ttl")
-    g2 = convert.excel_to_rdf(Path(__file__).parent / "043_exhaustive.xlsx", output_format="graph")
+    g2 = convert.excel_to_rdf(
+        Path(__file__).parent / "043_exhaustive.xlsx", output_format="graph"
+    )
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
 
 
@@ -52,8 +56,7 @@ def test_rdf_to_excel():
         output_file_path=tests_dir_path / "043_exhaustive_roundtrip.xlsx",
     )
     g2 = convert.excel_to_rdf(
-        tests_dir_path / "043_exhaustive.xlsx",
-        output_format="graph"
+        tests_dir_path / "043_exhaustive.xlsx", output_format="graph"
     )
 
     # clean up files

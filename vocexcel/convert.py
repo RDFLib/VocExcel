@@ -2,12 +2,9 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, Literal, Union, Optional
+from typing import Literal, Optional
 
-import pyshacl
-from colorama import Fore, Style
 from pydantic.error_wrappers import ValidationError
-from pyshacl.pytypes import GraphLike
 
 try:
     import models
@@ -60,6 +57,9 @@ except ImportError:
         create_prefix_dict,
         extract_concept_scheme as extract_concept_scheme_043,
     )
+
+    from convert_060 import excel_to_rdf as excel_to_rdf_060
+
     from vocexcel.utils import (
         ConversionError,
         load_workbook,
@@ -68,95 +68,10 @@ except ImportError:
         KNOWN_FILE_ENDINGS,
         RDF_FILE_ENDINGS,
         KNOWN_TEMPLATE_VERSIONS,
-        EXCEL_FILE_ENDINGS,
-    )
+        EXCEL_FILE_ENDINGS, validate_with_profile,
+)
 
 TEMPLATE_VERSION = None
-
-
-def validate_with_profile(
-    data_graph: Union[GraphLike, str, bytes],
-    profile="vocpub",
-    error_level=1,
-    message_level=1,
-    log_file=None,
-):
-    if profile not in profiles.PROFILES.keys():
-        raise ValueError(
-            "The profile chosen for conversion must be one of '{}'. 'vocpub' is default".format(
-                "', '".join(profiles.PROFILES.keys())
-            )
-        )
-    allow_warnings = True if error_level > 1 else False
-
-    # validate the RDF file
-    conforms, results_graph, results_text = pyshacl.validate(
-        data_graph,
-        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
-        allow_warnings=allow_warnings,
-    )
-
-    logging_level = logging.INFO
-
-    if message_level == 3:
-        logging_level = logging.ERROR
-    elif message_level == 2:
-        logging_level = logging.WARNING
-
-    if log_file:
-        logging.basicConfig(
-            level=logging_level, format="%(message)s", filename=log_file, force=True
-        )
-    else:
-        logging.basicConfig(level=logging_level, format="%(message)s")
-
-    info_list = []
-    warning_list = []
-    violation_list = []
-
-    from rdflib.namespace import RDF, SH
-
-    for report in results_graph.subjects(RDF.type, SH.ValidationReport):
-        for result in results_graph.objects(report, SH.result):
-            result_dict = {}
-            for p, o in results_graph.predicate_objects(result):
-                if p == SH.focusNode:
-                    result_dict["focusNode"] = str(o)
-                elif p == SH.resultMessage:
-                    result_dict["resultMessage"] = str(o)
-                elif p == SH.resultSeverity:
-                    result_dict["resultSeverity"] = str(o)
-                elif p == SH.sourceConstraintComponent:
-                    result_dict["sourceConstraintComponent"] = str(o)
-                elif p == SH.sourceShape:
-                    result_dict["sourceShape"] = str(o)
-                elif p == SH.value:
-                    result_dict["value"] = str(o)
-            result_message_formatted = log_msg(result_dict, log_file)
-            result_message = log_msg(result_dict, "placeholder")
-            if result_dict["resultSeverity"] == str(SH.Info):
-                logging.info(result_message_formatted)
-                info_list.append(result_message)
-            elif result_dict["resultSeverity"] == str(SH.Warning):
-                logging.warning(result_message_formatted)
-                warning_list.append(result_message)
-            elif result_dict["resultSeverity"] == str(SH.Violation):
-                logging.error(result_message_formatted)
-                violation_list.append(result_message)
-
-    error_messages = []
-
-    if error_level == 3:
-        error_messages = violation_list
-    elif error_level == 2:
-        error_messages = warning_list + violation_list
-    else:  # error_level == 1
-        error_messages = info_list + warning_list + violation_list
-
-    if len(error_messages) > 0:
-        raise ConversionError(
-            f"The file you supplied is not valid according to the {profile} profile."
-        )
 
 
 def excel_to_rdf(
@@ -183,7 +98,9 @@ def excel_to_rdf(
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
     elif template_version in ["0.5.0", "0.6.0"]:
-        return excel_to_rdf_060(wb, output_file_path, output_format)
+        print("validate")
+        print(validate)
+        return excel_to_rdf_060(wb, output_file_path, output_format, validate, profile, error_level, message_level, log_file)
 
     elif template_version == "0.4.3":
         try:
@@ -456,38 +373,6 @@ def rdf_to_excel(
     return dest
 
 
-def log_msg(result: Dict, log_file: str) -> str:
-    from rdflib.namespace import SH
-
-    formatted_msg = ""
-    message = f"""Validation Result in {result['sourceConstraintComponent'].split(str(SH))[1]} ({result['sourceConstraintComponent']}):
-\tSeverity: sh:{result['resultSeverity'].split(str(SH))[1]}
-\tSource Shape: <{result['sourceShape']}>
-\tFocus Node: <{result['focusNode']}>
-\tValue Node: <{result.get('value', '')}>
-\tMessage: {result['resultMessage']}
-"""
-    if result["resultSeverity"] == str(SH.Info):
-        formatted_msg = (
-            f"INFO: {message}"
-            if log_file
-            else Fore.BLUE + "INFO: " + Style.RESET_ALL + message
-        )
-    elif result["resultSeverity"] == str(SH.Warning):
-        formatted_msg = (
-            f"WARNING: {message}"
-            if log_file
-            else Fore.YELLOW + "WARNING: " + Style.RESET_ALL + message
-        )
-    elif result["resultSeverity"] == str(SH.Violation):
-        formatted_msg = (
-            f"VIOLATION: {message}"
-            if log_file
-            else Fore.RED + "VIOLATION: " + Style.RESET_ALL + message
-        )
-    return formatted_msg
-
-
 def main(args=None):
 
     if args is None:  # vocexcel run via entrypoint
@@ -545,7 +430,7 @@ def main(args=None):
         "-f",
         "--outputformat",
         help="An optionally-provided output format for RDF outputs. 'graph' returns the in-memory graph object, "
-             "not serialized RDF.",
+        "not serialized RDF.",
         required=False,
         choices=["turtle", "xml", "json-ld", "graph"],
         default="turtle",
@@ -607,9 +492,13 @@ def main(args=None):
     elif args.info:
         # not sure what to do here, just removing the errors
         from vocexcel import __version__
+
         print(f"VocExel version: {__version__}")
         from vocexcel.utils import KNOWN_TEMPLATE_VERSIONS
-        print(f"Known template versions: {', '.join(sorted(KNOWN_TEMPLATE_VERSIONS, reverse=True))}")
+
+        print(
+            f"Known template versions: {', '.join(sorted(KNOWN_TEMPLATE_VERSIONS, reverse=True))}"
+        )
     elif args.file_to_convert:
         if not args.file_to_convert.suffix.lower().endswith(tuple(KNOWN_FILE_ENDINGS)):
             print(
@@ -633,7 +522,7 @@ def main(args=None):
                     error_level=int(args.errorlevel),
                     message_level=int(args.messagelevel),
                     log_file=args.logfile,
-                    validate=True,
+                    validate=args.validate,
                 )
                 if args.outputfile is None:
                     print(o)

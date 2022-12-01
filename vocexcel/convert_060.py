@@ -1,24 +1,47 @@
-import logging
-
-from typing import Tuple, List, Optional
-from typing import Literal as TypeLiteral
-
-from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.workbook.workbook import Workbook
-from pydantic import ValidationError
 from pathlib import Path
-from rdflib import Graph, URIRef, Literal, BNode, Namespace
-from rdflib.namespace import DCTERMS, OWL, PROV, RDF, RDFS, SDO, SKOS, XSD
-import re
+from typing import Literal as TypeLiteral
+from typing import Optional
+
+from openpyxl.workbook.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
+from rdflib import Graph, URIRef, Literal, Namespace
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SKOS, XSD
+
 try:
     import models
-    from utils import split_and_tidy_to_strings, ConversionError, load_workbook, string_is_http_iri, expand_namespaces, string_from_iri, id_from_iri, make_agent, split_and_tidy_to_iris, bind_namespaces, make_iri
-except:
+    from utils import (
+        split_and_tidy_to_strings,
+        ConversionError,
+        load_workbook,
+        string_is_http_iri,
+        expand_namespaces,
+        string_from_iri,
+        id_from_iri,
+        make_agent,
+        split_and_tidy_to_iris,
+        bind_namespaces,
+        make_iri,
+        validate_with_profile,
+    )
+except ImportError:
     import sys
 
     sys.path.append("..")
     from vocexcel import models
-    from vocexcel.utils import split_and_tidy_to_strings, ConversionError, load_workbook, string_is_http_iri, expand_namespaces, string_from_iri, id_from_iri, make_agent, split_and_tidy_to_iris, bind_namespaces, make_iri
+    from vocexcel.utils import (
+        split_and_tidy_to_strings,
+        ConversionError,
+        load_workbook,
+        string_is_http_iri,
+        expand_namespaces,
+        string_from_iri,
+        id_from_iri,
+        make_agent,
+        split_and_tidy_to_iris,
+        bind_namespaces,
+        make_iri,
+        validate_with_profile,
+    )
 
 
 def extract_prefixes(sheet: Worksheet) -> dict[str, Namespace]:
@@ -50,30 +73,46 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
     custodian = sheet["B12"].value
 
     if iri_s is None:
-        raise ConversionError("Your vocabulary has no IRI. Please add it to the Concept Scheme sheet")
+        raise ConversionError(
+            "Your vocabulary has no IRI. Please add it to the Concept Scheme sheet"
+        )
     else:
         iri = make_iri(iri_s, prefixes)
 
     if title is None:
-        raise ConversionError("Your vocabulary has no title. Please add it to the Concept Scheme sheet")
+        raise ConversionError(
+            "Your vocabulary has no title. Please add it to the Concept Scheme sheet"
+        )
 
     if description is None:
-        raise ConversionError("Your vocabulary has no description. Please add it to the Concept Scheme sheet")
+        raise ConversionError(
+            "Your vocabulary has no description. Please add it to the Concept Scheme sheet"
+        )
 
     if created is None:
-        raise ConversionError("Your vocabulary has no created date. Please add it to the Concept Scheme sheet")
+        raise ConversionError(
+            "Your vocabulary has no created date. Please add it to the Concept Scheme sheet"
+        )
 
     if modified is None:
-        raise ConversionError("Your vocabulary has no modified date. Please add it to the Concept Scheme sheet")
+        raise ConversionError(
+            "Your vocabulary has no modified date. Please add it to the Concept Scheme sheet"
+        )
 
     if creator is None:
-        raise ConversionError("Your vocabulary has no creator. Please add it to the Concept Scheme sheet")
+        raise ConversionError(
+            "Your vocabulary has no creator. Please add it to the Concept Scheme sheet"
+        )
 
     if publisher is None:
-        raise ConversionError("Your vocabulary has no publisher. Please add it to the Concept Scheme sheet")
+        raise ConversionError(
+            "Your vocabulary has no publisher. Please add it to the Concept Scheme sheet"
+        )
 
     if provenance is None:
-        raise ConversionError("Your vocabulary has no provenance statement. Please add it to the Concept Scheme sheet")
+        raise ConversionError(
+            "Your vocabulary has no provenance statement. Please add it to the Concept Scheme sheet"
+        )
 
     g = Graph(bind_namespaces="rdflib")
     g.add((iri, RDF.type, SKOS.ConceptScheme))
@@ -91,7 +130,9 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
         g.add((iri, OWL.versionIRI, URIRef(iri + "/" + str(version))))
 
     if custodian is not None:
-        ISOROLES = Namespace("http://def.isotc211.org/iso19115/-1/2018/CitationAndResponsiblePartyInformation/code/CI_RoleCode/")
+        ISOROLES = Namespace(
+            "http://def.isotc211.org/iso19115/-1/2018/CitationAndResponsiblePartyInformation/code/CI_RoleCode/"
+        )
         g += make_agent(custodian, ISOROLES.custodian, prefixes, iri)
         g.bind("isoroles", ISOROLES)
 
@@ -126,7 +167,9 @@ def extract_concepts(sheet: Worksheet, prefixes) -> Graph:
             raise ConversionError(iri_conv[1])
 
         if pref_label is None:
-            raise ConversionError(f"You must provide a Preferred Label for Concept {iri_s}")
+            raise ConversionError(
+                f"You must provide a Preferred Label for Concept {iri_s}"
+            )
 
         if definition is None:
             raise ConversionError(f"You must provide a Definition for Concept {iri_s}")
@@ -134,7 +177,11 @@ def extract_concepts(sheet: Worksheet, prefixes) -> Graph:
         i += 1
 
         # ignore example Concepts
-        if iri_s in ["http://example.com/earth-science", "http://example.com/atmospheric-science", "http://example.com/geology"]:
+        if iri_s in [
+            "http://example.com/earth-science",
+            "http://example.com/atmospheric-science",
+            "http://example.com/geology",
+        ]:
             continue
 
         # create Graph
@@ -184,10 +231,14 @@ def extract_collections(sheet: Worksheet, prefixes) -> Graph:
             raise ConversionError(iri_conv[1])
 
         if pref_label is None:
-            raise ConversionError(f"You must provide a Preferred Label for Collection {iri_s}")
+            raise ConversionError(
+                f"You must provide a Preferred Label for Collection {iri_s}"
+            )
 
         if definition is None:
-            raise ConversionError(f"You must provide a Definition for Collection {iri_s}")
+            raise ConversionError(
+                f"You must provide a Definition for Collection {iri_s}"
+            )
 
         # create Graph
         g.add((iri, RDF.type, SKOS.Concept))
@@ -252,7 +303,13 @@ def extract_additions_concept_properties(sheet: Worksheet, prefixes) -> Graph:
                 identifier_type = make_iri(identifier_type_s, prefixes)
             else:
                 identifier_type = XSD.token
-            g.add((iri, DCTERMS.identifier, Literal(identifier_s, datatype=identifier_type)))
+            g.add(
+                (
+                    iri,
+                    DCTERMS.identifier,
+                    Literal(identifier_s, datatype=identifier_type),
+                )
+            )
 
         i += 1
 
@@ -261,17 +318,35 @@ def extract_additions_concept_properties(sheet: Worksheet, prefixes) -> Graph:
 
 
 def excel_to_rdf(
-        wb: Workbook,
-        output_file_path: Optional[Path] = None,
-        output_format: TypeLiteral["longturtle", "turtle", "xml", "json-ld", "graph"] = "longturtle"
+    wb: Workbook,
+    output_file_path: Optional[Path] = None,
+    output_format: TypeLiteral[
+        "longturtle", "turtle", "xml", "json-ld", "graph"
+    ] = "longturtle",
+    validate: bool = False,
+    profile="vocpub",
+    error_level=1,
+    message_level=1,
+    log_file: Optional[Path] = None,
 ):
     prefixes = extract_prefixes(wb["Prefixes"])
     cs = extract_concept_scheme(wb["Concept Scheme"], prefixes)
     cons = extract_concepts(wb["Concepts"], prefixes)
     cols = extract_collections(wb["Collections"], prefixes)
-    extra = extract_additions_concept_properties(wb["Additional Concept Properties"], prefixes)
+    extra = extract_additions_concept_properties(
+        wb["Additional Concept Properties"], prefixes
+    )
 
     g = cs + cons + cols + extra
+
+    if validate:
+        validate_with_profile(
+            g,
+            profile=profile,
+            error_level=error_level,
+            message_level=message_level,
+            log_file=log_file,
+        )
 
     if output_file_path is not None:
         g.serialize(destination=str(output_file_path), format=output_format)

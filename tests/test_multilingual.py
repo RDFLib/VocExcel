@@ -13,7 +13,7 @@ tests_dir_path = Path(__file__).parent
 def test_countrycodes():
     convert.excel_to_rdf(
         tests_dir_path / "030_languages.xlsx",
-        output_file_path=tests_dir_path / "030_languages.ttl"
+        output_file_path=tests_dir_path / "030_languages.ttl",
     )
 
     # file eg-languages-valid.ttl should have been created

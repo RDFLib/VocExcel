@@ -5,9 +5,17 @@ import pytest
 from rdflib import Graph, URIRef, Literal, compare, Namespace
 from rdflib.namespace import DCTERMS, SKOS, RDF
 from textwrap import dedent
+
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel.utils import ConversionError, load_workbook, expand_namespaces
-from vocexcel.convert_060 import extract_prefixes, extract_concept_scheme, extract_concepts, extract_collections, extract_additions_concept_properties, excel_to_rdf
+from vocexcel.convert_060 import (
+    extract_prefixes,
+    extract_concept_scheme,
+    extract_concepts,
+    extract_collections,
+    extract_additions_concept_properties,
+    excel_to_rdf,
+)
 
 
 def test_extract_prefixes():
@@ -17,8 +25,20 @@ def test_extract_prefixes():
 
     n = extract_prefixes(wb["Prefixes"])
 
-    g.add((expand_namespaces("ex:thing-1", n), SKOS.prefLabel, Literal("Thing 1", lang="en")))
-    g.add((expand_namespaces("ch:rhode-island-red", n), SKOS.prefLabel, Literal("Rhode Island Red", lang="en")))
+    g.add(
+        (
+            expand_namespaces("ex:thing-1", n),
+            SKOS.prefLabel,
+            Literal("Thing 1", lang="en"),
+        )
+    )
+    g.add(
+        (
+            expand_namespaces("ch:rhode-island-red", n),
+            SKOS.prefLabel,
+            Literal("Rhode Island Red", lang="en"),
+        )
+    )
 
     # print(g.serialize(format="longturtle"))
     expected = """
@@ -129,7 +149,9 @@ def test_extract_collections():
 def test_extract_additions_concept_properties():
     wb = load_workbook(Path(__file__).parent / "060_simple.xlsx")
     prefixes = extract_prefixes(wb["Prefixes"])
-    extra = extract_additions_concept_properties(wb["Additional Concept Properties"], prefixes)
+    extra = extract_additions_concept_properties(
+        wb["Additional Concept Properties"], prefixes
+    )
     expected = """
         PREFIX cdterms: <http://purl.org/dc/terms/>
         PREFIX ex: <http://example.com/>
@@ -146,12 +168,9 @@ def test_extract_additions_concept_properties():
 
 def test_rdf_to_excel():
     wb = load_workbook(Path(__file__).parent / "060_simple.xlsx")
-    g = excel_to_rdf(
-        wb,
-        output_format="graph"
-    )
+    g = excel_to_rdf(wb, output_format="graph")
     # print(g.serialize(format="longturtle"))
-    expected = '''
+    expected = """
         PREFIX cdterms: <http://purl.org/dc/terms/>
         PREFIX ch: <http://example.com/chickens/>
         PREFIX dcat: <http://www.w3.org/ns/dcat#>
@@ -227,6 +246,6 @@ def test_rdf_to_excel():
             skos:definition "The Silkie (also known as the Silky or Chinese silk chicken) is a breed of chicken named for its atypically fluffy plumage, which is said to feel like silk and satin."@en ;
             skos:prefLabel "Silkie"@en ;
         .    
-    '''
+    """
     g2 = Graph().parse(data=expected)
     assert compare.isomorphic(g, g2)

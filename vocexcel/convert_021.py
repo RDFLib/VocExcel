@@ -6,7 +6,7 @@ from pydantic import ValidationError
 try:
     import models
     from utils import split_and_tidy_to_strings, ConversionError
-except:
+except ImportError:
     import sys
 
     sys.path.append("..")
@@ -38,7 +38,9 @@ def extract_concepts_and_collections(
                             uri=s[f"A{row}"].value,
                             pref_label=s[f"B{row}"].value,
                             alt_labels=split_and_tidy_to_strings(s[f"C{row}"].value),
-                            pl_language_code=split_and_tidy_to_strings(s[f"D{row}"].value),
+                            pl_language_code=split_and_tidy_to_strings(
+                                s[f"D{row}"].value
+                            ),
                             definition=s[f"E{row}"].value,
                             children=split_and_tidy_to_strings(s[f"F{row}"].value),
                             other_ids=split_and_tidy_to_strings(s[f"G{row}"].value),
