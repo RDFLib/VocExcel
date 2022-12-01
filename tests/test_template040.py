@@ -15,7 +15,7 @@ tests_dir_path = Path(__file__).parent
 def test_empty_template():
     with pytest.raises(ConversionError) as e:
         convert.excel_to_rdf(
-            Path(__file__).parent.parent / "templates" / "VocExcel-template_040.xlsx",
+            Path(__file__).parent.parent / "templates" / "VocExcel-template-040.xlsx",
         )
     assert "7 validation errors for ConceptScheme" in str(e)
 

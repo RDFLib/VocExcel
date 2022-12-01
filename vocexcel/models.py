@@ -137,12 +137,37 @@ class Concept(BaseModel):
     narrow_match: List[str] = []
     broad_match: List[str] = []
 
-    @validator("children", allow_reuse=True)
-    @validator("related_match", allow_reuse=True)
-    @validator("close_match", allow_reuse=True)
-    @validator("exact_match", allow_reuse=True)
-    @validator("narrow_match", allow_reuse=True)
-    @validator("broad_match", allow_reuse=True)
+    @validator("children")
+    def each_c_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+        return elem
+
+    @validator("related_match")
+    def each_rm_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+        return elem
+
+    @validator("close_match")
+    def each_cm_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+        return elem
+
+    @validator("exact_match")
+    def each_em_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+        return elem
+
+    @validator("narrow_match")
+    def each_nm_must_be_an_iri(cls, elem):
+        r = all_strings_in_list_are_iris(elem)
+        assert r[0], r[1]
+        return elem
+
+    @validator("broad_match")
     def each_bm_must_be_an_iri(cls, elem):
         r = all_strings_in_list_are_iris(elem)
         assert r[0], r[1]

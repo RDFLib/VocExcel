@@ -12,11 +12,11 @@ from vocexcel.utils import ConversionError
 
 def test_empty_template():
     assert Path(
-        Path(__file__).parent.parent / "templates" / "VocExcel-template_042.xlsx"
+        Path(__file__).parent.parent / "templates" / "VocExcel-template-042.xlsx"
     ).is_file()
     with pytest.raises(ConversionError) as e:
         convert.excel_to_rdf(
-            Path(__file__).parent.parent / "templates" / "VocExcel-template_042.xlsx",
+            Path(__file__).parent.parent / "templates" / "VocExcel-template-042.xlsx",
         )
     assert "7 validation errors for ConceptScheme" in str(e)
 

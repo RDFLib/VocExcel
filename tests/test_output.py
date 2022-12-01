@@ -9,7 +9,7 @@ from rdflib.namespace import SKOS
 
 def test_example_complex():
     g = convert.excel_to_rdf(
-        Path(__file__).parent.parent / "templates" / "VocExcel-template_030.xlsx",
+        Path(__file__).parent.parent / "templates" / "VocExcel-template-030.xlsx",
         sheet_name="example - complex",
         output_format="graph",
     )

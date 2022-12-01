@@ -5,7 +5,7 @@ Another Excel-to-RDF converter for SKOS vocabs, but one that:
 
 * uses fixed templates to keep it simple
 * meets particular SKOS profile outcomes (https://w3id.org/profile/vocpub[VocPub])
-* is under active development and production use
+* is under active development, production use, and is commercially supported
 
 == Creating vocabularies
 
@@ -23,6 +23,8 @@ The template files in this repository's *templates/* folder are to be used to cr
 Use one Excel workbook per vocabulary.
 
 === Latest Template
+
+* **templates/VocExcel-template-060.xlsx**
 
 Unless you have a good reason to do something different, please use the latest version of the template. Currently, (December, 2022) the latest template is v0.6.0 (VocExcel-template_060.xlsx).
 

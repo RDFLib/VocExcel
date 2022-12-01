@@ -58,7 +58,7 @@ except ImportError:
         extract_concept_scheme as extract_concept_scheme_043,
     )
 
-    from convert_060 import excel_to_rdf as excel_to_rdf_060
+    from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
 
     from vocexcel.utils import (
         ConversionError,
