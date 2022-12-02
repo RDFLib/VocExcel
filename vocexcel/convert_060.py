@@ -269,12 +269,20 @@ def extract_additions_concept_properties(sheet: Worksheet, prefixes) -> Graph:
         exact_s = sheet[f"D{i}"].value
         narrow_s = sheet[f"E{i}"].value
         broad_s = sheet[f"F{i}"].value
-        identifier_s = sheet[f"G{i}"].value
-        identifier_type_s = sheet[f"H{i}"].value
+        notation_s = sheet[f"G{i}"].value
+        notation_type_s = sheet[f"H{i}"].value
 
         # check values
         if iri_s is None:
             break
+
+        i += 1
+
+        # ignore example Concepts
+        if iri_s in [
+            "http://example.com/geology",
+        ]:
+            continue
 
         # create Graph
         iri = make_iri(iri_s, prefixes)
@@ -298,20 +306,18 @@ def extract_additions_concept_properties(sheet: Worksheet, prefixes) -> Graph:
             broad = make_iri(broad_s, prefixes)
             g.add((iri, SKOS.broadMatch, broad))
 
-        if identifier_s is not None:
-            if identifier_type_s is not None:
-                identifier_type = make_iri(identifier_type_s, prefixes)
+        if notation_s is not None:
+            if notation_type_s is not None:
+                notation_type = make_iri(notation_type_s, prefixes)
             else:
-                identifier_type = XSD.token
+                notation_type = XSD.token
             g.add(
                 (
                     iri,
-                    DCTERMS.identifier,
-                    Literal(identifier_s, datatype=identifier_type),
+                    SKOS.notation,
+                    Literal(notation_s, datatype=notation_type),
                 )
             )
-
-        i += 1
 
     bind_namespaces(g, prefixes)
     return g

@@ -61,8 +61,8 @@ def get_template_version(wb: Workbook) -> str:
     # try 0.4.0, 0.5.0 & 0.6.0 locations
     try:
         intro_sheet = wb["Introduction"]
-        if intro_sheet["E11"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.5.0, 0.6.0
-            return intro_sheet["E11"].value
+        if intro_sheet["E4"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.5.0, 0.6.0
+            return intro_sheet["E4"].value
         if intro_sheet["J11"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.4.0
             return intro_sheet["J11"].value
     except Exception:
