@@ -153,12 +153,11 @@ def test_extract_additions_concept_properties():
         wb["Additional Concept Properties"], prefixes
     )
     expected = """
-        PREFIX cdterms: <http://purl.org/dc/terms/>
         PREFIX ex: <http://example.com/>
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
         
         ex:bantam
-            cdterms:identifier "B"^^<http://system-x.com> ;
+            skos:notation "ban"^^ex:other-system, "B"^^<http://system-x.com> ;
             skos:relatedMatch <http://other-voc.com/bantam> ;
         .
         """
@@ -225,7 +224,7 @@ def test_rdf_to_excel():
         
         ex:bantam
             a skos:Concept ;
-            cdterms:identifier "B"^^<http://system-x.com> ;
+            skos:notation "ban"^^ex:other-system, "B"^^<http://system-x.com> ;
             cdterms:source "https://en.wikipedia.org/wiki/Bantam_(poultry)"^^xsd:anyURI ;
             skos:definition "A bantam is any small variety of fowl, usually of chicken or duck."@en ;
             skos:narrower ex:silkie ;
