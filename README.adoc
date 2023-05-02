@@ -119,7 +119,7 @@ convert.rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
 
 == License
 
-This code is licensed using the GPL v3 licence. See the _LICENSE_ for the deed. Note that Excel is property of Microsoft.
+This code is licensed using the BSD 3-Clause. See the _LICENSE_ for the deed. Note that Excel is property of Microsoft.
 
 == Contact
 
