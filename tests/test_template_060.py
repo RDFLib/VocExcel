@@ -2,9 +2,8 @@ import sys
 from pathlib import Path
 
 import pytest
-from rdflib import Graph, URIRef, Literal, compare, Namespace
-from rdflib.namespace import DCTERMS, SKOS, RDF
-from textwrap import dedent
+from rdflib import Graph, Literal, compare
+from rdflib.namespace import SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel.utils import ConversionError, load_workbook, expand_namespaces

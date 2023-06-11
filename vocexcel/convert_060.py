@@ -140,10 +140,10 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
     g.add((iri, DCTERMS.identifier, id_from_iri(iri)))
 
     bind_namespaces(g, prefixes)
-    return g
+    return g, iri
 
 
-def extract_concepts(sheet: Worksheet, prefixes) -> Graph:
+def extract_concepts(sheet: Worksheet, prefixes, cs_iri) -> Graph:
     g = Graph(bind_namespaces="rdflib")
     i = 4
     while True:
@@ -186,6 +186,7 @@ def extract_concepts(sheet: Worksheet, prefixes) -> Graph:
 
         # create Graph
         g.add((iri, RDF.type, SKOS.Concept))
+        g.add((iri, SKOS.inScheme, cs_iri))
         g.add((iri, SKOS.prefLabel, Literal(pref_label.strip(), lang="en")))
         g.add((iri, SKOS.definition, Literal(definition.strip(), lang="en")))
 
@@ -210,7 +211,7 @@ def extract_concepts(sheet: Worksheet, prefixes) -> Graph:
     return g
 
 
-def extract_collections(sheet: Worksheet, prefixes) -> Graph:
+def extract_collections(sheet: Worksheet, prefixes, cs_iri) -> Graph:
     g = Graph(bind_namespaces="rdflib")
     i = 4
     while True:
@@ -241,7 +242,8 @@ def extract_collections(sheet: Worksheet, prefixes) -> Graph:
             )
 
         # create Graph
-        g.add((iri, RDF.type, SKOS.Concept))
+        g.add((iri, RDF.type, SKOS.Collection))
+        g.add((iri, SKOS.inScheme, cs_iri))
         g.add((iri, SKOS.prefLabel, Literal(pref_label, lang="en")))
         g.add((iri, SKOS.definition, Literal(definition, lang="en")))
 
@@ -336,9 +338,9 @@ def excel_to_rdf(
     log_file: Optional[Path] = None,
 ):
     prefixes = extract_prefixes(wb["Prefixes"])
-    cs = extract_concept_scheme(wb["Concept Scheme"], prefixes)
-    cons = extract_concepts(wb["Concepts"], prefixes)
-    cols = extract_collections(wb["Collections"], prefixes)
+    cs, cs_iri = extract_concept_scheme(wb["Concept Scheme"], prefixes)
+    cons = extract_concepts(wb["Concepts"], prefixes, cs_iri)
+    cols = extract_collections(wb["Collections"], prefixes, cs_iri)
     extra = extract_additions_concept_properties(
         wb["Additional Concept Properties"], prefixes
     )
