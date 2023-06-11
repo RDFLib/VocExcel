@@ -34,6 +34,7 @@ KNOWN_TEMPLATE_VERSIONS = [
     "0.4.4",
     "0.5.0",
     "0.6.0",
+    "0.6.2",
 ]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
 
@@ -58,10 +59,10 @@ def load_template(file_path: Path) -> Workbook:
 
 
 def get_template_version(wb: Workbook) -> str:
-    # try 0.4.0, 0.5.0 & 0.6.0 locations
+    # try 0.4.0, 0.5.0 & 0.6.x locations
     try:
         intro_sheet = wb["Introduction"]
-        if intro_sheet["E4"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.5.0, 0.6.0
+        if intro_sheet["E4"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.5.0, 0.6.x
             return intro_sheet["E4"].value
         if intro_sheet["J11"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.4.0
             return intro_sheet["J11"].value

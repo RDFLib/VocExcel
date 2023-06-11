@@ -28,6 +28,8 @@ try:
 
     from convert_060 import excel_to_rdf as excel_to_rdf_060
 
+    from convert_062 import excel_to_rdf as excel_to_rdf_062
+
     from utils import (
         ConversionError,
         load_workbook,
@@ -79,7 +81,7 @@ def excel_to_rdf(
     profile="vocpub",
     sheet_name: Optional[str] = None,
     output_file_path: Optional[Path] = None,
-    output_format: Literal["turtle", "xml", "json-ld", "graph"] = "turtle",
+    output_format: Literal["turtle", "xml", "json-ld", "graph"] = "longturtle",
     error_level=1,  # TODO: list Literal possible values
     message_level=1,  # TODO: list Literal possible values
     log_file: Optional[Path] = None,
@@ -97,7 +99,12 @@ def excel_to_rdf(
         )
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
-    elif template_version in ["0.5.0", "0.6.0"]:
+    elif template_version in ["0.6.2"]:
+        print("validate")
+        print(validate)
+        return excel_to_rdf_062(wb, output_file_path, output_format, validate, profile, error_level, message_level, log_file)
+
+    elif template_version in ["0.5.0", "0.6.0", "0.6.2"]:
         print("validate")
         print(validate)
         return excel_to_rdf_060(wb, output_file_path, output_format, validate, profile, error_level, message_level, log_file)
@@ -432,8 +439,8 @@ def main(args=None):
         help="An optionally-provided output format for RDF outputs. 'graph' returns the in-memory graph object, "
         "not serialized RDF.",
         required=False,
-        choices=["turtle", "xml", "json-ld", "graph"],
-        default="turtle",
+        choices=["longturtle", "turtle", "xml", "json-ld", "graph"],
+        default="longturtle",
     )
 
     parser.add_argument(
