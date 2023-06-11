@@ -22,6 +22,7 @@ try:
         bind_namespaces,
         make_iri,
         validate_with_profile,
+        add_top_concepts,
     )
 except ImportError:
     import sys
@@ -41,6 +42,7 @@ except ImportError:
         bind_namespaces,
         make_iri,
         validate_with_profile,
+        add_top_concepts,
     )
 
 
@@ -68,7 +70,7 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
     modified = sheet["B7"].value
     creator = sheet["B8"].value
     publisher = sheet["B9"].value
-    version = sheet["B10"].value
+    version = str(sheet["B10"].value).strip("'")
     history_note = sheet["B11"].value
     custodian = sheet["B12"].value
 
@@ -120,6 +122,7 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
     g.add((iri, SKOS.definition, Literal(description, lang="en")))
     g.add((iri, DCTERMS.created, Literal(created.date(), datatype=XSD.date)))
     g.add((iri, DCTERMS.modified, Literal(modified.date(), datatype=XSD.date)))
+    g.add((iri, SKOS.historyNote, Literal(history_note, lang="en")))
 
     g += make_agent(creator, DCTERMS.creator, prefixes, iri)
 
@@ -187,6 +190,8 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri) -> Graph:
         # create Graph
         g.add((iri, RDF.type, SKOS.Concept))
         g.add((iri, SKOS.inScheme, cs_iri))
+        if str(iri).startswith(str(cs_iri)):
+            g.add((iri, RDFS.isDefinedBy, cs_iri))
         g.add((iri, SKOS.prefLabel, Literal(pref_label.strip(), lang="en")))
         g.add((iri, SKOS.definition, Literal(definition.strip(), lang="en")))
 
@@ -244,6 +249,8 @@ def extract_collections(sheet: Worksheet, prefixes, cs_iri) -> Graph:
         # create Graph
         g.add((iri, RDF.type, SKOS.Collection))
         g.add((iri, SKOS.inScheme, cs_iri))
+        if str(iri).startswith(str(cs_iri)):
+            g.add((iri, RDFS.isDefinedBy, cs_iri))
         g.add((iri, SKOS.prefLabel, Literal(pref_label, lang="en")))
         g.add((iri, SKOS.definition, Literal(definition, lang="en")))
 
@@ -346,6 +353,8 @@ def excel_to_rdf(
     )
 
     g = cs + cons + cols + extra
+    g = add_top_concepts(g)
+    g.bind("cs", cs_iri)
 
     if validate:
         validate_with_profile(

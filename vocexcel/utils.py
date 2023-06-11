@@ -9,7 +9,7 @@ from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
 from pyshacl.pytypes import GraphLike
 from rdflib import Graph, URIRef, Literal, Namespace, BNode
-from rdflib.namespace import RDF, RDFS, DCTERMS, PROV, XSD, DCAT
+from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SKOS, XSD
 
 from vocexcel import profiles
 
@@ -190,6 +190,22 @@ def make_iri(s: str, prefixes: dict[str, Namespace]):
     if not iri_conv[0]:
         raise ConversionError(iri_conv[1])
     return iri
+
+
+def add_top_concepts(g: Graph) -> Graph:
+    """For every Concept that no other Concept indicat as being narrower than it, indicate that it is a top concept"""
+    cs = None
+    for x in g.subjects(RDF.type, SKOS.ConceptScheme):
+        cs = x
+    if cs is None:
+        raise ValueError("The input graph declares no SKOS ConceptScheme")
+
+    for c in g.subjects(RDF.type, SKOS.Concept):
+        if not g.value(None, SKOS.narrower, c):
+            g.add((c, SKOS.topConceptOf, cs))
+            g.add((cs, SKOS.hasTopConcept, c))
+
+    return g
 
 
 def validate_with_profile(
