@@ -19,9 +19,10 @@ async def convert_route(upload_file: UploadFile):
         return TurtleResponse(result)
     except Exception as err:
         import traceback
+
         tb = traceback.format_exception(err)
         print(tb)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail='There was an error processing the file.'
+            detail="There was an error processing the file.",
         ) from err

@@ -45,7 +45,9 @@ class ConversionError(Exception):
 
 
 def load_workbook(file_path: Path) -> Workbook:
-    if not isinstance(file_path, SpooledTemporaryFile) and not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
+    if not isinstance(
+        file_path, SpooledTemporaryFile
+    ) and not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
         raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
     return _load_workbook(filename=file_path, data_only=True)
 
