@@ -72,8 +72,9 @@ except ImportError:
         KNOWN_FILE_ENDINGS,
         RDF_FILE_ENDINGS,
         KNOWN_TEMPLATE_VERSIONS,
-        EXCEL_FILE_ENDINGS, validate_with_profile,
-)
+        EXCEL_FILE_ENDINGS,
+        validate_with_profile,
+    )
 
 TEMPLATE_VERSION = None
 
@@ -102,10 +103,28 @@ def excel_to_rdf(
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
     elif template_version in ["0.6.2"]:
-        return excel_to_rdf_062(wb, output_file_path, output_format, validate, profile, error_level, message_level, log_file)
+        return excel_to_rdf_062(
+            wb,
+            output_file_path,
+            output_format,
+            validate,
+            profile,
+            error_level,
+            message_level,
+            log_file,
+        )
 
     elif template_version in ["0.5.0", "0.6.0", "0.6.2"]:
-        return excel_to_rdf_060(wb, output_file_path, output_format, validate, profile, error_level, message_level, log_file)
+        return excel_to_rdf_060(
+            wb,
+            output_file_path,
+            output_format,
+            validate,
+            profile,
+            error_level,
+            message_level,
+            log_file,
+        )
 
     elif template_version in ["0.4.3", "0.4.4"]:
         try:

@@ -13,7 +13,12 @@ except:
     sys.path.append("..")
     from vocexcel import models, profiles
     from vocexcel.convert import validate_with_profile, log_msg
-    from vocexcel.utils import split_and_tidy_to_strings, ConversionError, validate_with_profile, log_msg
+    from vocexcel.utils import (
+        split_and_tidy_to_strings,
+        ConversionError,
+        validate_with_profile,
+        log_msg,
+    )
 
 ACCEPTED_TEMPLATE_VERSIONS = ["0.4.3"]
 SPREADSHEET_ID = None
