@@ -24,7 +24,7 @@ Use one Excel workbook per vocabulary.
 
 === Latest Template
 
-* **templates/VocExcel-template-060.xlsx**
+* **templates/VocExcel-template-062.xlsx**
 
 Unless you have a good reason to do something different, please use the latest version of the template. Currently, (December, 2022) the latest template is v0.6.0 (VocExcel-template_060.xlsx).
 
