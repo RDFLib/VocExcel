@@ -2,6 +2,7 @@ import logging
 import re
 from pathlib import Path
 from typing import Tuple, Union, Dict
+from tempfile import SpooledTemporaryFile
 
 import pyshacl
 from colorama import Fore, Style
@@ -44,9 +45,9 @@ class ConversionError(Exception):
 
 
 def load_workbook(file_path: Path) -> Workbook:
-    if not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
+    if not isinstance(file_path, SpooledTemporaryFile) and not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
         raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
-    return _load_workbook(filename=str(file_path), data_only=True)
+    return _load_workbook(filename=file_path, data_only=True)
 
 
 def load_template(file_path: Path) -> Workbook:

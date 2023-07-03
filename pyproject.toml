@@ -23,6 +23,11 @@ pipdeptree = "^2.3.3"
 pytest = "^7.2.0"
 black = "^22.1.0"
 
+[tool.poetry.group.web.dependencies]
+fastapi = "^0.99.1"
+uvicorn = "^0.22.0"
+python-multipart = "^0.0.6"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

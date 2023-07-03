@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Optional, BinaryIO
 
 from pydantic.error_wrappers import ValidationError
 
@@ -80,7 +80,7 @@ TEMPLATE_VERSION = None
 
 
 def excel_to_rdf(
-    file_to_convert_path: Path,
+    file_to_convert_path: Path | BinaryIO,
     profile="vocpub",
     sheet_name: Optional[str] = None,
     output_file_path: Optional[Path] = None,
