@@ -1,12 +1,23 @@
 from textwrap import dedent
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from vocexcel.web import router
 
 
 def register_routers(app: FastAPI) -> None:
     app.include_router(router.router)
+
+
+def register_middlewares(app: FastAPI) -> None:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 def create_app() -> FastAPI:
@@ -26,5 +37,6 @@ def create_app() -> FastAPI:
     )
 
     register_routers(app)
+    register_middlewares(app)
 
     return app
