@@ -64,7 +64,12 @@ const handleCopyRdfTurtle = () => {
 <template>
   <main>
     <h1>Convert</h1>
+    <p>
+      Currently supported VocExcel template file is 0.6.2. Download the template files
+      <a target="_blank" href="https://github.com/RDFLib/VocExcel/tree/master/templates">here</a>.
+    </p>
     <p>Select a VocExcel file and upload it to convert it to a SKOS vocabulary.</p>
+
     <Toast />
     <FileUpload
       name="upload_file"
