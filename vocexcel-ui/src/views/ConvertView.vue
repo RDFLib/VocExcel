@@ -16,6 +16,7 @@ const copyButtonTextDefault = 'Copy result'
 const copyButtonTextCopied = 'Copied!'
 const ONE_SECOND_IN_MS = 1000
 const copyButtonText = ref(copyButtonTextDefault)
+const previewWidth = ref(0)
 
 const onUploadComplete = (event: FileUploadUploadEvent) => {
   rdfTurtle.value = event.xhr.response
@@ -77,6 +78,7 @@ const handleCopyRdfTurtle = () => {
       :multiple="false"
       accept=".xlsx"
       :maxFileSize="1000000"
+      :preview-width="previewWidth"
       @upload="onUploadComplete"
       @error="onError"
     >
