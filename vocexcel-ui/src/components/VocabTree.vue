@@ -4,6 +4,7 @@ import Accordion from 'primevue/accordion'
 import AccordionTab from 'primevue/accordiontab'
 import Tree from 'primevue/tree'
 import Toast from 'primevue/toast'
+import ProgressSpinner from 'primevue/progressspinner'
 import { useToast } from 'primevue/usetoast'
 import { Parser, Store, DataFactory, NamedNode, BlankNode, Literal } from 'n3'
 import { QueryEngine } from '@comunica/query-sparql-rdfjs'
@@ -120,6 +121,7 @@ const toast = useToast()
 const queryEngine = new QueryEngine()
 const selectedKey = ref()
 const selectedNodeTurtleValue = ref('')
+const isTurtleCodeLoading = ref(false)
 
 const handleNodeSelectAsync = async (node: TreeNode) => {
   const bnodeDepth = getBnodeDepth(store, namedNode(node.key))
@@ -142,10 +144,12 @@ const handleNodeSelectAsync = async (node: TreeNode) => {
         if (convertedValue !== null) {
           selectedNodeTurtleValue.value = convertedValue
         }
+        isTurtleCodeLoading.value = false
       })
 
       data.on('error', (error) => {
         console.error(error)
+        isTurtleCodeLoading.value = false
       })
     } catch (err) {
       console.error(err)
@@ -154,13 +158,14 @@ const handleNodeSelectAsync = async (node: TreeNode) => {
 }
 
 const handleNodeSelect = (node: any) => {
-  handleNodeSelectAsync(node).then(async () => {
-    return undefined
-  })
+  selectedNodeTurtleValue.value = ''
+  isTurtleCodeLoading.value = true
+  handleNodeSelectAsync(node)
 }
 
 const handleNodeUnselect = () => {
   selectedNodeTurtleValue.value = ''
+  isTurtleCodeLoading.value = false
 }
 
 const store = new Store()
@@ -207,6 +212,7 @@ if (conceptSchemeIri !== null) {
             @node-unselect="handleNodeUnselect"
           />
           <pre v-if="selectedNodeTurtleValue">{{ selectedNodeTurtleValue }}</pre>
+          <ProgressSpinner v-if="isTurtleCodeLoading" />
         </div>
       </AccordionTab>
     </Accordion>
