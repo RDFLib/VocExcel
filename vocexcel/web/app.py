@@ -7,7 +7,7 @@ from vocexcel.web import router
 
 
 def register_routers(app: FastAPI) -> None:
-    app.include_router(router.router)
+    app.include_router(router.router, prefix="/api/v1")
 
 
 def register_middlewares(app: FastAPI) -> None:

@@ -3,10 +3,12 @@ import './assets/main.css'
 import 'primevue/resources/themes/lara-light-blue/theme.css'
 //core
 import 'primevue/resources/primevue.min.css'
+//icons
+import 'primeicons/primeicons.css'
 
 import { createApp } from 'vue'
 import PrimeVue from 'primevue/config'
-import Button from 'primevue/button'
+import ToastService from 'primevue/toastservice'
 
 import App from './App.vue'
 import router from './router'
@@ -15,7 +17,6 @@ const app = createApp(App)
 
 app.use(router)
 app.use(PrimeVue)
-
-app.component('Button', Button)
+app.use(ToastService)
 
 app.mount('#app')

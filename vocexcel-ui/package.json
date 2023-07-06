@@ -13,6 +13,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@comunica/query-sparql-rdfjs": "^2.8.0",
+    "n3": "^1.17.0",
+    "primeicons": "^6.0.1",
     "primevue": "^3.29.2",
     "vue": "^3.3.4",
     "vue-router": "^4.2.2"
@@ -22,6 +25,7 @@
     "@tailwindcss/typography": "^0.5.9",
     "@tsconfig/node18": "^2.0.1",
     "@types/jsdom": "^21.1.1",
+    "@types/n3": "^1.10.4",
     "@types/node": "^18.16.17",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vitejs/plugin-vue-jsx": "^3.0.1",

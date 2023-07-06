@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import FileUpload from 'primevue/fileupload'
-import { type FileUploadUploadEvent } from 'primevue/fileupload'
+import { type FileUploadUploadEvent, type FileUploadErrorEvent } from 'primevue/fileupload'
+import Accordion from 'primevue/accordion'
+import AccordionTab from 'primevue/accordiontab'
+import Button from 'primevue/button'
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
 
+import VocabTree from '@/components/VocabTree.vue'
+
+const toast = useToast()
 const rdfTurtle = ref('')
 const copyButtonTextDefault = 'Copy result'
 const copyButtonTextCopied = 'Copied!'
@@ -11,6 +19,24 @@ const copyButtonText = ref(copyButtonTextDefault)
 
 const onUploadComplete = (event: FileUploadUploadEvent) => {
   rdfTurtle.value = event.xhr.response
+}
+
+const onError = (event: FileUploadErrorEvent) => {
+  let filename = null
+  if (Array.isArray(event.files)) {
+    filename = event.files[0].name
+  } else {
+    filename = event.files
+  }
+
+  const errorMsg = `Failed to upload file ${filename}`
+  console.error(errorMsg)
+  toast.add({
+    severity: 'error',
+    summary: 'Error',
+    detail: errorMsg,
+    life: 3000
+  })
 }
 
 const handleCopyRdfTurtle = () => {
@@ -22,7 +48,14 @@ const handleCopyRdfTurtle = () => {
       }, ONE_SECOND_IN_MS)
     },
     () => {
-      console.error('Error copying result to clipboard')
+      const errorMsg = 'Error copying result to clipboard'
+      console.error(errorMsg)
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: errorMsg,
+        life: 3000
+      })
     }
   )
 }
@@ -32,13 +65,15 @@ const handleCopyRdfTurtle = () => {
   <main>
     <h1>Convert</h1>
     <p>Select a VocExcel file and upload it to convert it to a SKOS vocabulary.</p>
+    <Toast />
     <FileUpload
       name="upload_file"
-      url="http://localhost:8000/convert"
+      url="http://localhost:8000/api/v1/convert"
       :multiple="false"
       accept=".xlsx"
       :maxFileSize="1000000"
       @upload="onUploadComplete"
+      @error="onError"
     >
       <template #empty>
         <p>Drag and drop files to here to upload.</p>
@@ -46,19 +81,24 @@ const handleCopyRdfTurtle = () => {
     </FileUpload>
 
     <div v-if="rdfTurtle">
-      <div class="flex justify-between items-end">
-        <h3>Result</h3>
-        <div class="flex-shrink-0">
-          <Button @click="handleCopyRdfTurtle" size="small">{{ copyButtonText }}</Button>
-        </div>
-      </div>
+      <VocabTree :rdf-turtle="rdfTurtle" />
 
-      <pre>{{ rdfTurtle }}</pre>
+      <Accordion class="mt-4">
+        <AccordionTab header="Total RDF Turtle result">
+          <div class="flex flex-row-reverse">
+            <Button @click="handleCopyRdfTurtle" size="small"
+              ><span class="pr-2">{{ copyButtonText }}</span> <i class="pi pi-copy"></i
+            ></Button>
+          </div>
+
+          <pre>{{ rdfTurtle }}</pre>
+        </AccordionTab>
+      </Accordion>
     </div>
 
     <div class="mt-4">
       <router-link to="/" class="no-underline">
-        <Button size="small">Back to home</Button>
+        <Button size="small" severity="info" outlined>Back to home</Button>
       </router-link>
     </div>
   </main>
