@@ -118,10 +118,10 @@ const getConstructQuery = async (focusNodeIri: string, blankNodeDepth: number) =
 const props = defineProps<{ rdfTurtle: string }>()
 const toast = useToast()
 const queryEngine = new QueryEngine()
-const selectedKey = ref(null)
+const selectedKey = ref()
 const selectedNodeTurtleValue = ref('')
 
-const handleNodeSelect = async (node: TreeNode) => {
+const handleNodeSelectAsync = async (node: TreeNode) => {
   const bnodeDepth = getBnodeDepth(store, namedNode(node.key))
   const query = await getConstructQuery(node.key, bnodeDepth)
 
@@ -151,6 +151,12 @@ const handleNodeSelect = async (node: TreeNode) => {
       console.error(err)
     }
   }
+}
+
+const handleNodeSelect = (node: any) => {
+  handleNodeSelectAsync(node).then(async () => {
+    return undefined
+  })
 }
 
 const handleNodeUnselect = () => {
