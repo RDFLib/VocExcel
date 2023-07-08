@@ -74,7 +74,7 @@ const handleCopyRdfTurtle = () => {
     <Toast />
     <FileUpload
       name="upload_file"
-      url="http://localhost:8000/api/v1/convert"
+      url="/api/v1/convert"
       :multiple="false"
       accept=".xlsx"
       :maxFileSize="1000000"

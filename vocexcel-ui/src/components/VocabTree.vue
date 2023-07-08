@@ -77,7 +77,7 @@ const getBnodeDepth = (store: Store, node: Node, depth: number = 0, seen: BlankN
 
 const getConvertedRdfValue = async (ntriplesValue: string) => {
   try {
-    const response = await fetch('http://localhost:8000/api/v1/format', {
+    const response = await fetch('/api/v1/format', {
       method: 'POST',
       headers: { 'Content-Type': 'application/n-triples' },
       body: ntriplesValue
@@ -99,7 +99,7 @@ const getConvertedRdfValue = async (ntriplesValue: string) => {
 const getConstructQuery = async (focusNodeIri: string, blankNodeDepth: number) => {
   try {
     const response = await fetch(
-      `http://localhost:8000/api/v1/construct-query?focus_node_iri=${focusNodeIri}&depth=${blankNodeDepth}`
+      `/api/v1/construct-query?focus_node_iri=${focusNodeIri}&depth=${blankNodeDepth}`
     )
     return await response.text()
   } catch (error) {
