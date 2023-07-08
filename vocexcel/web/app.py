@@ -2,12 +2,18 @@ from textwrap import dedent
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-from vocexcel.web import router
+from vocexcel.web import router, settings
 
 
 def register_routers(app: FastAPI) -> None:
     app.include_router(router.router, prefix="/api/v1")
+    app.mount(
+        "/",
+        StaticFiles(directory=settings.VOCEXCEL_WEB_STATIC_DIR, html=True),
+        name="static",
+    )
 
 
 def register_middlewares(app: FastAPI) -> None:
