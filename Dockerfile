@@ -39,7 +39,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry export -f requirements.txt --with web | pip install -r /dev/stdin
 
 COPY . .
-COPY --from=node-builder /app/dist /app/vocexcel/static
+COPY --from=node-builder /app/dist /app/vocexcel/web/static
 RUN poetry build && pip install dist/*.whl
 
 # final
@@ -50,7 +50,7 @@ COPY --from=python-builder /opt/venv /opt/venv
 
 ENV VIRTUALENV=/opt/venv \
     PATH=/opt/venv/bin:${PATH} \
-    VOCEXCEL_WEB_STATIC_DIR=/opt/venv/lib/python3.11/site-packages/vocexcel/static
+    VOCEXCEL_WEB_STATIC_DIR=/opt/venv/lib/python3.11/site-packages/vocexcel/web/static
 
 RUN apk --no-cache add bash
 
