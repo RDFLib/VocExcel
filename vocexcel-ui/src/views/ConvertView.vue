@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import FileUpload from 'primevue/fileupload'
 import { type FileUploadUploadEvent, type FileUploadErrorEvent } from 'primevue/fileupload'
 import Accordion from 'primevue/accordion'
@@ -17,6 +17,12 @@ const copyButtonTextCopied = 'Copied!'
 const ONE_SECOND_IN_MS = 1000
 const copyButtonText = ref(copyButtonTextDefault)
 const previewWidth = ref(0)
+const version = ref('...')
+
+onMounted(async () => {
+  const response = await fetch('/api/v1/version')
+  version.value = await response.text()
+})
 
 const onUploadComplete = (event: FileUploadUploadEvent) => {
   rdfTurtle.value = event.xhr.response
@@ -65,6 +71,7 @@ const handleCopyRdfTurtle = () => {
 <template>
   <main>
     <h1>Convert</h1>
+    <p>VocExcel version {{ version }}</p>
     <p>
       Currently supported VocExcel template file is 0.6.2. Download the template files
       <a target="_blank" href="https://github.com/RDFLib/VocExcel/tree/master/templates">here</a>.

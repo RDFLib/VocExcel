@@ -1,19 +1,32 @@
 from textwrap import dedent
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
-from vocexcel.web import router, settings
+from vocexcel.web import router
+from vocexcel.web.settings import Settings
 
 
 def register_routers(app: FastAPI) -> None:
-    app.include_router(router.router, prefix="/api/v1")
-    app.mount(
-        "/",
-        StaticFiles(directory=settings.VOCEXCEL_WEB_STATIC_DIR, html=True),
-        name="static",
-    )
+    app.include_router(router.router, prefix="/api/v1", tags=["VocExcel"])
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def all_path_route(path):
+        """Catch-all route for SPA."""
+        index_html_path = Path(f"{Settings.VOCEXCEL_WEB_STATIC_DIR}/index.html")
+
+        path = (
+            Path(f"{Settings.VOCEXCEL_WEB_STATIC_DIR}/{path}")
+            if path != ""
+            else index_html_path
+        )
+
+        if path.is_file():
+            return FileResponse(path)
+
+        return FileResponse(index_html_path)
 
 
 def register_middlewares(app: FastAPI) -> None:

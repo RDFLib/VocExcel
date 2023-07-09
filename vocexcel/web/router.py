@@ -1,14 +1,20 @@
 from textwrap import dedent
 
 from fastapi import APIRouter, UploadFile, HTTPException, status, Body
-from fastapi.responses import PlainTextResponse, RedirectResponse
+from fastapi.responses import PlainTextResponse
 from rdflib import Graph
 from jinja2 import Template
 
 from vocexcel.convert import excel_to_rdf
 from vocexcel.web.response import TurtleResponse
+from vocexcel.web.settings import Settings
 
 router = APIRouter()
+
+
+@router.get("/version", response_class=PlainTextResponse)
+def version_route():
+    return Settings.VOCEXCEL_VERSION
 
 
 @router.post("/convert", response_class=TurtleResponse)
