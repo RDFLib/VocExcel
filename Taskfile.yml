@@ -24,3 +24,13 @@ tasks:
     desc: Run tests
     cmds:
       - poetry run pytest
+
+  run:
+    desc: Run Python dev server
+    cmds:
+      - poetry run python main.py
+
+  run:ui:
+    desc: Run Vite dev server
+    cmds:
+      - npm --prefix vocexcel-ui run dev
