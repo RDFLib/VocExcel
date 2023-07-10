@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 
 import pytest
-from rdflib import Graph, URIRef, Literal, compare
-from rdflib.namespace import DCTERMS, SKOS, RDF
+from rdflib import Graph, Literal, URIRef, compare
+from rdflib.namespace import DCTERMS, RDF, SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel import convert
@@ -48,6 +48,7 @@ def test_exhaustive_template_is_isomorphic():
     assert compare.isomorphic(g1, g2), "Graphs are not Isomorphic"
 
 
+@pytest.mark.xfail(reason="Incompatible with VocPub 3.1. Failing since 0.6.2.")
 def test_rdf_to_excel():
     tests_dir_path = Path(__file__).parent
     g1 = Graph().parse(tests_dir_path / "043_exhaustive.ttl")

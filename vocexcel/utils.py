@@ -1,14 +1,15 @@
 import logging
 import re
 from pathlib import Path
-from typing import Tuple, Union, Dict
+from tempfile import SpooledTemporaryFile
+from typing import Dict, Tuple, Union
 
 import pyshacl
 from colorama import Fore, Style
 from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
 from pyshacl.pytypes import GraphLike
-from rdflib import Graph, URIRef, Literal, Namespace, BNode
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SKOS, XSD
 
 from vocexcel import profiles
@@ -44,9 +45,11 @@ class ConversionError(Exception):
 
 
 def load_workbook(file_path: Path) -> Workbook:
-    if not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
+    if not isinstance(
+        file_path, SpooledTemporaryFile
+    ) and not file_path.name.lower().endswith(tuple(EXCEL_FILE_ENDINGS)):
         raise ValueError("Files for conversion to RDF must be Excel files ending .xlsx")
-    return _load_workbook(filename=str(file_path), data_only=True)
+    return _load_workbook(filename=file_path, data_only=True)
 
 
 def load_template(file_path: Path) -> Workbook:

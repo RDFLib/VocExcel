@@ -4,25 +4,25 @@ from typing import Optional
 
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from rdflib import Graph, URIRef, Literal, Namespace
+from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SKOS, XSD
 
 try:
     import models
     from utils import (
-        split_and_tidy_to_strings,
         ConversionError,
-        load_workbook,
-        string_is_http_iri,
-        expand_namespaces,
-        string_from_iri,
-        id_from_iri,
-        make_agent,
-        split_and_tidy_to_iris,
-        bind_namespaces,
-        make_iri,
-        validate_with_profile,
         add_top_concepts,
+        bind_namespaces,
+        expand_namespaces,
+        id_from_iri,
+        load_workbook,
+        make_agent,
+        make_iri,
+        split_and_tidy_to_iris,
+        split_and_tidy_to_strings,
+        string_from_iri,
+        string_is_http_iri,
+        validate_with_profile,
     )
 except ImportError:
     import sys
@@ -30,19 +30,19 @@ except ImportError:
     sys.path.append("..")
     from vocexcel import models
     from vocexcel.utils import (
-        split_and_tidy_to_strings,
         ConversionError,
-        load_workbook,
-        string_is_http_iri,
-        expand_namespaces,
-        string_from_iri,
-        id_from_iri,
-        make_agent,
-        split_and_tidy_to_iris,
-        bind_namespaces,
-        make_iri,
-        validate_with_profile,
         add_top_concepts,
+        bind_namespaces,
+        expand_namespaces,
+        id_from_iri,
+        load_workbook,
+        make_agent,
+        make_iri,
+        split_and_tidy_to_iris,
+        split_and_tidy_to_strings,
+        string_from_iri,
+        string_is_http_iri,
+        validate_with_profile,
     )
 
 

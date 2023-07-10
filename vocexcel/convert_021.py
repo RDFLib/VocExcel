@@ -1,17 +1,17 @@
-from typing import Tuple, List
+from typing import List, Tuple
 
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ValidationError
 
 try:
     import models
-    from utils import split_and_tidy_to_strings, ConversionError
+    from utils import ConversionError, split_and_tidy_to_strings
 except ImportError:
     import sys
 
     sys.path.append("..")
     from vocexcel import models
-    from vocexcel.utils import split_and_tidy_to_strings, ConversionError
+    from vocexcel.utils import ConversionError, split_and_tidy_to_strings
 
 
 def extract_concepts_and_collections(

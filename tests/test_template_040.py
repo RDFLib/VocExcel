@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 import pytest
-from rdflib import Graph, URIRef, Literal, compare
+from rdflib import Graph, Literal, URIRef, compare
 from rdflib.namespace import SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))

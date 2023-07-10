@@ -1,10 +1,12 @@
-import pytest
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import pytest
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
-from vocexcel.models import *
 from pydantic.error_wrappers import ValidationError
+
+from vocexcel.models import *
 
 
 def test_vocabulary_valid():

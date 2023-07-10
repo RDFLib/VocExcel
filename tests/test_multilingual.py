@@ -1,11 +1,12 @@
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
-from vocexcel import convert
-
 from pathlib import Path
+
 from rdflib import Graph
+
+from vocexcel import convert
 
 tests_dir_path = Path(__file__).parent
 
