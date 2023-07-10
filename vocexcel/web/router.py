@@ -14,11 +14,13 @@ router = APIRouter()
 
 @router.get("/version", response_class=PlainTextResponse)
 def version_route():
+    """VocExcel application version."""
     return Settings.VOCEXCEL_VERSION
 
 
 @router.post("/convert", response_class=TurtleResponse)
 async def convert_route(upload_file: UploadFile):
+    """Convert a VocExcel file to RDF Turtle."""
     try:
         file = upload_file.file
         result = excel_to_rdf(file)
@@ -41,6 +43,7 @@ async def convert_route(upload_file: UploadFile):
 
 @router.post("/format", response_class=TurtleResponse)
 def format_route(payload: str = Body(media_type="application/n-triples")):
+    """Format N-Triples as Turtle in the `longturtle` style."""
     graph = Graph()
     graph.parse(data=payload, format="ntriples")
     return graph.serialize(format="longturtle")
@@ -48,6 +51,7 @@ def format_route(payload: str = Body(media_type="application/n-triples")):
 
 @router.get("/construct-query")
 def construct_query_route(focus_node_iri: str, depth: int):
+    """Get the SPARQL Construct query for a given focus node IRI and the depth of the blank nodes in the graph closure."""
     query = Template(
         dedent(
             """\
