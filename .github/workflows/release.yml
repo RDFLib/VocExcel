@@ -7,6 +7,7 @@ on:
 
 env:
   IMAGE_NAME: ghcr.io/rdflib/vocexcel
+  PYTHON_VERSION: "3.11"
 
 jobs:
   release:
@@ -37,6 +38,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Use Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
 
       - name: Set up Node
         uses: actions/setup-node@v3
