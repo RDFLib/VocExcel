@@ -1,4 +1,4 @@
-name: Run tests and checkers
+name: Run tests and checks
 
 on:
   # Make workflow callable.
