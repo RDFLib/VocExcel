@@ -49,7 +49,7 @@ def format_route(payload: str = Body(media_type="application/n-triples")):
     return graph.serialize(format="longturtle")
 
 
-@router.get("/construct-query")
+@router.get("/construct-query", response_class=PlainTextResponse)
 def construct_query_route(focus_node_iri: str, depth: int):
     """Get the SPARQL Construct query for a given focus node IRI and the depth of the blank nodes in the graph closure."""
     query = Template(
