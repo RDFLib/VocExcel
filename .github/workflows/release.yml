@@ -55,7 +55,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: latest
-          cache: npm
 
       - name: Set up Git user
         uses: fregante/setup-git-user@v2
