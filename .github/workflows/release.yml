@@ -8,6 +8,7 @@ on:
 env:
   IMAGE_NAME: ghcr.io/rdflib/vocexcel
   PYTHON_VERSION: "3.11"
+  GIT_MAIN_BRANCH: master
 
 jobs:
   release:
@@ -15,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          ref: ${{ env.GIT_MAIN_BRANCH }}
 
       - name: Docker metadata
         id: metadata
