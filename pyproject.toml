@@ -47,3 +47,8 @@ select = [
     "I001",
     "I002"
 ]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
