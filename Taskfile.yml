@@ -6,13 +6,19 @@ tasks:
   install:
     desc: Install project and dependencies.
     cmds:
-      - poetry install
+      - poetry install --no-interaction --no-root
 
   format:
     desc: Format Python code.
     cmds:
       - poetry run ruff check --fix vocexcel tests
       - poetry run black vocexcel tests
+
+  format:check:
+    desc: Run formatters in check mode. Does not apply formatting.
+    cmds:
+      - poetry run ruff check vocexcel tests
+      - poetry run black --check vocexcel tests
 
   test:
     desc: Run tests

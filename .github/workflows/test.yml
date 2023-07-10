@@ -1,4 +1,4 @@
-name: Run tests
+name: Run tests and checkers
 
 on:
   # Make workflow callable.
@@ -29,8 +29,14 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
       - name: Install Python dependencies
-        run: poetry install --no-interaction --no-root
+        run: task install
 
       - name: Run Pytest
-        run: poetry run pytest
+        run: task test
+
+      - name: Run formatters in check mode
+        run: task format:check
