@@ -1,0 +1,20 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  install:
+    desc: Install project and dependencies.
+    cmds:
+      - poetry install
+
+  format:
+    desc: Format Python code.
+    cmds:
+      - poetry run ruff check --fix vocexcel tests
+      - poetry run black vocexcel tests
+
+  test:
+    desc: Run tests
+    cmds:
+      - poetry run pytest
