@@ -1,11 +1,11 @@
 from textwrap import dedent
 
-from fastapi import APIRouter, UploadFile, HTTPException, status, Body
+from fastapi import APIRouter, Body, HTTPException, UploadFile, status
 from fastapi.responses import PlainTextResponse
-from rdflib import Graph
 from jinja2 import Template
+from rdflib import Graph
 
-from vocexcel.convert import excel_to_rdf, ConversionError
+from vocexcel.convert import ConversionError, excel_to_rdf
 from vocexcel.web.response import TurtleResponse
 from vocexcel.web.settings import Settings
 

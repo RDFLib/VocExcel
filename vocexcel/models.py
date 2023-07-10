@@ -1,11 +1,11 @@
 import datetime
-from typing import List, Union
 from itertools import chain
+from typing import List, Union
 
 from openpyxl import Workbook
 from pydantic import BaseModel, validator
-from rdflib import Graph, URIRef, Literal
-from rdflib.namespace import DCAT, DCTERMS, OWL, SKOS, RDF, RDFS, XSD
+from rdflib import Graph, Literal, URIRef
+from rdflib.namespace import DCAT, DCTERMS, OWL, RDF, RDFS, SKOS, XSD
 
 try:
     from utils import all_strings_in_list_are_iris, string_is_http_iri

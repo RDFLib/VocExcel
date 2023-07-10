@@ -5,19 +5,20 @@ from googleapiclient.discovery import build
 from pydantic import ValidationError
 
 try:
-    import models, profiles
-    from utils import split_and_tidy_to_strings, ConversionError
+    import models
+    import profiles
+    from utils import ConversionError, split_and_tidy_to_strings
 except:
     import sys
 
     sys.path.append("..")
     from vocexcel import models, profiles
-    from vocexcel.convert import validate_with_profile, log_msg
+    from vocexcel.convert import log_msg, validate_with_profile
     from vocexcel.utils import (
-        split_and_tidy_to_strings,
         ConversionError,
-        validate_with_profile,
         log_msg,
+        split_and_tidy_to_strings,
+        validate_with_profile,
     )
 
 ACCEPTED_TEMPLATE_VERSIONS = ["0.4.3"]

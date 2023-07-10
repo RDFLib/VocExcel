@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 
 import pytest
-from rdflib import Graph, URIRef, Literal, compare
-from rdflib.namespace import DCTERMS, SKOS, RDF
+from rdflib import Graph, Literal, URIRef, compare
+from rdflib.namespace import DCTERMS, RDF, SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
 from vocexcel import convert

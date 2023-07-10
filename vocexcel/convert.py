@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Literal, Optional, BinaryIO
+from typing import BinaryIO, Literal, Optional
 
 from pydantic.error_wrappers import ValidationError
 
@@ -13,66 +13,75 @@ try:
         extract_concepts_and_collections as extract_concepts_and_collections_021,
     )
     from convert_030 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_030,
         extract_concept_scheme as extract_concept_scheme_030,
+    )
+    from convert_030 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_030,
+    )
+    from convert_040 import (
+        extract_concept_scheme as extract_concept_scheme_040,
     )
     from convert_040 import (
         extract_concepts_and_collections as extract_concepts_and_collections_040,
-        extract_concept_scheme as extract_concept_scheme_040,
+    )
+    from convert_043 import (
+        create_prefix_dict,
+    )
+    from convert_043 import (
+        extract_concept_scheme as extract_concept_scheme_043,
     )
     from convert_043 import (
         extract_concepts_and_collections as extract_concepts_and_collections_043,
-        create_prefix_dict,
-        extract_concept_scheme as extract_concept_scheme_043,
     )
-
     from convert_060 import excel_to_rdf as excel_to_rdf_060
-
     from convert_062 import excel_to_rdf as excel_to_rdf_062
-
     from utils import (
-        ConversionError,
-        load_workbook,
-        get_template_version,
-        KNOWN_FILE_ENDINGS,
-        RDF_FILE_ENDINGS,
-        KNOWN_TEMPLATE_VERSIONS,
         EXCEL_FILE_ENDINGS,
+        KNOWN_FILE_ENDINGS,
+        KNOWN_TEMPLATE_VERSIONS,
+        RDF_FILE_ENDINGS,
+        ConversionError,
+        get_template_version,
+        load_workbook,
     )
 except ImportError:
     sys.path.append("..")
     from vocexcel import models, profiles
-
     from vocexcel.convert_021 import (
         extract_concepts_and_collections as extract_concepts_and_collections_021,
     )
     from vocexcel.convert_030 import (
-        extract_concepts_and_collections as extract_concepts_and_collections_030,
         extract_concept_scheme as extract_concept_scheme_030,
+    )
+    from vocexcel.convert_030 import (
+        extract_concepts_and_collections as extract_concepts_and_collections_030,
+    )
+    from vocexcel.convert_040 import (
+        extract_concept_scheme as extract_concept_scheme_040,
     )
     from vocexcel.convert_040 import (
         extract_concepts_and_collections as extract_concepts_and_collections_040,
-        extract_concept_scheme as extract_concept_scheme_040,
+    )
+    from vocexcel.convert_043 import (
+        create_prefix_dict,
+    )
+    from vocexcel.convert_043 import (
+        extract_concept_scheme as extract_concept_scheme_043,
     )
     from vocexcel.convert_043 import (
         extract_concepts_and_collections as extract_concepts_and_collections_043,
-        create_prefix_dict,
-        extract_concept_scheme as extract_concept_scheme_043,
     )
-
     from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
-
     from vocexcel.convert_062 import excel_to_rdf as excel_to_rdf_062
-
     from vocexcel.utils import (
-        ConversionError,
-        load_workbook,
-        load_template,
-        get_template_version,
-        KNOWN_FILE_ENDINGS,
-        RDF_FILE_ENDINGS,
-        KNOWN_TEMPLATE_VERSIONS,
         EXCEL_FILE_ENDINGS,
+        KNOWN_FILE_ENDINGS,
+        KNOWN_TEMPLATE_VERSIONS,
+        RDF_FILE_ENDINGS,
+        ConversionError,
+        get_template_version,
+        load_template,
+        load_workbook,
         validate_with_profile,
     )
 
@@ -224,7 +233,7 @@ def rdf_to_excel(
     )
     # the RDF is valid so extract data and create Excel
     from rdflib import Graph
-    from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SKOS, OWL
+    from rdflib.namespace import DCAT, DCTERMS, OWL, PROV, RDF, RDFS, SKOS
 
     g = Graph().parse(
         str(file_to_convert_path), format=RDF_FILE_ENDINGS[file_to_convert_path.suffix]

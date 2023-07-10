@@ -6,15 +6,15 @@ from rdflib import Graph, Literal, compare
 from rdflib.namespace import SKOS
 
 sys.path.append(str(Path(__file__).parent.parent.absolute()))
-from vocexcel.utils import ConversionError, load_workbook, expand_namespaces
 from vocexcel.convert_060 import (
-    extract_prefixes,
+    excel_to_rdf,
+    extract_additions_concept_properties,
+    extract_collections,
     extract_concept_scheme,
     extract_concepts,
-    extract_collections,
-    extract_additions_concept_properties,
-    excel_to_rdf,
+    extract_prefixes,
 )
+from vocexcel.utils import ConversionError, expand_namespaces, load_workbook
 
 
 def test_extract_prefixes():

@@ -1,9 +1,9 @@
-from textwrap import dedent
 from pathlib import Path
+from textwrap import dedent
 
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from vocexcel.web import router
 from vocexcel.web.settings import Settings

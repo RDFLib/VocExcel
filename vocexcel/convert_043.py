@@ -1,18 +1,18 @@
 import logging
-from typing import Tuple, List
+from typing import List, Tuple
 
 from openpyxl.worksheet.worksheet import Worksheet
 from pydantic import ValidationError
 
 try:
     import models
-    from utils import split_and_tidy_to_strings, ConversionError, load_workbook
+    from utils import ConversionError, load_workbook, split_and_tidy_to_strings
 except ImportError:
     import sys
 
     sys.path.append("..")
     from vocexcel import models
-    from vocexcel.utils import split_and_tidy_to_strings, ConversionError, load_workbook
+    from vocexcel.utils import ConversionError, load_workbook, split_and_tidy_to_strings
 
 
 # Checking how many colon's in string

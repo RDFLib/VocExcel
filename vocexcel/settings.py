@@ -1,6 +1,5 @@
 from importlib import metadata
 
-
 try:
     from dotenv import load_dotenv
 
