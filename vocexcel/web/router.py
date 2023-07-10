@@ -5,7 +5,7 @@ from fastapi.responses import PlainTextResponse
 from rdflib import Graph
 from jinja2 import Template
 
-from vocexcel.convert import excel_to_rdf
+from vocexcel.convert import excel_to_rdf, ConversionError
 from vocexcel.web.response import TurtleResponse
 from vocexcel.web.settings import Settings
 
@@ -23,11 +23,16 @@ async def convert_route(upload_file: UploadFile):
         file = upload_file.file
         result = excel_to_rdf(file)
         return TurtleResponse(result)
+    except ConversionError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)
+        ) from err
     except Exception as err:
         import traceback
 
         tb = traceback.format_exception(err)
-        print(tb)
+        for item in tb:
+            print(item)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="There was an error processing the file.",

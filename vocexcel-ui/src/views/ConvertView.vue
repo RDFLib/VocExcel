@@ -29,20 +29,12 @@ const onUploadComplete = (event: FileUploadUploadEvent) => {
 }
 
 const onError = (event: FileUploadErrorEvent) => {
-  let filename = null
-  if (Array.isArray(event.files)) {
-    filename = event.files[0].name
-  } else {
-    filename = event.files
-  }
-
-  const errorMsg = `Failed to upload file ${filename}`
+  const errorMsg = JSON.parse(event.xhr.response).detail
   console.error(errorMsg)
   toast.add({
     severity: 'error',
     summary: 'Error',
-    detail: errorMsg,
-    life: 3000
+    detail: errorMsg
   })
 }
 
@@ -61,7 +53,7 @@ const handleCopyRdfTurtle = () => {
         severity: 'error',
         summary: 'Error',
         detail: errorMsg,
-        life: 3000
+        life: 5000
       })
     }
   )
