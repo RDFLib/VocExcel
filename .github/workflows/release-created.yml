@@ -1,9 +1,12 @@
 name: Release created
 
 on:
-  release:
-    types:
-      - created
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Git tag value'
+        required: true
+        type: string
 
 env:
   PYTHON_VERSION: "3.11"
