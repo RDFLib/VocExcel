@@ -50,5 +50,6 @@ jobs:
           poetry version ${{ steps.version.outputs.VALUE }}
           git add pyproject.toml
           git commit -m "chore: release ${{ steps.version.outputs.VALUE }}"
+          git push
           git tag ${{ steps.version.outputs.VALUE }}
           git push origin ${{ steps.version.outputs.VALUE }}
