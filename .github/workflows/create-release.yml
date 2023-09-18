@@ -1,7 +1,7 @@
-name: Release created
+name: Create release
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       tag:
         description: 'Git tag value'
@@ -43,11 +43,12 @@ jobs:
 
       - name: Get release version
         id: version
-        run: echo "VALUE=$(npx --yes semver ${{ github.event.release.tag_name }})" >> "$GITHUB_OUTPUT"
+        run: echo "VALUE=$(npx --yes semver ${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
 
       - name: Update project version
         run: |
           poetry version ${{ steps.version.outputs.VALUE }}
           git add pyproject.toml
           git commit -m "chore: release ${{ steps.version.outputs.VALUE }}"
-          git push
+          git tag ${{ steps.version.outputs.VALUE }}
+          git push origin ${{ steps.version.outputs.VALUE }}
