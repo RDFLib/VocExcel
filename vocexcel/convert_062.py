@@ -62,7 +62,7 @@ def extract_prefixes(sheet: Worksheet) -> dict[str, Namespace]:
     return prefixes
 
 
-def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
+def extract_concept_scheme(sheet: Worksheet, prefixes) -> tuple[Graph, str]:
     iri_s = sheet["B3"].value
     title = sheet["B4"].value
     description = sheet["B5"].value
