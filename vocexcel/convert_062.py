@@ -133,11 +133,12 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> Graph:
         g.add((iri, OWL.versionIRI, URIRef(iri + "/" + str(version))))
 
     if custodian is not None:
-        ISOROLES = Namespace(
-            "http://def.isotc211.org/iso19115/-1/2018/CitationAndResponsiblePartyInformation/code/CI_RoleCode/"
-        )
-        g += make_agent(custodian, ISOROLES.custodian, prefixes, iri)
-        g.bind("isoroles", ISOROLES)
+        for _custodian in split_and_tidy_to_strings(custodian):
+            ISOROLES = Namespace(
+                "http://def.isotc211.org/iso19115/-1/2018/CitationAndResponsiblePartyInformation/code/CI_RoleCode/"
+            )
+            g += make_agent(_custodian, ISOROLES.custodian, prefixes, iri)
+            g.bind("isoroles", ISOROLES)
 
     # auto-created
     g.add((iri, DCTERMS.identifier, id_from_iri(iri)))
@@ -207,7 +208,10 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri) -> Graph:
             g.add((iri, SKOS.historyNote, Literal(history_note.strip())))
 
         if source is not None:
-            g.add((iri, DCTERMS.source, Literal(source.strip(), datatype=XSD.anyURI)))
+            for _source in split_and_tidy_to_strings(source):
+                g.add(
+                    (iri, DCTERMS.source, Literal(_source.strip(), datatype=XSD.anyURI))
+                )
 
         if home is not None:
             g.add((iri, RDFS.isDefinedBy, URIRef(home.strip())))
