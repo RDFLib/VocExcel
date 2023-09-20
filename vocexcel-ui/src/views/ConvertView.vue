@@ -76,7 +76,7 @@ const handleCopyRdfTurtle = () => {
       url="/api/v1/convert"
       :multiple="false"
       accept=".xlsx"
-      :maxFileSize="1000000"
+      :maxFileSize="100000000"
       :preview-width="previewWidth"
       @upload="onUploadComplete"
       @error="onError"
