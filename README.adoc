@@ -115,7 +115,7 @@ convert.rdf_to_excel(Path(".") / "path" / "to" / "vocab-file.xlsx")
 
 ==== Online
 
-*Coming soon! (Dec, 2022)*
+https://vocexcel.dev.kurrawong.ai
 
 == License
 
@@ -123,11 +123,11 @@ This code is licensed using the BSD 3-Clause. See the _LICENSE_ for the deed. No
 
 == Contact
 
+**Commercial support**: +
+info@kurrawong.ai
+
 *Lead Developer*: +
 **Nicholas Car** +
 *Data System Architect* +
-https://kurrawong.net[KurrawongAI] +
-nick@kurrawong.net
-
-**Company support**: +
-info@kurrawong.net
+https://kurrawong.ai[KurrawongAI] +
+nick@kurrawong.ai
