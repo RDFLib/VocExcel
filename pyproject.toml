@@ -3,12 +3,12 @@ name = "vocexcel"
 version = "0.8.1"
 description = """Another Excel to RDF converter for SKOS vocabs, \
   but one that include profile-based validation of results."""
-authors = ["peterphilips <peter.philips@surroundaustralia.com>"]
+authors = ["Nicholas Car <nick@kurrawong.ai>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8.1,<4.0"
 openpyxl = "^3.0.9"
-rdflib = "^6.2.0"
+rdflib = "^7.0.0"
 pydantic = "^1.9.0"
 pyshacl = "^0.18.1"
 dateutils = "^0.6.12"
