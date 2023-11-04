@@ -4,8 +4,9 @@ from typing import Optional
 
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from rdflib import Graph, Literal, Namespace, URIRef
-from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SKOS, XSD
+from rdflib import Graph, Literal, Namespace, URIRef, BNode
+from rdflib.namespace import OWL, PROV, RDF, RDFS, SDO, SKOS, XSD
+REG = Namespace("http://purl.org/linked-data/registry#")
 
 try:
     import models
@@ -23,6 +24,8 @@ try:
         string_from_iri,
         string_is_http_iri,
         validate_with_profile,
+        STATUSES,
+        VOCDERMODS,
     )
 except ImportError:
     import sys
@@ -43,6 +46,8 @@ except ImportError:
         string_from_iri,
         string_is_http_iri,
         validate_with_profile,
+        STATUSES,
+        VOCDERMODS,
     )
 
 
@@ -62,7 +67,7 @@ def extract_prefixes(sheet: Worksheet) -> dict[str, Namespace]:
     return prefixes
 
 
-def extract_concept_scheme(sheet: Worksheet, prefixes) -> tuple[Graph, str]:
+def extract_concept_scheme(sheet: Worksheet, prefixes, template_version="0.7.0") -> tuple[Graph, str]:
     iri_s = sheet["B3"].value
     title = sheet["B4"].value
     description = sheet["B5"].value
@@ -70,9 +75,22 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> tuple[Graph, str]:
     modified = sheet["B7"].value
     creator = sheet["B8"].value
     publisher = sheet["B9"].value
-    version = str(sheet["B10"].value).strip("'")
-    history_note = sheet["B11"].value
-    custodian = sheet["B12"].value
+    if template_version == "0.6.2":
+        custodian = sheet["B12"].value
+        version = str(sheet["B10"].value).strip("'")
+        history_note = sheet["B11"].value
+        status = None
+        derived_from = None
+        voc_der_mod = None
+        themes = None
+    else:  # 0.6.3
+        custodian = sheet["B10"].value
+        version = str(sheet["B11"].value).strip("'")
+        history_note = sheet["B12"].value
+        status = sheet["B13"].value
+        derived_from = sheet["B14"].value
+        voc_der_mod = sheet["B15"].value
+        themes = split_and_tidy_to_strings(sheet["B16"].value)
 
     if iri_s is None:
         raise ConversionError(
@@ -116,21 +134,37 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> tuple[Graph, str]:
             "Your vocabulary has no History Note statement. Please add it to the Concept Scheme sheet"
         )
 
+    if status is not None and status not in STATUSES:
+        raise ConversionError(
+            f"You have supplied a status for your vocab of {status} but it is not recognised. "
+            f"If supplied, it must be one of {', '.join(STATUSES.keys())}"
+        )
+
+    if derived_from is not None:
+        if voc_der_mod is None:
+            raise ConversionError(
+                "If you supply a 'Derived From' value - IRI of another vocab - "
+                "you must also supply a 'Derivation Mode' value")
+
+        if voc_der_mod not in VOCDERMODS:
+            raise ConversionError(
+                f"You have supplied a vocab derivation mode for your vocab of {voc_der_mod} but it is not recognised. "
+                f"If supplied, it must be one of {', '.join(VOCDERMODS.keys())}"
+            )
+
+        derived_from = make_iri(derived_from, prefixes)
+
     g = Graph(bind_namespaces="rdflib")
     g.add((iri, RDF.type, SKOS.ConceptScheme))
     g.add((iri, SKOS.prefLabel, Literal(title, lang="en")))
     g.add((iri, SKOS.definition, Literal(description, lang="en")))
-    g.add((iri, DCTERMS.created, Literal(created.date(), datatype=XSD.date)))
-    g.add((iri, DCTERMS.modified, Literal(modified.date(), datatype=XSD.date)))
+    g.add((iri, SDO.dateCreated, Literal(created.date(), datatype=XSD.date)))
+    g.add((iri, SDO.dateModified, Literal(modified.date(), datatype=XSD.date)))
     g.add((iri, SKOS.historyNote, Literal(history_note, lang="en")))
 
-    g += make_agent(creator, DCTERMS.creator, prefixes, iri)
+    g += make_agent(creator, SDO.creator, prefixes, iri)
 
-    g += make_agent(publisher, DCTERMS.publisher, prefixes, iri)
-
-    if version is not None:
-        g.add((iri, OWL.versionInfo, Literal(str(version))))
-        g.add((iri, OWL.versionIRI, URIRef(iri + "/" + str(version))))
+    g += make_agent(publisher, SDO.publisher, prefixes, iri)
 
     if custodian is not None:
         for _custodian in split_and_tidy_to_strings(custodian):
@@ -140,8 +174,26 @@ def extract_concept_scheme(sheet: Worksheet, prefixes) -> tuple[Graph, str]:
             g += make_agent(_custodian, ISOROLES.custodian, prefixes, iri)
             g.bind("isoroles", ISOROLES)
 
-    # auto-created
-    g.add((iri, DCTERMS.identifier, id_from_iri(iri)))
+    if version is not None:
+        g.add((iri, SDO.version, Literal(str(version))))
+        g.add((iri, OWL.versionIRI, URIRef(iri + "/" + str(version))))
+
+    if status is not None:
+        g.add((iri, REG.status, URIRef(STATUSES[status])))
+
+    if derived_from is not None:
+        qd = BNode()
+        g.add((iri, PROV.qualifiedDerivation, qd))
+        g.add((qd, PROV.entity, URIRef(derived_from)))
+        g.add((qd, PROV.hadRole, URIRef(VOCDERMODS[voc_der_mod])))
+
+    if themes is not None:
+        for theme in themes:
+            try:
+                theme = make_iri(theme, prefixes)
+            except ConversionError:
+                theme = Literal(theme)
+            g.add((iri, SDO.keywords, theme))
 
     bind_namespaces(g, prefixes)
     return g, iri
@@ -193,7 +245,11 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri) -> Graph:
         g.add((iri, SKOS.inScheme, cs_iri))
         if str(iri).startswith(str(cs_iri)):
             g.add((iri, RDFS.isDefinedBy, cs_iri))
-        g.add((iri, SKOS.prefLabel, Literal(pref_label.strip(), lang="en")))
+        if "@" in pref_label:
+            val, lang = pref_label.strip().split("@")
+            g.add((iri, SKOS.prefLabel, Literal(val, lang=lang)))
+        else:
+            g.add((iri, SKOS.prefLabel, Literal(pref_label.strip(), lang="en")))
         g.add((iri, SKOS.definition, Literal(definition.strip(), lang="en")))
 
         if alt_labels is not None:
@@ -210,7 +266,7 @@ def extract_concepts(sheet: Worksheet, prefixes, cs_iri) -> Graph:
         if source is not None:
             for _source in split_and_tidy_to_strings(source):
                 g.add(
-                    (iri, DCTERMS.source, Literal(_source.strip(), datatype=XSD.anyURI))
+                    (iri, SDO.citation, Literal(_source.strip(), datatype=XSD.anyURI))
                 )
 
         if home is not None:
@@ -253,6 +309,7 @@ def extract_collections(sheet: Worksheet, prefixes, cs_iri) -> Graph:
         # create Graph
         g.add((iri, RDF.type, SKOS.Collection))
         g.add((iri, SKOS.inScheme, cs_iri))
+        g.add((iri, RDFS.isDefinedBy, cs_iri))
         if str(iri).startswith(str(cs_iri)):
             g.add((iri, RDFS.isDefinedBy, cs_iri))
         g.add((iri, SKOS.prefLabel, Literal(pref_label, lang="en")))
@@ -343,13 +400,14 @@ def excel_to_rdf(
         "longturtle", "turtle", "xml", "json-ld", "graph"
     ] = "longturtle",
     validate: bool = False,
-    profile="vocpub",
+    profile="vocpub-46",
     error_level=1,
     message_level=1,
     log_file: Optional[Path] = None,
+    template_version="0.6.3"
 ):
     prefixes = extract_prefixes(wb["Prefixes"])
-    cs, cs_iri = extract_concept_scheme(wb["Concept Scheme"], prefixes)
+    cs, cs_iri = extract_concept_scheme(wb["Concept Scheme"], prefixes, template_version)
     cons = extract_concepts(wb["Concepts"], prefixes, cs_iri)
     cols = extract_collections(wb["Collections"], prefixes, cs_iri)
     extra = extract_additions_concept_properties(
@@ -359,6 +417,7 @@ def excel_to_rdf(
     g = cs + cons + cols + extra
     g = add_top_concepts(g)
     g.bind("cs", cs_iri)
+    g.bind("reg", REG)
 
     if validate:
         validate_with_profile(

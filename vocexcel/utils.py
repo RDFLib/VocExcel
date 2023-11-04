@@ -10,7 +10,7 @@ from openpyxl import load_workbook as _load_workbook
 from openpyxl.workbook.workbook import Workbook
 from pyshacl.pytypes import GraphLike
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SKOS, XSD
+from rdflib.namespace import DCAT, DCTERMS, PROV, RDF, RDFS, SDO, SKOS, XSD
 
 from vocexcel import profiles
 
@@ -36,8 +36,36 @@ KNOWN_TEMPLATE_VERSIONS = [
     "0.5.0",
     "0.6.0",
     "0.6.2",
+    "0.6.3",
+    "0.7.0",
 ]
 LATEST_TEMPLATE = KNOWN_TEMPLATE_VERSIONS[-1]
+
+STATUSES = {
+    "Accepted": "https://linked.data.gov.au/def/reg-statuses/accepted",
+    "Deprecated": "https://linked.data.gov.au/def/reg-statuses/deprecated",
+    "Retired": "https://linked.data.gov.au/def/reg-statuses/retired",
+    "Superseded": "https://linked.data.gov.au/def/reg-statuses/superceded",
+    "Unstable": "https://linked.data.gov.au/def/reg-statuses/unstable",
+    "Valid": "https://linked.data.gov.au/def/reg-statuses/valid",
+    "Experimental": "https://linked.data.gov.au/def/reg-statuses/experimental",
+    "Stable": "https://linked.data.gov.au/def/reg-statuses/stable",
+    "Addition": "https://linked.data.gov.au/def/reg-statuses/addition",
+    "Original": "https://linked.data.gov.au/def/reg-statuses/original",
+    "Not Accepted": "https://linked.data.gov.au/def/reg-statuses/notAccepted",
+    "Invalid": "https://linked.data.gov.au/def/reg-statuses/invalid",
+    "Reserved": "https://linked.data.gov.au/def/reg-statuses/reserved",
+    "Submitted": "https://linked.data.gov.au/def/reg-statuses/submitted",
+}
+VOCDERMODS = {
+    "Direct": "https://linked.data.gov.au/def/reg-statuses/direct",
+    "Extension": "https://linked.data.gov.au/def/reg-statuses/extension",
+    "Subsetting & Extension": "https://linked.data.gov.au/def/reg-statuses/subsetting-and-extension",
+    "None": "https://linked.data.gov.au/def/reg-statuses/none",
+    "Not Applicable": "https://linked.data.gov.au/def/reg-statuses/not-applicable",
+    "Relabelling": "https://linked.data.gov.au/def/reg-statuses/relabelling",
+    "Subsetting": "https://linked.data.gov.au/def/reg-statuses/subsetting",
+}
 
 
 class ConversionError(Exception):
@@ -63,24 +91,28 @@ def load_template(file_path: Path) -> Workbook:
 
 def get_template_version(wb: Workbook) -> str:
     # try 0.4.0, 0.5.0 & 0.6.x locations
-    try:
-        intro_sheet = wb["Introduction"]
-        if intro_sheet["E4"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.5.0, 0.6.x
-            return intro_sheet["E4"].value
-        if intro_sheet["J11"].value in KNOWN_TEMPLATE_VERSIONS:  # 0.4.0
-            return intro_sheet["J11"].value
-    except Exception:
-        pass
+    def find_version(wb: Workbook):
+        try:
+            intro_sheet = wb["Introduction"]
+            if intro_sheet["E4"].value is not None:  # 0.5.0, 0.6.x
+                return intro_sheet["E4"].value
+            if intro_sheet["J11"].value is not None:  # 0.4.0
+                return intro_sheet["J11"].value
 
-    # try 0.2.1 & 0.3.0 locations
-    try:
-        # older template version
-        pi = wb["program info"]
-        if pi["B2"].value in KNOWN_TEMPLATE_VERSIONS:
-            return pi["B2"].value
-    except Exception:
-        pass
+            # try 0.2.1 & 0.3.0 locations
+            pi = wb["program info"]
+            if pi["B2"].value is not None:
+                return pi["B2"].value
+        except Exception:
+            return None
 
+    version = find_version(wb)
+    if version in KNOWN_TEMPLATE_VERSIONS:
+        return version
+    elif version is not None:
+        raise ConversionError(
+            f"The version of your template, {version}, is not supported"
+        )
     # if we get here, the template version is either unknown or can't be located
     raise Exception(
         "The version of the Excel template you are using cannot be determined"
@@ -174,9 +206,16 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
     creator_iri_conv = string_is_http_iri(str(iri))
     if not creator_iri_conv[0]:
         iri = BNode()
-    ag.add((iri, RDF.type, PROV.Agent))
-    ag.add((iri, RDFS.label, Literal(string_from_iri(agent_value))))
-    if agent_role in [DCTERMS.creator, DCTERMS.publisher, DCTERMS.rightsHolder]:
+    if "orcid" in iri:
+        agent_type = SDO.Person
+        url_email = SDO.email
+    else:
+        agent_type = SDO.Organization
+        url_email = SDO.url
+    ag.add((iri, RDF.type, agent_type))
+    ag.add((iri, url_email, Literal("", datatype=XSD.anyURI)))
+    ag.add((iri, SDO.name, Literal(string_from_iri(agent_value))))
+    if agent_role in [DCTERMS.creator, DCTERMS.publisher, DCTERMS.rightsHolder, SDO.creator, SDO.publisher, SDO.rightsHolder]:
         ag.add((iri_of_subject, agent_role, iri))
     else:
         qa = BNode()
@@ -213,23 +252,22 @@ def add_top_concepts(g: Graph) -> Graph:
 
 def validate_with_profile(
     data_graph: Union[GraphLike, str, bytes],
-    profile="vocpub",
+    profile="vocpub-46",
     error_level=1,
     message_level=1,
     log_file=None,
 ):
     if profile not in profiles.PROFILES.keys():
         raise ValueError(
-            "The profile chosen for conversion must be one of '{}'. 'vocpub' is default".format(
-                "', '".join(profiles.PROFILES.keys())
-            )
+            f"The profile chosen for conversion must be one of '{', '.join(profiles.PROFILES.keys())}' "
+            f"but you selected {profile}"
         )
     allow_warnings = True if error_level > 1 else False
 
     # validate the RDF file
     conforms, results_graph, results_text = pyshacl.validate(
         data_graph,
-        shacl_graph=str(Path(__file__).parent / "validator.vocpub.ttl"),
+        shacl_graph=str(Path(__file__).parent / f"{profile}.ttl"),
         allow_warnings=allow_warnings,
     )
 

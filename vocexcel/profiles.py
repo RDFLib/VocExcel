@@ -66,9 +66,9 @@ RDF_MEDIA_TYPES = [
 HTML_MEDIA_TYPE = "text/html"
 
 
-VOC_PUB_PROFILE = Profile(
-    "https://w3id.org/profile/vocpub",
-    "Vocabulary Publication Profile",
+VOC_PUB_PROFILE_46 = Profile(
+    "https://w3id.org/profile/vocpub/4.6",
+    "Vocabulary Publication Profile v4.6",
     "SKOS ConceptSchemes, Collections & Concepts as well as additional Dublin Core Terms & schema.org "
     "annotation properties to be used to publish vocabularies.",
     RDF_MEDIA_TYPES + [HTML_MEDIA_TYPE, "text/markdown"],
@@ -79,4 +79,6 @@ VOC_PUB_PROFILE = Profile(
 )
 
 
-PROFILES = {"vocpub": VOC_PUB_PROFILE}
+PROFILES = {
+    "vocpub-46": VOC_PUB_PROFILE_46
+}

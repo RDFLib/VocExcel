@@ -34,7 +34,8 @@ try:
         extract_concepts_and_collections as extract_concepts_and_collections_043,
     )
     from convert_060 import excel_to_rdf as excel_to_rdf_060
-    from convert_062 import excel_to_rdf as excel_to_rdf_062
+    from convert_063 import excel_to_rdf as excel_to_rdf_063
+    from convert_070 import excel_to_rdf as excel_to_rdf_070
     from utils import (
         EXCEL_FILE_ENDINGS,
         KNOWN_FILE_ENDINGS,
@@ -72,7 +73,8 @@ except ImportError:
         extract_concepts_and_collections as extract_concepts_and_collections_043,
     )
     from vocexcel.convert_060 import excel_to_rdf as excel_to_rdf_060
-    from vocexcel.convert_062 import excel_to_rdf as excel_to_rdf_062
+    from vocexcel.convert_063 import excel_to_rdf as excel_to_rdf_063
+    from vocexcel.convert_070 import excel_to_rdf as excel_to_rdf_070
     from vocexcel.utils import (
         EXCEL_FILE_ENDINGS,
         KNOWN_FILE_ENDINGS,
@@ -90,7 +92,7 @@ TEMPLATE_VERSION = None
 
 def excel_to_rdf(
     file_to_convert_path: Path | BinaryIO,
-    profile="vocpub",
+    profile="vocpub-46",
     sheet_name: Optional[str] = None,
     output_file_path: Optional[Path] = None,
     output_format: Literal["turtle", "xml", "json-ld", "graph"] = "longturtle",
@@ -103,16 +105,8 @@ def excel_to_rdf(
     wb = load_workbook(file_to_convert_path)
     template_version = get_template_version(wb)
 
-    # test that we have a valid template variable.
-    if template_version not in KNOWN_TEMPLATE_VERSIONS:
-        raise ValueError(
-            f"Unknown Template Version. Known Template Versions are {', '.join(KNOWN_TEMPLATE_VERSIONS)},"
-            f" you supplied {template_version}"
-        )
-
-    # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
-    elif template_version in ["0.6.2"]:
-        return excel_to_rdf_062(
+    if template_version in ["0.7.0"]:
+        return excel_to_rdf_070(
             wb,
             output_file_path,
             output_format,
@@ -121,9 +115,24 @@ def excel_to_rdf(
             error_level,
             message_level,
             log_file,
+            template_version
         )
 
-    elif template_version in ["0.5.0", "0.6.0", "0.6.2"]:
+    # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
+    elif template_version in ["0.6.2", "0.6.3"]:
+        return excel_to_rdf_063(
+            wb,
+            output_file_path,
+            output_format,
+            validate,
+            profile,
+            error_level,
+            message_level,
+            log_file,
+            template_version
+        )
+
+    elif template_version in ["0.5.0", "0.6.0", "0.6.1"]:
         return excel_to_rdf_060(
             wb,
             output_file_path,
@@ -208,7 +217,7 @@ def excel_to_rdf(
 
 def rdf_to_excel(
     file_to_convert_path: Path,
-    profile: Optional[str] = "vocpub",
+    profile: Optional[str] = "vocpub-46",
     output_file_path: Optional[Path] = None,
     template_file_path: Optional[Path] = None,
     error_level=1,
@@ -412,7 +421,8 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser(
-        prog="vocexcel", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        prog="vocexcel",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
@@ -439,7 +449,9 @@ def main(args=None):
     )
 
     parser.add_argument(
-        "-v", "--validate", help="Validate output file", action="store_true"
+        "-v", "--validate",
+        help="Validate output file",
+        action="store_true"
     )
 
     parser.add_argument(
@@ -449,7 +461,7 @@ def main(args=None):
         "you can choose which one you want to convert the Excel file according to. The list of profiles - URIs "
         "and their corresponding tokens - supported by VocExcel, can be found by running the program with the "
         "flag -lp or --listprofiles.",
-        default="vocpub",
+        default="vocpub-46",
     )
 
     parser.add_argument(
