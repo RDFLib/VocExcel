@@ -93,11 +93,12 @@ def get_template_version(wb: Workbook) -> str:
     # try 0.4.0, 0.5.0 & 0.6.x locations
     def find_version(wb: Workbook):
         try:
-            intro_sheet = wb["Introduction"]
-            if intro_sheet["E4"].value is not None:  # 0.5.0, 0.6.x
-                return intro_sheet["E4"].value
-            if intro_sheet["J11"].value is not None:  # 0.4.0
-                return intro_sheet["J11"].value
+            if "Introduction" in wb.sheetnames:
+                intro_sheet = wb["Introduction"]
+                if intro_sheet["E4"].value is not None:  # 0.5.0, 0.6.x
+                    return intro_sheet["E4"].value
+                if intro_sheet["J11"].value is not None:  # 0.4.0
+                    return intro_sheet["J11"].value
 
             # try 0.2.1 & 0.3.0 locations
             pi = wb["program info"]
@@ -125,7 +126,7 @@ def split_and_tidy_to_strings(s: str):
     if s == "" or s is None:
         return []
     else:
-        return [x.strip() for x in re.split("[,\n]\s?", s.strip()) if x != ""]
+        return [x.strip() for x in re.split(r"[,\n]\s?", s.strip()) if x != ""]
 
 
 def split_and_tidy_to_iris(s: str, prefixes):
