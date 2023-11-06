@@ -79,6 +79,4 @@ VOC_PUB_PROFILE_46 = Profile(
 )
 
 
-PROFILES = {
-    "vocpub-46": VOC_PUB_PROFILE_46
-}
+PROFILES = {"vocpub-46": VOC_PUB_PROFILE_46}

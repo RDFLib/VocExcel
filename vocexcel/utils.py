@@ -216,7 +216,14 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
     ag.add((iri, RDF.type, agent_type))
     ag.add((iri, url_email, Literal("", datatype=XSD.anyURI)))
     ag.add((iri, SDO.name, Literal(string_from_iri(agent_value))))
-    if agent_role in [DCTERMS.creator, DCTERMS.publisher, DCTERMS.rightsHolder, SDO.creator, SDO.publisher, SDO.rightsHolder]:
+    if agent_role in [
+        DCTERMS.creator,
+        DCTERMS.publisher,
+        DCTERMS.rightsHolder,
+        SDO.creator,
+        SDO.publisher,
+        SDO.rightsHolder,
+    ]:
         ag.add((iri_of_subject, agent_role, iri))
     else:
         qa = BNode()

@@ -115,7 +115,7 @@ def excel_to_rdf(
             error_level,
             message_level,
             log_file,
-            template_version
+            template_version,
         )
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
@@ -129,7 +129,7 @@ def excel_to_rdf(
             error_level,
             message_level,
             log_file,
-            template_version
+            template_version,
         )
 
     elif template_version in ["0.5.0", "0.6.0", "0.6.1"]:
@@ -421,8 +421,7 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser(
-        prog="vocexcel",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        prog="vocexcel", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
@@ -449,9 +448,7 @@ def main(args=None):
     )
 
     parser.add_argument(
-        "-v", "--validate",
-        help="Validate output file",
-        action="store_true"
+        "-v", "--validate", help="Validate output file", action="store_true"
     )
 
     parser.add_argument(
