@@ -1,6 +1,11 @@
 = VocExcel
 :toc:
 
+---
+== We have moved
+Development has moved to https://github.com/Kurrawong/VocExcel[KurrawongAi/VocPrez]
+
+---
 Another Excel-to-RDF converter for SKOS vocabs, but one that:
 
 * uses fixed templates to keep it simple
