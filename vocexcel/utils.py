@@ -98,13 +98,14 @@ def get_template_version(wb: Workbook) -> str:
                 return intro_sheet["E4"].value
             if intro_sheet["J11"].value is not None:  # 0.4.0
                 return intro_sheet["J11"].value
-
-            # try 0.2.1 & 0.3.0 locations
-            pi = wb["program info"]
-            if pi["B2"].value is not None:
-                return pi["B2"].value
         except Exception:
-            return None
+            try:
+                # try 0.2.1 & 0.3.0 locations
+                pi = wb["program info"]
+                if pi["B2"].value is not None:
+                    return pi["B2"].value
+            except Exception:
+                return None
 
     version = find_version(wb)
     if version in KNOWN_TEMPLATE_VERSIONS:
