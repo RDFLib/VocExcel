@@ -4,13 +4,16 @@ from typing import Optional
 
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from rdflib import Graph, Literal, Namespace, URIRef, BNode
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCAT, DCTERMS, OWL, PROV, RDF, RDFS, SDO, SKOS, XSD
+
 REG = Namespace("http://purl.org/linked-data/registry#")
 
 try:
     import models
     from utils import (
+        STATUSES,
+        VOCDERMODS,
         ConversionError,
         add_top_concepts,
         bind_namespaces,
@@ -24,8 +27,6 @@ try:
         string_from_iri,
         string_is_http_iri,
         validate_with_profile,
-        STATUSES,
-        VOCDERMODS,
     )
 except ImportError:
     import sys
@@ -33,6 +34,8 @@ except ImportError:
     sys.path.append("..")
     from vocexcel import models
     from vocexcel.utils import (
+        STATUSES,
+        VOCDERMODS,
         ConversionError,
         add_top_concepts,
         bind_namespaces,
@@ -46,8 +49,6 @@ except ImportError:
         string_from_iri,
         string_is_http_iri,
         validate_with_profile,
-        STATUSES,
-        VOCDERMODS,
     )
 
 
@@ -67,7 +68,9 @@ def extract_prefixes(sheet: Worksheet) -> dict[str, Namespace]:
     return prefixes
 
 
-def extract_concept_scheme(sheet: Worksheet, prefixes, template_version="0.6.3") -> tuple[Graph, str]:
+def extract_concept_scheme(
+    sheet: Worksheet, prefixes, template_version="0.6.3"
+) -> tuple[Graph, str]:
     iri_s = sheet["B3"].value
     title = sheet["B4"].value
     description = sheet["B5"].value
@@ -144,7 +147,8 @@ def extract_concept_scheme(sheet: Worksheet, prefixes, template_version="0.6.3")
         if voc_der_mod is None:
             raise ConversionError(
                 "If you supply a 'Derived From' value - IRI of another vocab - "
-                "you must also supply a 'Derivation Mode' value")
+                "you must also supply a 'Derivation Mode' value"
+            )
 
         if voc_der_mod not in VOCDERMODS:
             raise ConversionError(
@@ -407,10 +411,12 @@ def excel_to_rdf(
     error_level=1,
     message_level=1,
     log_file: Optional[Path] = None,
-    template_version="0.6.3"
+    template_version="0.6.3",
 ):
     prefixes = extract_prefixes(wb["Prefixes"])
-    cs, cs_iri = extract_concept_scheme(wb["Concept Scheme"], prefixes, template_version)
+    cs, cs_iri = extract_concept_scheme(
+        wb["Concept Scheme"], prefixes, template_version
+    )
     cons = extract_concepts(wb["Concepts"], prefixes, cs_iri)
     cols = extract_collections(wb["Collections"], prefixes, cs_iri)
     extra = extract_additions_concept_properties(

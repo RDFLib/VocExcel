@@ -68,7 +68,7 @@ def excel_to_rdf(
             error_level,
             message_level,
             log_file,
-            template_version
+            template_version,
         )
 
     # The way the voc is made - which Excel sheets to use - is dependent on the particular template version
@@ -82,7 +82,7 @@ def excel_to_rdf(
             error_level,
             message_level,
             log_file,
-            template_version
+            template_version,
         )
 
     elif template_version in ["0.5.0", "0.6.0", "0.6.1"]:

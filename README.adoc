@@ -1,11 +1,18 @@
 = VocExcel
 :toc:
 
+---
+== We have moved
+Development has moved to https://github.com/Kurrawong/VocExcel[KurrawongAi/VocPrez]
+
+---
 Another Excel-to-RDF converter for SKOS vocabs, but one that:
 
 * uses fixed templates to keep it simple
 * meets particular SKOS profile outcomes (https://w3id.org/profile/vocpub[VocPub])
 * is under active development, production use, and is commercially supported
+
+An online version of VocExcel is available at https://vocexcel.dev.kurrawong.ai.
 
 == Creating vocabularies
 
